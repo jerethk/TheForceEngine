@@ -266,6 +266,11 @@ namespace TFE_DarkForces
 				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
 				return bossk_setup(obj, setupFunc);
 			} break;
+			case KW_RODIAN:
+			{
+				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
+				return rodian_setup(obj, setupFunc);
+			}
 			case KW_BARREL:
 			{
 				obj->entityFlags = ETFLAG_AI_ACTOR;

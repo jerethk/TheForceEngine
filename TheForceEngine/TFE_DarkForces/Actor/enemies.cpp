@@ -183,4 +183,41 @@ namespace TFE_DarkForces
 
 		return (Logic*)dispatch;
 	}
+
+	Logic* rodian_setup(SecObject* obj, LogicSetupFunc* setupFunc) 
+	{
+		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
+		dispatch->alertSndSrc = s_alertSndSrc[ALERT_RODIAN];
+
+		DamageModule* module = actor_createDamageModule(dispatch);
+		module->hp = FIXED(27);
+		module->hurtSndSrc = s_agentSndSrc[AGENTSND_RODIAN_HURT];
+		module->dieSndSrc = s_agentSndSrc[AGENTSND_RODIAN_DIE];
+		module->itemDropId = ITEM_ENERGY;
+		actor_addModule(dispatch, (ActorModule*)module);
+
+		AttackModule* attackMod = actor_createAttackModule(dispatch);
+		s_actorState.attackMod = attackMod;
+		attackMod->projType = PROJ_PISTOL_BOLT;
+		attackMod->attackPrimSndSrc = s_pistolSndSrc;
+		FLAGS_CLEAR_SET(attackMod->attackFlags, ATTFLAG_MELEE, ATTFLAG_RANGED);
+		actor_addModule(dispatch, (ActorModule*)attackMod);
+
+		ThinkerModule* thinkerMod = actor_createThinkerModule(dispatch);
+		thinkerMod->target.speedRotation = HALF_16 - 1;
+		thinkerMod->target.speed = FIXED(10);
+		thinkerMod->anim.flags &= 0xfffffffe;
+		thinkerMod->startDelay = TICKS(2);
+		actor_addModule(dispatch, (ActorModule*)thinkerMod);
+
+		MovementModule* moveMod = actor_createMovementModule(dispatch);
+		dispatch->moveMod = moveMod;
+		dispatch->animTable = s_rodianAnimTable;
+
+		moveMod->collisionFlags |= 1;
+		moveMod->physics.width = obj->worldWidth;
+		actor_setupInitAnimation();
+
+		return (Logic*)dispatch;
+	}
 }  // namespace TFE_DarkForces

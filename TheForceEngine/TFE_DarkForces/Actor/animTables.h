@@ -22,6 +22,7 @@ namespace TFE_DarkForces
 	extern const s32 s_reeyeesAnimTable[];
 	extern const s32 s_bosskAnimTable[];
 	extern const s32 s_gamorAnimTable[];
+	extern const s32 s_rodianAnimTable[];
 	// Exploders
 	extern const s32 s_mineBarrelAnimTable[];
 	// Flyers

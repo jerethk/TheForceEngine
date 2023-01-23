@@ -96,6 +96,7 @@ namespace TFE_DarkForces
 		s_alertSndSrc[ALERT_CREATURE] = sound_load("creatur1.voc", SOUND_PRIORITY_MED5);
 		s_alertSndSrc[ALERT_PROBE]    = sound_load("probe-1.voc",  SOUND_PRIORITY_MED5);
 		s_alertSndSrc[ALERT_INTDROID] = sound_load("intalert.voc", SOUND_PRIORITY_MED5);
+		s_alertSndSrc[ALERT_RODIAN]   = sound_load("rodalert.voc", SOUND_PRIORITY_MED5);
 
 		s_officerAlertSndSrc[0] = sound_load("ranofc02.voc", SOUND_PRIORITY_MED5);
 		s_officerAlertSndSrc[1] = sound_load("ranofc04.voc", SOUND_PRIORITY_MED5);
@@ -133,6 +134,8 @@ namespace TFE_DarkForces
 		s_agentSndSrc[AGENTSND_SMALL_EXPLOSION] = sound_load("ex-small.voc", SOUND_PRIORITY_MED5);
 		s_agentSndSrc[AGENTSND_PROBE_ALM]       = sound_load("probalm.voc",  SOUND_PRIORITY_MED5);
 		s_agentSndSrc[AGENTSND_TINY_EXPLOSION]  = sound_load("ex-tiny1.voc", SOUND_PRIORITY_MED5);
+		s_agentSndSrc[AGENTSND_RODIAN_HURT]		= sound_load("rodpain.voc", SOUND_PRIORITY_MED5);
+		s_agentSndSrc[AGENTSND_RODIAN_DIE]		= sound_load("roddie.voc", SOUND_PRIORITY_MED5);
 
 		sound_setBaseVolume(s_agentSndSrc[AGENTSND_REMOTE_2], 40);
 

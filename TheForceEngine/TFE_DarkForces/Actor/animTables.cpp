@@ -9,6 +9,8 @@ namespace TFE_DarkForces
 	{ 0, 1, 2, 3, 4, 5, 6, -1, -1, -1, -1, -1, 12, -1, -1, -1 };
 	const s32 s_gamorAnimTable[] =
 	{ 0, 1, 2, 3, 4, 5, -1, -1, -1, -1, -1, -1, 12, -1, -1, -1 };
+	const s32 s_rodianAnimTable[] =
+	{ 0, 6, 2, 3, 4, 5,  1, -1, -1, -1, -1, -1, 12, -1, -1, -1 };
 	// Exploders
 	const s32 s_mineBarrelAnimTable[] =
 	{ 0, -1, 1, 1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
@@ -48,6 +50,7 @@ namespace TFE_DarkForces
 		s_officerAnimTable,
 		s_troopAnimTable,
 		s_commandoAnimTable,
+		s_rodianAnimTable,
 	};
 	static const s32 s_animTableCount = TFE_ARRAYSIZE(s_animTables);
 
