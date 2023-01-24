@@ -120,6 +120,46 @@ namespace TFE_DarkForces
 		return (Logic*)dispatch;
 	}
 
+	Logic* trooper2_setup(SecObject* obj, LogicSetupFunc* setupFunc)
+	{
+		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
+		dispatch->flags |= FLAG_BIT(5);	// Use Stormtrooper alert table.
+		dispatch->alertSndSrc = 0;
+
+		DamageModule* module = actor_createDamageModule(dispatch);
+		module->hp = FIXED(18);
+		module->hurtSndSrc = s_agentSndSrc[AGENTSND_STORM_HURT];
+		module->dieSndSrc = s_agentSndSrc[AGENTSND_STORM_DIE];
+		module->itemDropId = ITEM_POWER;
+		actor_addModule(dispatch, (ActorModule*)module);
+
+		AttackModule* attackMod = actor_createAttackModule(dispatch);
+		s_actorState.attackMod = attackMod;
+		FLAGS_CLEAR_SET(attackMod->attackFlags, ATTFLAG_MELEE, ATTFLAG_RANGED);
+		attackMod->projType = PROJ_REPEATER;
+		attackMod->attackPrimSndSrc = s_repeater1SndSrc;
+		actor_addModule(dispatch, (ActorModule*)attackMod);
+
+		ThinkerModule* thinkerMod = actor_createThinkerModule(dispatch);
+		thinkerMod->target.speedRotation = HALF_16 - 1;
+		thinkerMod->target.speed = FIXED(8);
+		thinkerMod->delay = 116;
+		thinkerMod->anim.flags &= 0xfffffffe;
+		thinkerMod->startDelay = TICKS(2);
+		actor_addModule(dispatch, (ActorModule*)thinkerMod);
+
+		MovementModule* moveMod = actor_createMovementModule(dispatch);
+		dispatch->moveMod = moveMod;
+		dispatch->animTable = s_troopAnimTable;
+		s_actorState.curLogic = (Logic*)dispatch;
+
+		moveMod->collisionFlags |= 1;
+		moveMod->physics.width = obj->worldWidth;
+		actor_setupInitAnimation();
+
+		return (Logic*)dispatch;
+	}
+	
 	Logic* commando_setup(SecObject* obj, LogicSetupFunc* setupFunc)
 	{
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);

@@ -198,6 +198,11 @@ namespace TFE_DarkForces
 				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
 				return trooper_setup(obj, setupFunc);
 			} break;
+			case KW_STORM2:
+			{
+				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
+				return trooper2_setup(obj, setupFunc);
+			} break;
 			case KW_INT_DROID:
 			{
 				obj->entityFlags = (ETFLAG_AI_ACTOR | ETFLAG_FLYING);

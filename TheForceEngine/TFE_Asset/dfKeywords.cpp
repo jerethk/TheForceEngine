@@ -117,6 +117,7 @@ static const char* c_keywords[] =
 	"PLAYER",
 	"TROOP",
 	"STORM1",
+	"STORM2",
 	"INT_DROID",
 	"PROBE_DROID",
 	"D_TROOP1",
