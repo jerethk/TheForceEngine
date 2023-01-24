@@ -141,6 +141,7 @@ static const char* c_keywords[] =
 	"REE_YEES",
 	"REE_YEES2",
 	"BOSSK",
+	"CIVILIAN",
 	"BARREL",
 	"LAND_MINE",
 	"KELL",
