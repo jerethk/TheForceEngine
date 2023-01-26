@@ -488,7 +488,7 @@ namespace TFE_DarkForces
 					projLogic->flags &= ~PROJFLAG_CAMERA_PASS_SOUND;
 					projLogic->prevColObj = s_playerObject;
 
-					projLogic->dmg = mul16(FIXED(weaponCharge + 1), FIXED(10));
+					projLogic->dmg = mul16(FIXED(weaponCharge), FIXED(10));
 
 					if (targetFound)
 					{
