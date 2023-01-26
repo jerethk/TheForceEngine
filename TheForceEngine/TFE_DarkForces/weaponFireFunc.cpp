@@ -247,140 +247,302 @@ namespace TFE_DarkForces
 		struct LocalContext
 		{
 			Tick delay;
+			Tick startTick;
 			s32  iFrame;
 		};
 		task_begin_ctx;
 
 		if (*s_curPlayerWeapon->ammo)
 		{
-			task_localBlockBegin;
-			if (s_pistolSndId)
+			if (!s_secondaryFire)
 			{
-				sound_stop(s_pistolSndId);
-			}
-			s_pistolSndId = sound_play(s_pistolSndSrc);
-
-			if (s_curPlayerWeapon->wakeupRange)
-			{
-				vec3_fixed origin = { s_playerObject->posWS.x, s_playerObject->posWS.y, s_playerObject->posWS.z };
-				collision_effectObjectsInRangeXZ(s_playerObject->sector, s_curPlayerWeapon->wakeupRange, origin, hitEffectWakeupFunc, s_playerObject, ETFLAG_AI_ACTOR);
-			}
-
-			fixed16_16 mtx[9];
-			weapon_computeMatrix(mtx, -s_playerObject->pitch, -s_playerObject->yaw);
-
-			vec3_fixed inVec =
-			{
-				0x6666,	// 0.4
-				0x9999, // 0.6
-				0x33333 // 3.2
-			};
-			vec3_fixed outVec;
-			rotateVectorM3x3(&inVec, &outVec, mtx);
-
-			fixed16_16 xPos = s_playerObject->posWS.x + outVec.x;
-			fixed16_16 yPos = outVec.y + s_playerObject->posWS.y - s_playerObject->worldHeight + s_headwaveVerticalOffset;
-			fixed16_16 zPos = s_playerObject->posWS.z + outVec.z;
-
-			JBool targetFound = computeAutoaim(xPos, yPos, zPos, s_playerObject->pitch, s_playerObject->yaw, s_curPlayerWeapon->variation & 0xffff);
-			if (!targetFound)
-			{
-				s32 variation = s_curPlayerWeapon->variation & 0xffff;
-				variation = random(variation * 2) - variation;
-				s_weaponFirePitch = s_playerObject->pitch + variation;
-
-				variation = s_curPlayerWeapon->variation & 0xffff;
-				variation = random(variation * 2) - variation;
-				s_weaponFireYaw = s_playerObject->yaw + variation;
-			}
-
-			s32 canFire = s_canFireWeaponPrim;
-			fixed16_16 mtx2[9];
-			s_canFireWeaponPrim = 0;
-			if (canFire > 1)
-			{
-				weapon_computeMatrix(mtx2, -s_weaponFirePitch, -s_weaponFireYaw);
-			}
-
-			// Spawn projectiles.
-			fixed16_16 fire = intToFixed16(canFire);
-			while (canFire)
-			{
-				if (*s_curPlayerWeapon->ammo == 0)
+				// Primary Fire
+				task_localBlockBegin;
+				if (s_pistolSndId)
 				{
-					break;
+					sound_stop(s_pistolSndId);
 				}
-				fire -= ONE_16;
-				canFire--;
-				s32 superChargeFrame = s_superCharge ? 0 : 1;
-				// This is always true if super charge is *not* active otherwise
-				// it is true every other frame.
-				if (superChargeFrame | (s_fireFrame & 1))
+				s_pistolSndId = sound_play(s_pistolSndSrc);
+
+				if (s_curPlayerWeapon->wakeupRange)
 				{
-					*s_curPlayerWeapon->ammo = pickup_addToValue(s_playerInfo.ammoEnergy, -1, 500);
+					vec3_fixed origin = { s_playerObject->posWS.x, s_playerObject->posWS.y, s_playerObject->posWS.z };
+					collision_effectObjectsInRangeXZ(s_playerObject->sector, s_curPlayerWeapon->wakeupRange, origin, hitEffectWakeupFunc, s_playerObject, ETFLAG_AI_ACTOR);
 				}
 
-				ProjectileLogic* projLogic;
-				fixed16_16 yPos = s_playerObject->posWS.y - s_playerObject->worldHeight + s_headwaveVerticalOffset;
-				projLogic = (ProjectileLogic*)createProjectile(PROJ_PISTOL_BOLT, s_playerObject->sector, s_playerObject->posWS.x, yPos, s_playerObject->posWS.z, s_playerObject);
-				projLogic->flags &= ~PROJFLAG_CAMERA_PASS_SOUND;
-				projLogic->prevColObj = s_playerObject;
+				fixed16_16 mtx[9];
+				weapon_computeMatrix(mtx, -s_playerObject->pitch, -s_playerObject->yaw);
 
-				if (targetFound)
+				vec3_fixed inVec =
 				{
-					proj_setYawPitch(projLogic, s_wpnPitchSin, s_wpnPitchCos, s_autoAimDirX, s_autoAimDirZ);
+					0x6666,	// 0.4
+					0x9999, // 0.6
+					0x33333 // 3.2
+				};
+				vec3_fixed outVec;
+				rotateVectorM3x3(&inVec, &outVec, mtx);
 
-					SecObject* projObj = projLogic->logic.obj;
-					projObj->pitch = s_weaponFirePitch;
-					projObj->yaw = s_weaponFireYaw;
+				fixed16_16 xPos = s_playerObject->posWS.x + outVec.x;
+				fixed16_16 yPos = outVec.y + s_playerObject->posWS.y - s_playerObject->worldHeight + s_headwaveVerticalOffset;
+				fixed16_16 zPos = s_playerObject->posWS.z + outVec.z;
+
+				JBool targetFound = computeAutoaim(xPos, yPos, zPos, s_playerObject->pitch, s_playerObject->yaw, s_curPlayerWeapon->variation & 0xffff);
+				if (!targetFound)
+				{
+					s32 variation = s_curPlayerWeapon->variation & 0xffff;
+					variation = random(variation * 2) - variation;
+					s_weaponFirePitch = s_playerObject->pitch + variation;
+
+					variation = s_curPlayerWeapon->variation & 0xffff;
+					variation = random(variation * 2) - variation;
+					s_weaponFireYaw = s_playerObject->yaw + variation;
 				}
-				else
+
+				s32 canFire = s_canFireWeaponPrim;
+				fixed16_16 mtx2[9];
+				s_canFireWeaponPrim = 0;
+				if (canFire > 1)
 				{
-					proj_setTransform(projLogic, s_weaponFirePitch, s_weaponFireYaw);
+					weapon_computeMatrix(mtx2, -s_weaponFirePitch, -s_weaponFireYaw);
 				}
 
-				if (canFire)
+				// Spawn projectiles.
+				fixed16_16 fire = intToFixed16(canFire);
+				while (canFire)
 				{
-					vec3_fixed inVec2 = { 0 };
-					if (canFire > 1)
+					if (*s_curPlayerWeapon->ammo == 0)
 					{
-						// TODO: This doesn't seem to be hit in the base game.
-						assert(0);
+						break;
+					}
+					fire -= ONE_16;
+					canFire--;
+					s32 superChargeFrame = s_superCharge ? 0 : 1;
+					// This is always true if super charge is *not* active otherwise
+					// it is true every other frame.
+					if (superChargeFrame | (s_fireFrame & 1))
+					{
+						*s_curPlayerWeapon->ammo = pickup_addToValue(s_playerInfo.ammoEnergy, -1, 500);
 					}
 
-					Tick v0 = (s_superCharge) ? 21 : 43;
-					Tick v1 = (s_superCharge) ? 7 : 14;
-					Tick v2 = (s_superCharge) ? 7 : 14;
-					inVec2.z = intToFixed16(s32(float(v0 + v1 + v2) * 1.71f));
+					ProjectileLogic* projLogic;
+					fixed16_16 yPos = s_playerObject->posWS.y - s_playerObject->worldHeight + s_headwaveVerticalOffset;
+					projLogic = (ProjectileLogic*)createProjectile(PROJ_PISTOL_BOLT, s_playerObject->sector, s_playerObject->posWS.x, yPos, s_playerObject->posWS.z, s_playerObject);
+					projLogic->flags &= ~PROJFLAG_CAMERA_PASS_SOUND;
+					projLogic->prevColObj = s_playerObject;
 
-					vec3_fixed outVec2;
-					rotateVectorM3x3(&inVec2, &outVec2, mtx2);
-					// First try using the outVec value computed above.
-					projLogic->delta = outVec;
-					tfe_adjustWeaponCollisionSpeed(projLogic);
-
-					ProjectileHitType hitType = proj_handleMovement(projLogic);
-					if (!handleProjectileHit(projLogic, hitType))
+					if (targetFound)
 					{
-						// If that fails, then try the new value.
-						projLogic->delta = outVec2;
+						proj_setYawPitch(projLogic, s_wpnPitchSin, s_wpnPitchCos, s_autoAimDirX, s_autoAimDirZ);
+
+						SecObject* projObj = projLogic->logic.obj;
+						projObj->pitch = s_weaponFirePitch;
+						projObj->yaw = s_weaponFireYaw;
+					}
+					else
+					{
+						proj_setTransform(projLogic, s_weaponFirePitch, s_weaponFireYaw);
+					}
+
+					if (canFire)
+					{
+						vec3_fixed inVec2 = { 0 };
+						if (canFire > 1)
+						{
+							// TODO: This doesn't seem to be hit in the base game.
+							assert(0);
+						}
+
+						Tick v0 = (s_superCharge) ? 21 : 43;
+						Tick v1 = (s_superCharge) ? 7 : 14;
+						Tick v2 = (s_superCharge) ? 7 : 14;
+						inVec2.z = intToFixed16(s32(float(v0 + v1 + v2) * 1.71f));
+
+						vec3_fixed outVec2;
+						rotateVectorM3x3(&inVec2, &outVec2, mtx2);
+						// First try using the outVec value computed above.
+						projLogic->delta = outVec;
 						tfe_adjustWeaponCollisionSpeed(projLogic);
 
-						hitType = proj_handleMovement(projLogic);
-						fire = handleProjectileHit(projLogic, hitType);
-					}
-				}
-				else
-				{
-					projLogic->delta = outVec;
-					tfe_adjustWeaponCollisionSpeed(projLogic);
+						ProjectileHitType hitType = proj_handleMovement(projLogic);
+						if (!handleProjectileHit(projLogic, hitType))
+						{
+							// If that fails, then try the new value.
+							projLogic->delta = outVec2;
+							tfe_adjustWeaponCollisionSpeed(projLogic);
 
-					ProjectileHitType hitType = proj_handleMovement(projLogic);
-					handleProjectileHit(projLogic, hitType);
+							hitType = proj_handleMovement(projLogic);
+							fire = handleProjectileHit(projLogic, hitType);
+						}
+					}
+					else
+					{
+						projLogic->delta = outVec;
+						tfe_adjustWeaponCollisionSpeed(projLogic);
+
+						ProjectileHitType hitType = proj_handleMovement(projLogic);
+						handleProjectileHit(projLogic, hitType);
+					}
+					tfe_restoreWeaponCollisionSpeed(projLogic);
 				}
-				tfe_restoreWeaponCollisionSpeed(projLogic);
+				task_localBlockEnd;
 			}
-			task_localBlockEnd;
+			else
+			{
+				// Secondary fire
+				s_curPlayerWeapon->xOffset = 10;
+				s_curPlayerWeapon->yOffset = 10;
+				taskCtx->startTick = s_curTick;
+				task_callTaskFunc(weapon_handleState2);
+
+				// Wait until the player is no longer "shooting"
+				// This holds the thermal detonator in place.
+				while (s_isShooting)
+				{
+					task_yield(TASK_NO_DELAY);
+					task_callTaskFunc(weapon_handleState);
+				};
+
+				task_localBlockBegin;
+				task_callTaskFunc(weapon_handleState2);
+				
+				// calculate weapon charge from length of time fire button was held down
+				fixed16_16 dt = intToFixed16(s_curTick - taskCtx->startTick);	
+				dt = max(dt, FIXED(40));
+				dt = min(dt, FIXED(320));
+				fixed16_16 weaponCharge = dt / FIXED(40);
+
+				if (s_pistolSndId)
+				{
+					sound_stop(s_pistolSndId);
+				}
+				s_pistolSndId = sound_play(s_pistolSndSrc);
+
+				if (s_curPlayerWeapon->wakeupRange)
+				{
+					vec3_fixed origin = { s_playerObject->posWS.x, s_playerObject->posWS.y, s_playerObject->posWS.z };
+					collision_effectObjectsInRangeXZ(s_playerObject->sector, s_curPlayerWeapon->wakeupRange, origin, hitEffectWakeupFunc, s_playerObject, ETFLAG_AI_ACTOR);
+				}
+
+				fixed16_16 mtx[9];
+				weapon_computeMatrix(mtx, -s_playerObject->pitch, -s_playerObject->yaw);
+
+				vec3_fixed inVec =
+				{
+					0x6666,	// 0.4
+					0x9999, // 0.6
+					0x33333 // 3.2
+				};
+				vec3_fixed outVec;
+				rotateVectorM3x3(&inVec, &outVec, mtx);
+
+				fixed16_16 xPos = s_playerObject->posWS.x + outVec.x;
+				fixed16_16 yPos = outVec.y + s_playerObject->posWS.y - s_playerObject->worldHeight + s_headwaveVerticalOffset;
+				fixed16_16 zPos = s_playerObject->posWS.z + outVec.z;
+
+				JBool targetFound = computeAutoaim(xPos, yPos, zPos, s_playerObject->pitch, s_playerObject->yaw, s_curPlayerWeapon->variation & 0xffff);
+				if (!targetFound)
+				{
+					s32 variation = s_curPlayerWeapon->variation & 0xffff;
+					s_weaponFirePitch = s_playerObject->pitch + variation;
+
+					variation = s_curPlayerWeapon->variation & 0xffff;
+					s_weaponFireYaw = s_playerObject->yaw + variation;
+				}
+
+
+				s32 canFire = s_canFireWeaponSec;
+				fixed16_16 mtx2[9];
+				s_canFireWeaponSec = 0;
+				if (canFire > 1)
+				{
+					weapon_computeMatrix(mtx2, -s_weaponFirePitch, -s_weaponFireYaw);
+				}
+
+				// Spawn projectiles.
+				fixed16_16 fire = intToFixed16(canFire);
+				while (canFire)
+				{
+					if (*s_curPlayerWeapon->ammo == 0)
+					{
+						break;
+					}
+					fire -= ONE_16;
+					canFire--;
+					s32 superChargeFrame = s_superCharge ? 0 : 1;
+					// This is always true if super charge is *not* active otherwise
+					// it is true every other frame.
+					if (superChargeFrame | (s_fireFrame & 1))
+					{
+						*s_curPlayerWeapon->ammo = pickup_addToValue(s_playerInfo.ammoEnergy, -weaponCharge, 500);
+					}
+
+					ProjectileLogic* projLogic;
+					fixed16_16 yPos = s_playerObject->posWS.y - s_playerObject->worldHeight + s_headwaveVerticalOffset;
+					projLogic = (ProjectileLogic*)createProjectile(PROJ_PISTOL_BOLT, s_playerObject->sector, s_playerObject->posWS.x, yPos, s_playerObject->posWS.z, s_playerObject);
+					projLogic->flags &= ~PROJFLAG_CAMERA_PASS_SOUND;
+					projLogic->prevColObj = s_playerObject;
+
+					projLogic->dmg = mul16(FIXED(weaponCharge + 1), FIXED(10));
+
+					if (targetFound)
+					{
+						proj_setYawPitch(projLogic, s_wpnPitchSin, s_wpnPitchCos, s_autoAimDirX, s_autoAimDirZ);
+
+						SecObject* projObj = projLogic->logic.obj;
+						projObj->pitch = s_weaponFirePitch;
+						projObj->yaw = s_weaponFireYaw;
+					}
+					else
+					{
+						proj_setTransform(projLogic, s_weaponFirePitch, s_weaponFireYaw);
+					}
+
+					if (canFire)
+					{
+						vec3_fixed inVec2 = { 0 };
+						if (canFire > 1)
+						{
+							// TODO: This doesn't seem to be hit in the base game.
+							assert(0);
+						}
+
+						Tick v0 = (s_superCharge) ? 21 : 43;
+						Tick v1 = (s_superCharge) ? 7 : 14;
+						Tick v2 = (s_superCharge) ? 7 : 14;
+						inVec2.z = intToFixed16(s32(float(v0 + v1 + v2) * 1.71f));
+
+						vec3_fixed outVec2;
+						rotateVectorM3x3(&inVec2, &outVec2, mtx2);
+						// First try using the outVec value computed above.
+						projLogic->delta = outVec;
+						tfe_adjustWeaponCollisionSpeed(projLogic);
+
+						ProjectileHitType hitType = proj_handleMovement(projLogic);
+						if (!handleProjectileHit(projLogic, hitType))
+						{
+							// If that fails, then try the new value.
+							projLogic->delta = outVec2;
+							tfe_adjustWeaponCollisionSpeed(projLogic);
+
+							hitType = proj_handleMovement(projLogic);
+							fire = handleProjectileHit(projLogic, hitType);
+						}
+					}
+					else
+					{
+						projLogic->delta = outVec;
+						tfe_adjustWeaponCollisionSpeed(projLogic);
+
+						ProjectileHitType hitType = proj_handleMovement(projLogic);
+						handleProjectileHit(projLogic, hitType);
+					}
+					tfe_restoreWeaponCollisionSpeed(projLogic);
+				}
+
+				s_curPlayerWeapon->xOffset = 0;
+				s_curPlayerWeapon->yOffset = 0;
+				task_localBlockEnd;
+			}
 			
 			// Animation.
 			for (taskCtx->iFrame = 0; taskCtx->iFrame < TFE_ARRAYSIZE(c_pistolAnim); taskCtx->iFrame++)
