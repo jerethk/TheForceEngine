@@ -489,6 +489,7 @@ namespace TFE_DarkForces
 					projLogic->prevColObj = s_playerObject;
 
 					projLogic->dmg = mul16(FIXED(weaponCharge), FIXED(10));
+					projLogic->projForce = mul16(FIXED(weaponCharge), 655);
 
 					if (targetFound)
 					{
