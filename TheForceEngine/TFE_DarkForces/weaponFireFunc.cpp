@@ -498,7 +498,7 @@ namespace TFE_DarkForces
 				// it is true every other frame.
 				if (superChargeFrame | (s_fireFrame & 1))
 				{
-					*s_curPlayerWeapon->ammo = pickup_addToValue(s_playerInfo.ammoEnergy, -2, 500);
+					*s_curPlayerWeapon->ammo = pickup_addToValue(s_playerInfo.ammoEnergy, s_secondaryFire ? -2 : -1, 500);
 				}
 
 				ProjectileLogic* projLogic;
@@ -577,18 +577,15 @@ namespace TFE_DarkForces
 				} while (msg != MSG_RUN_TASK);
 			}
 
-			if (!s_secondaryFire) 
+			// Primary fire delay
+			if (!s_secondaryFire && s_isShooting)
 			{
-				// Primary fire delay
-				if (s_isShooting)
+				taskCtx->delay = (s_superCharge) ? 10 : 20;
+				do
 				{
-					taskCtx->delay = (s_superCharge) ? 10 : 20;
-					do
-					{
-						task_yield(taskCtx->delay);
-						task_callTaskFunc(weapon_handleState);
-					} while (msg != MSG_RUN_TASK);
-				}
+					task_yield(taskCtx->delay);
+					task_callTaskFunc(weapon_handleState);
+				} while (msg != MSG_RUN_TASK);
 			}
 
 			s_canFireWeaponPrim = 1;
