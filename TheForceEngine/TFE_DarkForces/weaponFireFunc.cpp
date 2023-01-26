@@ -470,11 +470,8 @@ namespace TFE_DarkForces
 			if (!targetFound)
 			{
 				s32 variation = s_curPlayerWeapon->variation & 0xffff;
-				variation = random(variation * 2) - variation;
+				variation = s_secondaryFire ? random(variation * 2) - variation : variation;
 				s_weaponFirePitch = s_playerObject->pitch + variation;
-
-				variation = s_curPlayerWeapon->variation & 0xffff;
-				variation = random(variation * 2) - variation;
 				s_weaponFireYaw = s_playerObject->yaw + variation;
 			}
 
@@ -578,6 +575,20 @@ namespace TFE_DarkForces
 					task_yield(taskCtx->delay);
 					task_callTaskFunc(weapon_handleState);
 				} while (msg != MSG_RUN_TASK);
+			}
+
+			if (!s_secondaryFire) 
+			{
+				// Primary fire delay
+				if (s_isShooting)
+				{
+					taskCtx->delay = (s_superCharge) ? 10 : 20;
+					do
+					{
+						task_yield(taskCtx->delay);
+						task_callTaskFunc(weapon_handleState);
+					} while (msg != MSG_RUN_TASK);
+				}
 			}
 
 			s_canFireWeaponPrim = 1;
