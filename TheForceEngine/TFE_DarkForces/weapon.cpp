@@ -46,6 +46,7 @@ namespace TFE_DarkForces
 		
 	SoundSourceId s_punchSwingSndSrc;
 	SoundSourceId s_pistolSndSrc;
+	SoundSourceId s_pistolChargingSndSrc;
 	SoundSourceId s_pistolEmptySndSrc;
 	SoundSourceId s_rifleSndSrc;
 	SoundSourceId s_rifleEmptySndSrc;
@@ -385,6 +386,7 @@ namespace TFE_DarkForces
 		// Load Sounds.
 		s_punchSwingSndSrc    = sound_load("swing.voc",    SOUND_PRIORITY_HIGH3);
 		s_pistolSndSrc        = sound_load("pistol-1.voc", SOUND_PRIORITY_HIGH0);
+		s_pistolChargingSndSrc	= sound_load("altcharg.voc", SOUND_PRIORITY_HIGH0);
 		s_pistolEmptySndSrc   = sound_load("pistout1.voc", SOUND_PRIORITY_HIGH0);
 		s_rifleSndSrc         = sound_load("rifle-1.voc",  SOUND_PRIORITY_HIGH0);
 		s_rifleEmptySndSrc    = sound_load("riflout.voc",  SOUND_PRIORITY_HIGH0);

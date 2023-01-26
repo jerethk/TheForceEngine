@@ -394,6 +394,12 @@ namespace TFE_DarkForces
 				taskCtx->startTick = s_curTick;
 				task_callTaskFunc(weapon_handleState2);
 
+				if (s_pistolSndId)
+				{
+					sound_stop(s_pistolSndId);
+				}
+				s_pistolSndId = sound_play(s_pistolChargingSndSrc);
+
 				// Wait until the player is no longer "shooting"
 				// This holds the thermal detonator in place.
 				while (s_isShooting)

@@ -104,6 +104,7 @@ namespace TFE_DarkForces
 	// Weapon sounds (external since AI uses it).
 	extern SoundSourceId s_punchSwingSndSrc;
 	extern SoundSourceId s_pistolSndSrc;
+	extern SoundSourceId s_pistolChargingSndSrc;
 	extern SoundSourceId s_pistolEmptySndSrc;
 	extern SoundSourceId s_rifleSndSrc;
 	extern SoundSourceId s_rifleEmptySndSrc;
