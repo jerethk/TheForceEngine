@@ -580,7 +580,7 @@ namespace TFE_DarkForces
 				} while (msg != MSG_RUN_TASK);
 			}
 
-			if (*s_curPlayerWeapon->ammo % 20 == 0 || (*s_curPlayerWeapon->ammo + 1) % 20 == 0)
+			if (*s_curPlayerWeapon->ammo != 0 && *s_curPlayerWeapon->ammo % 20 == 0 || (*s_curPlayerWeapon->ammo + 1) % 20 == 0)
 			{
 				sound_play(s_weaponChangeSnd);
 				taskCtx->delay = 100;
