@@ -412,10 +412,9 @@ namespace TFE_DarkForces
 				task_callTaskFunc(weapon_handleState2);
 				
 				// calculate weapon charge from length of time fire button was held down
-				fixed16_16 dt = intToFixed16(s_curTick - taskCtx->startTick);	
-				dt = max(dt, FIXED(40));
-				dt = min(dt, FIXED(320));
-				fixed16_16 weaponCharge = dt / FIXED(40);
+				Tick dt = s_curTick - taskCtx->startTick;	
+				dt = clamp(dt, 40, 320);
+				s32 weaponCharge = dt / 40;
 
 				if (s_pistolSndId)
 				{
