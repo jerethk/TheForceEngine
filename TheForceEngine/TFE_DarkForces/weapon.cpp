@@ -1279,12 +1279,12 @@ namespace TFE_DarkForces
 
 		if (s_wearingGoggles)
 		{
-			s32 x = 0;
-			s32 y = 0;
+			s32 x = -60;
+			s32 y = -2;
 			if (weapon)
 			{
-				x -= (weapon->xWaveOffset >> 3);
-				y += (weapon->yWaveOffset >> 2);
+				// x -= (weapon->xWaveOffset >> 3);
+				// y += (weapon->yWaveOffset >> 2);
 			}
 			const u8* atten = RClassic_Fixed::computeLighting(gasmaskLightingZDist, 0);
 			TextureData* tex = s_gogglesTexture;
