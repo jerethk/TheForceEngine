@@ -1974,7 +1974,7 @@ namespace TFE_DarkForces
 				if (s_landUpVel > FIXED(107))
 				{
 					bool inWater = s_playerSector->secHeight - 1 >= 0;
-					float dmgFactor = inWater ? 2 * 65536.0 / s_playerSector->secHeight : 2;
+					float dmgFactor = inWater ? 2 * 32768.0 / (s_playerSector->secHeight + 32768) : 2;
 					fixed16_16 dmg = dmgFactor * (s_landUpVel - FIXED(107));
 					player_applyDamage(dmg, 0, JFALSE);
 					s_landUpVel = 0;
