@@ -1973,7 +1973,9 @@ namespace TFE_DarkForces
 				// Fall Damage if moving at faster than 107 units / second.
 				if (s_landUpVel > FIXED(107))
 				{
-					fixed16_16 dmg = 2 * (s_landUpVel - FIXED(107));
+					bool inWater = s_playerSector->secHeight - 1 >= 0;
+					float dmgFactor = inWater ? 2 * 65536.0 / s_playerSector->secHeight : 2;
+					fixed16_16 dmg = dmgFactor * (s_landUpVel - FIXED(107));
 					player_applyDamage(dmg, 0, JFALSE);
 					s_landUpVel = 0;
 				}
