@@ -885,6 +885,7 @@ namespace TFE_DarkForces
 	{
 		disableNightvisionInternal();
 		s_nightvisionActive = JFALSE;
+		s_wearingGoggles = JFALSE;
 		hud_sendTextMessage(9);
 	}
 
@@ -900,6 +901,7 @@ namespace TFE_DarkForces
 			return;
 		}
 
+		s_wearingGoggles = JTRUE;
 		s_nightvisionActive = JTRUE;
 		beginNightVision(16);
 		hud_sendTextMessage(10);

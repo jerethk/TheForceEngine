@@ -198,6 +198,7 @@ namespace TFE_DarkForces
 	JBool s_weaponFiringSec = JFALSE;
 	JBool s_wearingCleats = JFALSE;
 	JBool s_wearingGasmask = JFALSE;
+	JBool s_wearingGoggles = JFALSE;
 	JBool s_nightvisionActive = JFALSE;
 	JBool s_headlampActive = JFALSE;
 	JBool s_superCharge   = JFALSE;
@@ -534,6 +535,7 @@ namespace TFE_DarkForces
 		s_energy = FIXED(2);
 
 		s_wearingGasmask    = JFALSE;
+		s_wearingGoggles	= JFALSE;
 		s_wearingCleats     = JFALSE;
 		s_nightvisionActive = JFALSE;
 		s_headlampActive    = JFALSE;
@@ -2354,6 +2356,7 @@ namespace TFE_DarkForces
 				{
 					s_nightvisionActive = JFALSE;
 					disableNightvisionInternal();
+					s_wearingGoggles = JFALSE;
 					hud_sendTextMessage(9);
 				}
 				if (s_headlampActive)
@@ -2821,6 +2824,7 @@ namespace TFE_DarkForces
 		SERIALIZE(ObjState_InitVersion, s_weaponFiringSec, 0);
 		SERIALIZE(ObjState_InitVersion, s_wearingCleats, 0);
 		SERIALIZE(ObjState_InitVersion, s_wearingGasmask, 0);
+		SERIALIZE(ObjState_InitVersion, s_wearingGoggles, 0);
 		SERIALIZE(ObjState_InitVersion, s_nightvisionActive, 0);
 		SERIALIZE(ObjState_InitVersion, s_headlampActive, 0);
 		SERIALIZE(ObjState_InitVersion, s_superCharge, 0);

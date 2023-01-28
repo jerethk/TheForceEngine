@@ -22,6 +22,7 @@ namespace TFE_DarkForces
 	
 	static TextureData* s_rhand1 = nullptr;
 	static TextureData* s_gasmaskTexture = nullptr;
+	static TextureData* s_gogglesTexture = nullptr;
 	static PlayerWeapon s_playerWeaponList[WPN_COUNT];
 			
 	static Tick s_weaponDelayPrimary;
@@ -110,6 +111,7 @@ namespace TFE_DarkForces
 
 		s_rhand1 = nullptr;
 		s_gasmaskTexture = nullptr;
+		s_gogglesTexture = nullptr;
 
 		s_weaponAutoMount2 = JFALSE;
 		s_secondaryFire = JFALSE;
@@ -691,6 +693,7 @@ namespace TFE_DarkForces
 		// Get weapon textures.
 		weapon_addTexture(texList, s_rhand1);
 		weapon_addTexture(texList, s_gasmaskTexture);
+		weapon_addTexture(texList, s_gogglesTexture);
 		for (s32 i = 0; i < WPN_COUNT; i++)
 		{
 			for (s32 f = 0; f < s_playerWeaponList[i].frameCount; f++)
@@ -707,6 +710,7 @@ namespace TFE_DarkForces
 		{
 			s_rhand1 = loadWeaponTexture("rhand1.bm");
 			s_gasmaskTexture = loadWeaponTexture("gmask.bm");
+			s_gogglesTexture = loadWeaponTexture("goggles.bm");
 
 			s_playerWeaponList[WPN_FIST].frames[0] = s_rhand1;
 			s_playerWeaponList[WPN_FIST].frames[1] = loadWeaponTexture("punch1.bm");
@@ -1273,6 +1277,51 @@ namespace TFE_DarkForces
 			}
 		}
 
+		if (s_wearingGoggles)
+		{
+			s32 x = 0;
+			s32 y = 0;
+			if (weapon)
+			{
+				x -= (weapon->xWaveOffset >> 3);
+				y += (weapon->yWaveOffset >> 2);
+			}
+			const u8* atten = RClassic_Fixed::computeLighting(gasmaskLightingZDist, 0);
+			TextureData* tex = s_gogglesTexture;
+
+			u32 dispWidth, dispHeight;
+			vfb_getResolution(&dispWidth, &dispHeight);
+
+			if (dispWidth == 320 && dispHeight == 200)
+			{
+				if (atten)
+				{
+					blitTextureToScreenLit(tex, rect, x, y, atten, display, JTRUE);
+				}
+				else
+				{
+					blitTextureToScreen(tex, rect, x, y, display, JTRUE);
+				}
+			}
+			else
+			{
+				// HUD scaling.
+				fixed16_16 xScale = vfb_getXScale();
+				fixed16_16 yScale = vfb_getYScale();
+				x = floor16(mul16(xScale, intToFixed16(x))) + vfb_getWidescreenOffset();
+				y = floor16(yScale + mul16(yScale, intToFixed16(y)));
+
+				if (atten && !s_weaponLight)
+				{
+					blitTextureToScreenLitScaled(tex, rect, x, y, xScale, yScale, atten, display, JTRUE);
+				}
+				else
+				{
+					blitTextureToScreenScaled(tex, rect, x, y, xScale, yScale, display, JTRUE);
+				}
+			}
+		}
+		
 		if (s_wearingGasmask)
 		{
 			s32 x = 105;

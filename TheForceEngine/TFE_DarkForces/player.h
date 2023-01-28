@@ -85,6 +85,7 @@ namespace TFE_DarkForces
 	extern JBool s_weaponFiringSec;
 	extern JBool s_wearingCleats;
 	extern JBool s_wearingGasmask;
+	extern JBool s_wearingGoggles;
 	extern JBool s_nightvisionActive;
 	extern JBool s_headlampActive;
 	extern JBool s_superCharge;
