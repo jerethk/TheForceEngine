@@ -470,7 +470,7 @@ namespace TFE_DarkForces
 			if (!targetFound)
 			{
 				s32 variation = s_curPlayerWeapon->variation & 0xffff;
-				variation = s_secondaryFire ? random(variation * 2) - variation : variation;
+				variation = !s_secondaryFire ? random(variation * 2) - variation : random(variation) - (variation / 2);
 				s_weaponFirePitch = s_playerObject->pitch + variation;
 				s_weaponFireYaw = s_playerObject->yaw + variation;
 			}
@@ -498,7 +498,7 @@ namespace TFE_DarkForces
 				// it is true every other frame.
 				if (superChargeFrame | (s_fireFrame & 1))
 				{
-					*s_curPlayerWeapon->ammo = pickup_addToValue(s_playerInfo.ammoEnergy, s_secondaryFire ? -2 : -1, 500);
+					*s_curPlayerWeapon->ammo = pickup_addToValue(s_playerInfo.ammoEnergy, s_secondaryFire ? -1 : -2, 500);
 				}
 
 				ProjectileLogic* projLogic;
@@ -578,9 +578,9 @@ namespace TFE_DarkForces
 			}
 
 			// Primary fire delay
-			if (!s_secondaryFire && s_isShooting)
+			if (s_secondaryFire && s_isShooting)
 			{
-				taskCtx->delay = (s_superCharge) ? 10 : 20;
+				taskCtx->delay = (s_superCharge) ? 15 : 30;
 				do
 				{
 					task_yield(taskCtx->delay);
