@@ -414,7 +414,7 @@ namespace TFE_DarkForces
 				// calculate weapon charge from length of time fire button was held down, but limit to ammo available
 				Tick dt = s_curTick - taskCtx->startTick;	
 				dt = clamp(dt, 40, 320);
-				s32 weaponCharge = min(dt / 40, *s_curPlayerWeapon->ammo);
+				s32 weaponCharge = min((s32)dt / 40, *s_curPlayerWeapon->ammo);
 
 				if (s_pistolSndId)
 				{
