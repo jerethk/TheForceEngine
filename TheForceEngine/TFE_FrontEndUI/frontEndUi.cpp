@@ -651,6 +651,7 @@ namespace TFE_FrontEndUI
 					// Game
 					gameSettings->df_showSecretFoundMsg = false;
 					gameSettings->df_bobaFettFacePlayer = false;
+					gameSettings->df_waterCushion = false;
 					// Graphics
 					graphicsSettings->rendererIndex = RENDERER_SOFTWARE;
 					graphicsSettings->widescreen = false;
@@ -1075,6 +1076,12 @@ namespace TFE_FrontEndUI
 		if (ImGui::Checkbox("Boba Fett Face Player Fix", &bobaFettFacePlayer))
 		{
 			gameSettings->df_bobaFettFacePlayer = bobaFettFacePlayer;
+		}
+
+		bool waterCushion = gameSettings->df_waterCushion;
+		if (ImGui::Checkbox("Fall Damage Cushioned by Water", &waterCushion))
+		{
+			gameSettings->df_waterCushion = waterCushion;
 		}
 
 		if (s_drawNoGameDataMsg)

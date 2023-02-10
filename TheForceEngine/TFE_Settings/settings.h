@@ -157,6 +157,7 @@ struct TFE_Settings_Game
 	bool df_enableAutoaim      = true;  // Set to true to enable autoaim, false to disable.
 	bool df_showSecretFoundMsg = true;  // Show a message when the player finds a secret.
 	bool df_autorun = false;			// Run by default instead of walk.
+	bool df_waterCushion = false;		// Water cushions fall damage
 	PitchLimit df_pitchLimit  = PITCH_VANILLA_PLUS;
 };
 
