@@ -220,7 +220,7 @@ namespace TFE_DarkForces
 		return (Logic*)dispatch;
 	}
 
-	Logic* civilian_setup(SecObject* obj, LogicSetupFunc* setupFunc)
+	Logic* civilianWalk_setup(SecObject* obj, LogicSetupFunc* setupFunc)
 	{
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = 0;
@@ -239,6 +239,27 @@ namespace TFE_DarkForces
 		thinkerMod->anim.flags &= 0xfffffffe;
 		thinkerMod->startDelay = TICKS(100);
 		actor_addModule(dispatch, (ActorModule*)thinkerMod);
+
+		MovementModule* moveMod = actor_createMovementModule(dispatch);
+		dispatch->moveMod = moveMod;
+		dispatch->animTable = s_bosskAnimTable;
+
+		moveMod->collisionFlags |= 1;
+		moveMod->physics.width = obj->worldWidth;
+		actor_setupInitAnimation();
+
+		return (Logic*)dispatch;
+	}
+
+	Logic* civilianStand_setup(SecObject* obj, LogicSetupFunc* setupFunc)
+	{
+		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
+		dispatch->alertSndSrc = 0;
+
+		DamageModule* module = actor_createDamageModule(dispatch);
+		module->hp = FIXED(1);
+		module->dieSndSrc = s_agentSndSrc[AGENTSND_STORM_DIE];
+		actor_addModule(dispatch, (ActorModule*)module);
 
 		MovementModule* moveMod = actor_createMovementModule(dispatch);
 		dispatch->moveMod = moveMod;

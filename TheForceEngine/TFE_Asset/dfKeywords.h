@@ -149,7 +149,8 @@ enum KEYWORD
 	KW_REE_YEES2,			// logics
 	KW_BOSSK,				// logics
 	KW_FOLLOWER,
-	KW_CIVILIAN,
+	KW_CIVILIAN_WALK,
+	KW_CIVILIAN_STAND,
 	KW_BARREL,				// logics
 	KW_LAND_MINE,			// logics
 	KW_KELL,				// logics

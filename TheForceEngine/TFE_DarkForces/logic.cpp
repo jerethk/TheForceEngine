@@ -318,10 +318,15 @@ namespace TFE_DarkForces
 				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
 				return follower_setup(obj, setupFunc);
 			} break;
-			case KW_CIVILIAN:
+			case KW_CIVILIAN_WALK:
 			{
 				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
-				return civilian_setup(obj, setupFunc);
+				return civilianWalk_setup(obj, setupFunc);
+			} break;
+			case KW_CIVILIAN_STAND:
+			{
+				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
+				return civilianStand_setup(obj, setupFunc);
 			} break;
 		}
 
