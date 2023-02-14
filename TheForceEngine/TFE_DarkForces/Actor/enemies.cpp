@@ -184,7 +184,7 @@ namespace TFE_DarkForces
 		return (Logic*)dispatch;
 	}
 
-	Logic* civilian_setup(SecObject* obj, LogicSetupFunc* setupFunc)
+	Logic* follower_setup(SecObject* obj, LogicSetupFunc* setupFunc)
 	{
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = 0;
