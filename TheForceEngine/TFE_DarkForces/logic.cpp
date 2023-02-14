@@ -318,7 +318,11 @@ namespace TFE_DarkForces
 				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
 				return follower_setup(obj, setupFunc);
 			} break;
-
+			case KW_CIVILIAN:
+			{
+				obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_HAS_GRAVITY;
+				return civilian_setup(obj, setupFunc);
+			} break;
 		}
 
 		TFE_System::logWrite(LOG_ERROR, "Logic", "Unknown logic type - %d.", logicId);

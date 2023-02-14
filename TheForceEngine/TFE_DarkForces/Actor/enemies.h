@@ -14,4 +14,5 @@ namespace TFE_DarkForces
 	Logic* bossk_setup(SecObject* obj, LogicSetupFunc* setupFunc);
 	Logic* gamor_setup(SecObject* obj, LogicSetupFunc* setupFunc);
 	Logic* follower_setup(SecObject* obj, LogicSetupFunc* setupFunc);
+	Logic* civilian_setup(SecObject* obj, LogicSetupFunc* setupFunc);
 }  // namespace TFE_DarkForces
