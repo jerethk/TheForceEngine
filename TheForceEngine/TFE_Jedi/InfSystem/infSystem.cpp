@@ -3574,6 +3574,8 @@ namespace TFE_Jedi
 		{
 			sector->floorOffset.x += deltaX;
 			sector->floorOffset.z += deltaZ;
+
+			sector_moveObjects(sector, elev->flags, deltaX, deltaZ);
 		}
 		else if (elev->type == IELEV_SCROLL_CEILING)
 		{
