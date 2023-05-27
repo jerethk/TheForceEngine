@@ -801,12 +801,18 @@ namespace TFE_Jedi
 			// The object collides with the ceiling.
 			s_hcolDstPos.y = ceilHeight + colInfo->height;
 		}
-		else if (s_hcolDstPos.y > floorHeight)
+		if (s_hcolDstPos.y > floorHeight)
 		{
 			// The object collides with the floor.
 			s_hcolDstPos.y = floorHeight;
 		}
 		s_hcolObj->posWS.y = s_hcolDstPos.y;
+
+		// Crush AI if distance between floor and ceiling is less than 1/3 of the object's worldHeight		
+		if (s_hcolObj->entityFlags & ETFLAG_AI_ACTOR && floorHeight - ceilHeight < s_hcolObj->worldHeight / 3)
+		{
+			message_sendToObj(obj, MSG_CRUSH, nullptr);
+		}
 
 		// These values are probably filled in at 2346a6, 23474f, and/or 23487f - which need to be figured out first.
 		colInfo->wall = colWall;
