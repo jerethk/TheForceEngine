@@ -61,7 +61,7 @@ namespace TFE_DarkForces
 			TFE_Sprite_Jedi::getWax("exptiny.wax", POOL_GAME),
 			0,                              // force
 			0,                              // damage
-			0,                              // explosiveRange
+			FIXED(2),                              // explosiveRange
 			FIXED(40),                      // wakeupRange
 			sound_load("ex-tiny1.voc", SOUND_PRIORITY_LOW0),     // soundEffect
 		};
@@ -81,7 +81,7 @@ namespace TFE_DarkForces
 			TFE_Sprite_Jedi::getWax("emisexp.wax", POOL_GAME),
 			0,                              // force
 			0,                              // damage
-			0,                              // explosiveRange
+			FIXED(3),                              // explosiveRange
 			FIXED(40),                      // wakeupRange
 			sound_load("ex-tiny1.voc", SOUND_PRIORITY_LOW0),     // soundEffect
 		};
@@ -151,7 +151,7 @@ namespace TFE_DarkForces
 			TFE_Sprite_Jedi::getWax("plasexp.wax", POOL_GAME),
 			0,                              // force
 			0,                              // damage
-			0,                              // explosiveRange
+			FIXED(4),                              // explosiveRange
 			FIXED(50),                      // wakeupRange
 			sound_load("ex-med1.voc", SOUND_PRIORITY_LOW0),      // soundEffect
 		};
@@ -161,7 +161,7 @@ namespace TFE_DarkForces
 			TFE_Sprite_Jedi::getWax("bullexp.wax", POOL_GAME),
 			0,                              // force
 			0,                              // damage
-			0,                              // explosiveRange
+			FIXED(2),                              // explosiveRange
 			FIXED(50),                      // wakeupRange
 			sound_load("ex-tiny1.voc", SOUND_PRIORITY_LOW0),     // soundEffect
 		};
