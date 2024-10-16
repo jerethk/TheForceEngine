@@ -325,6 +325,7 @@ echo ^)";
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="TFE_ExternalData\weaponExternal.h" />
     <ClInclude Include="Shaders\curve.h" />
     <ClInclude Include="Shaders\filter.h" />
     <ClInclude Include="Shaders\grid.h" />
@@ -728,6 +729,7 @@ echo ^)";
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="TFE_ExternalData\weaponExternal.cpp" />
     <ClCompile Include="TFE_A11y\accessibility.cpp" />
     <ClCompile Include="TFE_A11y\filePathList.cpp" />
     <ClCompile Include="TFE_Archive\archive.cpp" />

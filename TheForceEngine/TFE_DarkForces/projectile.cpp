@@ -13,11 +13,14 @@
 #include <TFE_Jedi/Level/rwall.h>
 #include <TFE_Jedi/Memory/allocator.h>
 #include <TFE_Jedi/Serialization/serialization.h>
+#include <TFE_ExternalData/weaponExternal.h>
 
 using namespace TFE_Jedi;
 
 namespace TFE_DarkForces
 {
+	typedef ProjectileHitType(*ProjectileUpdateFunc)(ProjectileLogic*);
+
 	//////////////////////////////////////////////////////////////
 	// Structures and Constants
 	//////////////////////////////////////////////////////////////
@@ -98,6 +101,8 @@ namespace TFE_DarkForces
 	ProjectileHitType landMineUpdateFunc(ProjectileLogic* logic);
 	ProjectileHitType arcingProjectileUpdateFunc(ProjectileLogic* logic);
 	ProjectileHitType homingMissileProjectileUpdateFunc(ProjectileLogic* logic);
+
+	ProjectileUpdateFunc getUpdateFunc(const char* updateFunc);
 	   
 	void projectileTaskFunc(MessageType msg);
 
@@ -153,6 +158,28 @@ namespace TFE_DarkForces
 		s_projectileTask = createSubTask("projectiles", projectileTaskFunc);
 	}
 
+	void setProjectileLogic(ProjectileLogic* &projLogic, u32 projectileIndex, TFE_ExternalData::ExternalProjectile* externalProjectiles)
+	{
+		projLogic->updateFunc = getUpdateFunc(externalProjectiles[projectileIndex].updateFunc);
+		projLogic->dmg = FIXED(externalProjectiles[projectileIndex].damage);
+		projLogic->falloffAmt = externalProjectiles[projectileIndex].falloffAmount;
+		projLogic->nextFalloffTick = s_curTick + externalProjectiles[projectileIndex].nextFalloffTick;
+		projLogic->dmgFalloffDelta = externalProjectiles[projectileIndex].damageFalloffDelta;
+		projLogic->minDmg = FIXED(externalProjectiles[projectileIndex].minDamage);
+
+		projLogic->projForce = externalProjectiles[projectileIndex].force;
+		projLogic->speed = FIXED(externalProjectiles[projectileIndex].speed);
+		projLogic->horzBounciness = externalProjectiles[projectileIndex].horzBounciness;
+		projLogic->vertBounciness = externalProjectiles[projectileIndex].vertBounciness;
+		projLogic->bounceCnt = externalProjectiles[projectileIndex].bounceCount;
+		projLogic->reflVariation = externalProjectiles[projectileIndex].reflectVariation;
+		projLogic->reflectEffectId = (HitEffectID)externalProjectiles[projectileIndex].reflectEffectId;
+		projLogic->hitEffectId = (HitEffectID)externalProjectiles[projectileIndex].hitEffectId;;
+		projLogic->duration = s_curTick + externalProjectiles[projectileIndex].duration;
+		projLogic->cameraPassSnd = sound_load(externalProjectiles[projectileIndex].cameraPassSound, SOUND_PRIORITY_LOW3);
+		projLogic->reflectSnd = sound_load(externalProjectiles[projectileIndex].reflectSound, SOUND_PRIORITY_LOW1);
+	}
+
 	// TODO: Move projectile data to an external file to avoid hardcoding it for TFE.
 	Logic* createProjectile(ProjectileType type, RSector* sector, fixed16_16 x, fixed16_16 y, fixed16_16 z, SecObject* obj)
 	{
@@ -186,6 +213,8 @@ namespace TFE_DarkForces
 
 		obj_addLogic(projObj, (Logic*)projLogic, LOGIC_PROJECTILE, s_projectileTask, projectileLogicCleanupFunc);
 		
+		TFE_ExternalData::ExternalProjectile* externalProjectiles = TFE_ExternalData::getExternalProjectiles();
+
 		switch (type)
 		{
 			case PROJ_PUNCH:
@@ -193,17 +222,7 @@ namespace TFE_DarkForces
 				spirit_setData(projObj);
 
 				projLogic->type = PROJ_PUNCH;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(6);
-				projLogic->falloffAmt = 0;
-				projLogic->projForce = 1310;
-				projLogic->speed = FIXED(230);
-				projLogic->horzBounciness = 0;
-				projLogic->vertBounciness = 0;
-				projLogic->bounceCnt = 0;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_NONE;
-				projLogic->duration = s_curTick;
+				setProjectileLogic(projLogic, 0, externalProjectiles);
 			} break;
 			case PROJ_PISTOL_BOLT:
 			{
@@ -215,24 +234,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_PISTOL_BOLT;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(10);
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = ONE_16;
-				projLogic->dmgFalloffDelta = 14;
-
-				projLogic->projForce = 655;
-				projLogic->speed = FIXED(250);
-				projLogic->horzBounciness = ONE_16;
-				projLogic->vertBounciness = ONE_16;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 9;
-				projLogic->nextFalloffTick = s_curTick + 14;	// ~0.1 seconds
-				projLogic->reflectEffectId = HEFFECT_SMALL_EXP;
-				projLogic->hitEffectId = HEFFECT_SMALL_EXP;
-				projLogic->duration = s_curTick + 436;	// ~3 seconds
-				projLogic->cameraPassSnd = s_stdProjCameraSnd;
-				projLogic->reflectSnd = s_stdProjReflectSnd;
+				setProjectileLogic(projLogic, 1, externalProjectiles);
 			} break;
 			case PROJ_RIFLE_BOLT:
 			{
@@ -244,24 +246,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_RIFLE_BOLT;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(10);
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = 52428;	// 0.8 damage
-				projLogic->dmgFalloffDelta = 14;
-
-				projLogic->projForce = 655;
-				projLogic->speed = FIXED(250);
-				projLogic->horzBounciness = ONE_16;
-				projLogic->vertBounciness = ONE_16;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 9;
-				projLogic->nextFalloffTick = s_curTick + 14;	// ~0.1 seconds
-				projLogic->reflectEffectId = HEFFECT_SMALL_EXP;
-				projLogic->hitEffectId = HEFFECT_SMALL_EXP;
-				projLogic->duration = s_curTick + 582;	// ~4 seconds
-				projLogic->cameraPassSnd = s_stdProjCameraSnd;
-				projLogic->reflectSnd = s_stdProjReflectSnd;
+				setProjectileLogic(projLogic, 2, externalProjectiles);
 			} break;
 			case PROJ_THERMAL_DET:
 			{
@@ -274,22 +259,7 @@ namespace TFE_DarkForces
 
 				projLogic->flags |= PROJFLAG_EXPLODE;
 				projLogic->type = PROJ_THERMAL_DET;
-				projLogic->updateFunc = arcingProjectileUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = 0;
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = 6553;
-				projLogic->speed = FIXED(80);
-				projLogic->horzBounciness = 29491;	// 0.45
-				projLogic->vertBounciness = 58327;  // 0.89
-				projLogic->bounceCnt = -1;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_THERMDET_EXP;
-				projLogic->duration = s_curTick + 436;	// ~3 seconds
-				projLogic->cameraPassSnd = NULL_SOUND;
-				projLogic->reflectSnd = s_thermalDetReflectSnd;
+				setProjectileLogic(projLogic, 3, externalProjectiles);
 			} break;
 			case PROJ_REPEATER:
 			{
@@ -301,24 +271,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_REPEATER;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(10);
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = 19660;	// 0.3 damage
-				projLogic->dmgFalloffDelta = 19660;	// 135 seconds, this probably should have been 0.3 seconds, or 43
-
-				projLogic->projForce = 1966;
-				projLogic->speed = FIXED(270);
-				projLogic->horzBounciness = 0;
-				projLogic->vertBounciness = 0;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 9;
-				projLogic->nextFalloffTick = s_curTick + 19660;	// ~135 seconds, should have been ~0.3 seconds.
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_REPEATER_EXP;
-				projLogic->duration = s_curTick + 582;	// ~4 seconds
-				projLogic->cameraPassSnd = s_stdProjCameraSnd;
-				projLogic->reflectSnd = s_stdProjReflectSnd;
+				setProjectileLogic(projLogic, 4, externalProjectiles);
 			} break;
 			case PROJ_PLASMA:
 			{
@@ -332,24 +285,7 @@ namespace TFE_DarkForces
 				obj_setSpriteAnim(projObj);
 
 				projLogic->type = PROJ_PLASMA;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(15);
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = 39321;		// 0.6 damage
-				projLogic->dmgFalloffDelta = 29;	// 0.2 seconds
-
-				projLogic->projForce = 3276;
-				projLogic->speed = FIXED(100);
-				projLogic->horzBounciness = 58982;	// 0.9
-				projLogic->vertBounciness = 58982;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 9;
-				projLogic->nextFalloffTick = s_curTick + 29;	// ~0.2 second
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_PLASMA_EXP;
-				projLogic->duration = s_curTick + 1456;	// ~10 seconds
-				projLogic->cameraPassSnd = s_plasmaCameraSnd;
-				projLogic->reflectSnd = s_plasmaReflectSnd;
+				setProjectileLogic(projLogic, 5, externalProjectiles);
 			} break;
 			case PROJ_MORTAR:
 			{
@@ -362,19 +298,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_MORTAR;
-				projLogic->updateFunc = arcingProjectileUpdateFunc;
-				projLogic->dmg = 0;	// Damage is set to 0 for some reason.
-				projLogic->falloffAmt = 0;		// No falloff
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = 13107;
-				projLogic->speed = FIXED(110);
-				projLogic->horzBounciness = 26214;	// 0.4
-				projLogic->vertBounciness = 39321;	// 0.6
-				projLogic->bounceCnt = 0;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_MORTAR_EXP;
-				projLogic->duration = s_curTick + 582;	// ~4 seconds -> ~440 units
+				setProjectileLogic(projLogic, 6, externalProjectiles);
 			} break;
 			case PROJ_LAND_MINE:
 			{
@@ -387,20 +311,8 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_LAND_MINE;
-				projLogic->updateFunc = arcingProjectileUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->falloffAmt = 0;
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = 13107;
-				projLogic->speed = 0;
-				projLogic->horzBounciness = 0;
-				projLogic->vertBounciness = 0;
-				projLogic->bounceCnt = -1;
-				projLogic->reflectEffectId = HEFFECT_NONE;
 				projLogic->flags |= PROJFLAG_EXPLODE;
-				projLogic->hitEffectId = HEFFECT_LARGE_EXP;
-				projLogic->duration = s_curTick + 436;	// ~3 seconds
+				setProjectileLogic(projLogic, 7, externalProjectiles);
 			} break;
 			case PROJ_LAND_MINE_PROX:
 			{
@@ -413,20 +325,8 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_LAND_MINE_PROX;
-				projLogic->updateFunc = arcingProjectileUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->falloffAmt = 0;
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = 13107;
-				projLogic->speed = 0;
-				projLogic->horzBounciness = 0;
-				projLogic->vertBounciness = 0;
-				projLogic->bounceCnt = -1;
-				projLogic->reflectEffectId = HEFFECT_NONE;
 				projLogic->flags |= PROJFLAG_EXPLODE;
-				projLogic->hitEffectId = HEFFECT_LARGE_EXP;
-				projLogic->duration = s_curTick + 436;	// ~3 seconds
+				setProjectileLogic(projLogic, 8, externalProjectiles);
 			} break;
 			case PROJ_LAND_MINE_PLACED:
 			{
@@ -438,18 +338,8 @@ namespace TFE_DarkForces
 				projObj->flags |= OBJ_FLAG_MOVABLE;
 				projObj->worldWidth = 0;
 
-				projLogic->updateFunc = landMineUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->falloffAmt = 0;
-				projLogic->projForce = 13107;
-				projLogic->speed = 0;
-				projLogic->horzBounciness = 0;
-				projLogic->vertBounciness = 0;
-				projLogic->bounceCnt = -1;
-				projLogic->duration = 0;
-				projLogic->reflectEffectId = HEFFECT_NONE;
 				projLogic->flags |= PROJFLAG_EXPLODE;
-				projLogic->hitEffectId = HEFFECT_LARGE_EXP;
+				setProjectileLogic(projLogic, 9, externalProjectiles);
 			} break;
 			case PROJ_CONCUSSION:
 			{
@@ -457,19 +347,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_CONCUSSION;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->falloffAmt = 0;
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = 3932;
-				projLogic->speed = FIXED(190);
-				projLogic->horzBounciness = 58982;	// 0.9
-				projLogic->vertBounciness = 58982;
-				projLogic->bounceCnt = 0;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_CONCUSSION;
-				projLogic->duration = s_curTick + 728;	// ~5 seconds
+				setProjectileLogic(projLogic, 10, externalProjectiles);
 			} break;
 			case PROJ_CANNON:
 			{
@@ -483,22 +361,7 @@ namespace TFE_DarkForces
 				obj_setSpriteAnim(projObj);
 
 				projLogic->type = PROJ_CANNON;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(30);
-				projLogic->falloffAmt = 0;		// No falloff
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = 4032;
-				projLogic->speed = FIXED(100);
-				projLogic->horzBounciness = 58982;	// 0.9
-				projLogic->vertBounciness = 58982;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 18;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_CANNON_EXP;
-				projLogic->duration = s_curTick + 582;	// ~4 seconds -> ~400 units
-				projLogic->cameraPassSnd = s_plasmaCameraSnd;
-				projLogic->reflectSnd = s_plasmaReflectSnd;
+				setProjectileLogic(projLogic, 11, externalProjectiles);
 			} break;
 			case PROJ_MISSILE:
 			{
@@ -511,19 +374,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_MISSILE;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = 0;	// Damage is set to 0 for some reason.
-				projLogic->falloffAmt = 0;		// No falloff
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = ONE_16;
-				projLogic->speed = FIXED(74);
-				projLogic->horzBounciness = 58982;	// 0.9
-				projLogic->vertBounciness = 58982;
-				projLogic->bounceCnt = 0;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_MISSILE_EXP;
-				projLogic->duration = s_curTick + 1019;	// ~7 seconds -> ~518 units
+				setProjectileLogic(projLogic, 12, externalProjectiles);
 				projLogic->flightSndSource = s_missileLoopingSnd;
 			} break;
 			case PROJ_TURRET_BOLT:
@@ -536,24 +387,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_TURRET_BOLT;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(17);
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = ONE_16;
-				projLogic->dmgFalloffDelta = 14;
-
-				projLogic->projForce = 1966;
-				projLogic->speed = FIXED(300);
-				projLogic->horzBounciness = ONE_16;
-				projLogic->vertBounciness = ONE_16;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 9;
-				projLogic->nextFalloffTick = s_curTick + 14;	// ~0.1 seconds
-				projLogic->reflectEffectId = HEFFECT_SMALL_EXP;
-				projLogic->hitEffectId = HEFFECT_SMALL_EXP;
-				projLogic->duration = s_curTick + 436;	// ~3 seconds
-				projLogic->cameraPassSnd = s_stdProjCameraSnd;
-				projLogic->reflectSnd = s_stdProjReflectSnd;
+				setProjectileLogic(projLogic, 13, externalProjectiles);
 			} break;
 			case PROJ_REMOTE_BOLT:
 			{
@@ -565,44 +399,15 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_REMOTE_BOLT;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = ONE_16;
-				projLogic->minDmg = 0;
-				projLogic->falloffAmt = ONE_16;
-				projLogic->dmgFalloffDelta = 14;
-
-				projLogic->projForce = 655;
-				projLogic->speed = FIXED(300);
-				projLogic->horzBounciness = ONE_16;
-				projLogic->vertBounciness = ONE_16;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 9;
-				projLogic->nextFalloffTick = s_curTick + 14;	// ~0.1 seconds
-				projLogic->reflectEffectId = HEFFECT_SMALL_EXP;
-				projLogic->hitEffectId = HEFFECT_SMALL_EXP;
-				projLogic->duration = s_curTick + 436;	// ~3 seconds
-				projLogic->cameraPassSnd = s_stdProjCameraSnd;
-				projLogic->reflectSnd = s_stdProjReflectSnd;
+				setProjectileLogic(projLogic, 14, externalProjectiles);
 			} break;
 			case PROJ_EXP_BARREL:
 			{
 				spirit_setData(projObj);
 
 				projLogic->type = PROJ_EXP_BARREL;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->falloffAmt = 0;
-				projLogic->dmgFalloffDelta = 0;
-
-				projLogic->projForce = 0;
-				projLogic->speed = 0;
-				projLogic->horzBounciness = 0;
-				projLogic->vertBounciness = 0;
-				projLogic->bounceCnt = 0;
-				projLogic->reflectEffectId = HEFFECT_NONE;
+				setProjectileLogic(projLogic, 15, externalProjectiles);
 				projLogic->flags |= PROJFLAG_EXPLODE;
-				projLogic->hitEffectId = HEFFECT_EXP_BARREL;
-				projLogic->duration = s_curTick;
 			} break;
 			case PROJ_HOMING_MISSILE:
 			{
@@ -615,23 +420,12 @@ namespace TFE_DarkForces
 
 				projLogic->flags |= PROJFLAG_EXPLODE;
 				projLogic->type = PROJ_HOMING_MISSILE;
-				projLogic->updateFunc = homingMissileProjectileUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = 0;
-				projLogic->dmgFalloffDelta = ONE_16;
+				setProjectileLogic(projLogic, 16, externalProjectiles);
 
-				projLogic->projForce = ONE_16;
-				projLogic->speed = FIXED(58) / 2; // try slowing them down...; the value is correct according to the code, but they are slower in DOS.
-				projLogic->horzBounciness = 58982;	// 0.9
-				projLogic->vertBounciness = 58982;
-				projLogic->bounceCnt = 0;
-				projLogic->homingAngleSpd = 455;	// Starting homing rate = 10 degrees / second
-				projLogic->reflectEffectId = HEFFECT_NONE;
 				projLogic->flightSndSource = s_homingMissileFlightSnd;
-				projLogic->hitEffectId = HEFFECT_MISSILE_EXP;
-				projLogic->duration = s_curTick + 1456;
-				projLogic->reflectSnd = 0;
+				projLogic->homingAngleSpd = 455;	// Starting homing rate = 10 degrees / second
+				projLogic->speed = FIXED(58) / 2; // try slowing them down...; the value is correct according to the code, but they are slower in DOS.
+
 			} break;
 			case PROJ_PROBE_PROJ:
 			{
@@ -645,24 +439,7 @@ namespace TFE_DarkForces
 				obj_setSpriteAnim(projObj);
 
 				projLogic->type = PROJ_PROBE_PROJ;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = FIXED(10);
-				projLogic->minDmg = ONE_16;
-				projLogic->falloffAmt = ONE_16;		// 1.0 damage
-				projLogic->dmgFalloffDelta = 14;
-
-				projLogic->projForce = 2621;
-				projLogic->speed = FIXED(100);
-				projLogic->horzBounciness = 58982;	// 0.9
-				projLogic->vertBounciness = 58982;
-				projLogic->bounceCnt = 3;
-				projLogic->reflVariation = 9;
-				projLogic->nextFalloffTick = s_curTick + 14;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_PLASMA_EXP;
-				projLogic->duration = s_curTick + 1165;	// ~8 seconds
-				projLogic->cameraPassSnd = s_plasmaCameraSnd;
-				projLogic->reflectSnd = s_plasmaReflectSnd;
+				setProjectileLogic(projLogic, 17, externalProjectiles);
 			} break;
 			case PROJ_BOBAFET_BALL:
 			{
@@ -675,19 +452,7 @@ namespace TFE_DarkForces
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_BOBAFET_BALL;
-				projLogic->updateFunc = stdProjectileUpdateFunc;
-				projLogic->dmg = 0;
-				projLogic->falloffAmt = 0;
-
-				projLogic->projForce = ONE_16;
-				projLogic->speed = FIXED(90);
-				projLogic->horzBounciness = 58982;	// 0.9
-				projLogic->vertBounciness = 58982;
-				projLogic->bounceCnt = 0;
-				projLogic->reflectEffectId = HEFFECT_NONE;
-				projLogic->hitEffectId = HEFFECT_EXP_25;
-				projLogic->duration = s_curTick + 1456;
-				projLogic->cameraPassSnd = s_bobaBallCameraSnd;
+				setProjectileLogic(projLogic, 18, externalProjectiles);
 			} break;
 		}
 		projLogic->col_speed = projLogic->speed;
@@ -856,6 +621,31 @@ namespace TFE_DarkForces
 		deleteLogicAndObject(logic);
 		allocator_deleteItem(s_projectiles, logic);
 		// Bug: allocator_release() is never called
+	}
+
+	ProjectileUpdateFunc getUpdateFunc(const char* updateFunc)
+	{
+		if (strcasecmp(updateFunc, "standard") == 0)
+		{
+			return stdProjectileUpdateFunc;
+		}
+
+		if (strcasecmp(updateFunc, "arcing") == 0)
+		{
+			return arcingProjectileUpdateFunc;
+		}
+
+		if (strcasecmp(updateFunc, "landmine") == 0)
+		{
+			return landMineUpdateFunc;
+		}
+
+		if (strcasecmp(updateFunc, "homing") == 0)
+		{
+			return homingMissileProjectileUpdateFunc;
+		}
+
+		return stdProjectileUpdateFunc;
 	}
 
 	// The "standard" update function - projectiles travel in a straight line with a fixed velocity.

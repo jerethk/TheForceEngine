@@ -53,6 +53,8 @@
 #include <TFE_Jedi/Task/task.h>
 #include <TFE_Jedi/IMuse/imuse.h>
 #include <TFE_Jedi/Serialization/serialization.h>
+#include <TFE_ExternalData/weaponExternal.h>
+#include <TFE_FrontEndUI/console.h>
 #include <assert.h>
 
 // Add texture callbacks.
@@ -1214,10 +1216,23 @@ namespace TFE_DarkForces
 		player_init();
 		actor_allocatePhysicsActorList();
 		loadCutsceneList();
-		projectile_startup();
-		hitEffect_startup();
 		weapon_startup();
 		loadLangHotkeys();
+
+		TFE_ExternalData::loadExternalProjectiles();
+		if (!TFE_ExternalData::validateExternalProjectiles())
+		{
+			TFE_Console::addToHistory("Warning: Projectile data is incomplete. PROJECTILES.JSON may have been altered. Projectiles may not behave as expected.");
+		}
+
+		TFE_ExternalData::loadExternalEffects();
+		if (!TFE_ExternalData::validateExternalEffects())
+		{
+			TFE_Console::addToHistory("Warning: Effect data is incomplete. EFFECTS.JSON may have been altered. Effects may not behave as expected.");
+		}
+
+		projectile_startup();
+		hitEffect_startup();
 
 		FilePath filePath;
 		TFE_Paths::getFilePath("swfont1.fnt", &filePath);

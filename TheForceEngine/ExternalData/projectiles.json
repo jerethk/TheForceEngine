@@ -1,0 +1,370 @@
+{
+    "projectiles": [
+        {
+            "type": "PUNCH",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 6,
+                "falloffAmount": 0,
+                "force": 1310,
+                "speed": 230,
+                "horzBounciness": 0,
+                "vertBounciness": 0,
+                "bounceCount": 0,
+                "reflectEffect": null,
+                "hitEffect": null,
+                "duration": 0
+            }
+        },
+        {
+            "type": "PISTOL_BOLT",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 10,
+                "minDamage": 1,
+                "falloffAmount": 65536,
+                "damageFalloffDelta": 14,
+                "force": 655,
+                "speed": 250,
+                "horzBounciness": 65536,
+                "vertBounciness": 65536,
+                "bounceCount": 3,
+                "reflectVariation": 9,
+                "nextFalloffTick": 14,
+                "reflectEffect": "SMALL_EXP",
+                "hitEffect": "SMALL_EXP",
+                "duration": 436,
+                "cameraPassSound": "lasrby.voc",
+                "reflectSound": "boltref1.voc"
+            }
+        },
+        {
+            "type": "RIFLE_BOLT",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 10,
+                "minDamage": 1,
+                "falloffAmount": 52428,
+                "damageFalloffDelta": 14,
+                "force": 655,
+                "speed": 250,
+                "horzBounciness": 65536,
+                "vertBounciness": 65536,
+                "bounceCount": 3,
+                "reflectVariation": 9,
+                "nextFalloffTick": 14,
+                "reflectEffect": "SMALL_EXP",
+                "hitEffect": "SMALL_EXP",
+                "duration": 582,
+                "cameraPassSound": "lasrby.voc",
+                "reflectSound": "boltref1.voc"
+            }
+        },
+        {
+            "type": "THERMAL_DET",
+            "data": {
+                "updateFunc": "arcing",
+                "damage": 0,
+                "minDamage": 1,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 6553,
+                "speed": 80,
+                "horzBounciness": 29491,
+                "vertBounciness": 58327,
+                "bounceCount": -1,
+                "reflectEffect": null,
+                "hitEffect": "thermdet_exp",
+                "duration": 436,
+                "cameraPassSound": null,
+                "reflectSound": "thermal1.voc"
+            }
+        },
+        {
+            "type": "REPEATER",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 10,
+                "minDamage": 1,
+                "falloffAmount": 19660,
+                "damageFalloffDelta": 19660,
+                "force": 1966,
+                "speed": 270,
+                "horzBounciness": 0,
+                "vertBounciness": 0,
+                "bounceCount": 3,
+                "reflectVariation": 9,
+                "nextFalloffTick": 19660,
+                "reflectEffect": null,
+                "hitEffect": "REPEATER_EXP",
+                "duration": 582,
+                "cameraPassSound": "lasrby.voc",
+                "reflectSound": "boltref1.voc"
+            }
+        },
+        {
+            "type": "PLASMA",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 15,
+                "minDamage": 1,
+                "falloffAmount": 39321,
+                "damageFalloffDelta": 29,
+                "force": 3276,
+                "speed": 100,
+                "horzBounciness": 58982,
+                "vertBounciness": 58982,
+                "bounceCount": 3,
+                "reflectVariation": 9,
+                "nextFalloffTick": 29,
+                "reflectEffect": null,
+                "hitEffect": "PLASMA_EXP",
+                "duration": 1456,
+                "cameraPassSound": "emisby.voc",
+                "reflectSound": "bigrefl1.voc"
+            }
+        },
+        {
+            "type": "MORTAR",
+            "data": {
+                "updateFunc": "arcing",
+                "damage": 0,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 13107,
+                "speed": 110,
+                "horzBounciness": 26214,
+                "vertBounciness": 39321,
+                "bounceCount": 0,
+                "reflectEffect": null,
+                "hitEffect": "MORTAR_EXP",
+                "duration": 582
+            }
+        },
+        {
+            "type": "LAND_MINE",
+            "data": {
+                "updateFunc": "arcing",
+                "damage": 0,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 13107,
+                "speed": 0,
+                "horzBounciness": 0,
+                "vertBounciness": 0,
+                "bounceCount": -1,
+                "reflectEffect": null,
+                "hitEffect": "LARGE_EXP",
+                "duration": 436
+            }
+        },
+        {
+            "type": "LAND_MINE_PROX",
+            "data": {
+                "updateFunc": "arcing",
+                "damage": 0,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 13107,
+                "speed": 0,
+                "horzBounciness": 0,
+                "vertBounciness": 0,
+                "bounceCount": -1,
+                "reflectEffect": null,
+                "hitEffect": "LARGE_EXP",
+                "duration": 436
+            }
+        },
+        {
+            "type": "LAND_MINE_PLACED",
+            "data": {
+                "updateFunc": "landmine",
+                "damage": 0,
+                "falloffAmount": 0,
+                "force": 13107,
+                "speed": 0,
+                "horzBounciness": 0,
+                "vertBounciness": 0,
+                "bounceCount": -1,
+                "reflectEffect": null,
+                "hitEffect": "LARGE_EXP",
+                "duration": 0
+            }
+        },
+        {
+            "type": "CONCUSSION",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 0,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 3932,
+                "speed": 190,
+                "horzBounciness": 58982,
+                "vertBounciness": 58982,
+                "bounceCount": 0,
+                "reflectEffect": null,
+                "hitEffect": "concussion",
+                "duration": 728
+            }
+        },
+        {
+            "type": "CANNON",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 30,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 4032,
+                "speed": 100,
+                "horzBounciness": 58982,
+                "vertBounciness": 58982,
+                "bounceCount": 3,
+                "reflectVariation": 18,
+                "reflectEffect": null,
+                "hitEffect": "CANNON_EXP",
+                "duration": 582,
+                "cameraPassSound": "emisby.voc",
+                "reflectSound": "bigrefl1.voc"
+            }
+        },
+        {
+            "type": "MISSILE",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 0,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 65536,
+                "speed": 74,
+                "horzBounciness": 58982,
+                "vertBounciness": 58982,
+                "bounceCount": 0,
+                "reflectEffect": null,
+                "hitEffect": "MISSILE_EXP",
+                "duration": 1019,
+                "flightSound": "rocket-1.voc"
+            }
+        },
+        {
+            "type": "TURRET_BOLT",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 17,
+                "minDamage": 1,
+                "falloffAmount": 65536,
+                "damageFalloffDelta": 14,
+                "force": 1966,
+                "speed": 300,
+                "horzBounciness": 65536,
+                "vertBounciness": 65536,
+                "bounceCount": 3,
+                "reflectVariation": 9,
+                "nextFalloffTick": 14,
+                "reflectEffect": "SMALL_EXP",
+                "hitEffect": "SMALL_EXP",
+                "duration": 436,
+                "cameraPassSound": "lasrby.voc",
+                "reflectSound": "boltref1.voc"
+            }
+        },
+        {
+            "type": "REMOTE_BOLT",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 1,
+                "minDamage": 0,
+                "falloffAmount": 65536,
+                "damageFalloffDelta": 14,
+                "force": 655,
+                "speed": 300,
+                "horzBounciness": 65536,
+                "vertBounciness": 65536,
+                "bounceCount": 3,
+                "reflectVariation": 9,
+                "nextFalloffTick": 14,
+                "reflectEffect": "SMALL_EXP",
+                "hitEffect": "SMALL_EXP",
+                "duration": 436,
+                "cameraPassSound": "lasrby.voc",
+                "reflectSound": "boltref1.voc"
+            }
+        },
+        {
+            "type": "EXP_BARREL",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 0,
+                "minDamage": 0,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 0,
+                "force": 0,
+                "speed": 0,
+                "horzBounciness": 0,
+                "vertBounciness": 0,
+                "bounceCount": 0,
+                "reflectEffect": null,
+                "hitEffect": "EXP_BARREL",
+                "duration": 0
+            }
+        },
+        {
+            "type": "HOMING_MISSILE",
+            "data": {
+                "updateFunc": "homing",
+                "damage": 0,
+                "minDamage": 1,
+                "falloffAmount": 0,
+                "damageFalloffDelta": 65536,
+                "force": 65536,
+                "speed": 58,
+                "horzBounciness": 58982,
+                "vertBounciness": 58982,
+                "bounceCount": 0,
+                "reflectEffect": null,
+                "hitEffect": "MISSILE_EXP",
+                "duration": 1456,
+                "reflectSound": ""
+            }
+        },
+        {
+            "type": "PROBE_PROJ",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 10,
+                "minDamage": 1,
+                "falloffAmount": 65536,
+                "damageFalloffDelta": 14,
+                "force": 2621,
+                "speed": 100,
+                "horzBounciness": 58982,
+                "vertBounciness": 58982,
+                "bounceCount": 3,
+                "reflectVariation": 9,
+                "nextFalloffTick": 14,
+                "reflectEffect": null,
+                "hitEffect": "PLASMA_EXP",
+                "duration": 1165,
+                "cameraPassSound": "emisby.voc",
+                "reflectSound": "bigrefl1.voc"
+            }
+        },
+        {
+            "type": "BOBAFETT_BALL",
+            "data": {
+                "updateFunc": "standard",
+                "damage": 0,
+                "falloffAmount": 0,
+                "force": 65536,
+                "speed": 90,
+                "horzBounciness": 58982,
+                "vertBounciness": 58982,
+                "bounceCount": 0,
+                "reflectEffect": null,
+                "hitEffect": "EXP_25",
+                "duration": 1456,
+                "cameraPassSound": "fireball.voc"
+            }
+        }
+    ]
+}

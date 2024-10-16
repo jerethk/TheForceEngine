@@ -194,6 +194,9 @@
     <Filter Include="Source\TFE_Editor\LevelEditor\Scripting">
       <UniqueIdentifier>{edd9ea1a-0570-4524-a9d7-f703a2c09cad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\TFE_ExternalData">
+      <UniqueIdentifier>{2186a8b0-621b-493e-8ae3-a559790a52fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -1399,6 +1402,9 @@
     <ClInclude Include="TFE_Editor\LevelEditor\editSector.h">
       <Filter>Source\TFE_Editor\LevelEditor</Filter>
     </ClInclude>
+    <ClInclude Include="TFE_ExternalData\weaponExternal.h">
+      <Filter>Source\TFE_ExternalData</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -2438,6 +2444,9 @@
     </ClCompile>
     <ClCompile Include="TFE_Editor\LevelEditor\editSector.cpp">
       <Filter>Source\TFE_Editor\LevelEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="TFE_ExternalData\weaponExternal.cpp">
+      <Filter>Source\TFE_ExternalData</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
