@@ -10,6 +10,8 @@ namespace TFE_ExternalData
 	struct ExternalProjectile
 	{
 		const char* type = nullptr;
+		const char* assetType = "spirit";
+		const char* asset = "";
 		const char* updateFunc = "";
 		u32 damage;
 		u32 falloffAmount;

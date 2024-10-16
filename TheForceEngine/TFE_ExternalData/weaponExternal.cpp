@@ -263,6 +263,18 @@ namespace TFE_ExternalData
 			return false;
 		}
 
+		if (cJSON_IsString(data) && strcasecmp(data->string, "assetType") == 0)
+		{
+			projectile.assetType = data->valuestring;
+			return true;
+		}
+
+		if (cJSON_IsString(data) && strcasecmp(data->string, "asset") == 0)
+		{
+			projectile.asset = data->valuestring;
+			return true;
+		}
+
 		if (cJSON_IsString(data) && strcasecmp(data->string, "updateFunc") == 0)
 		{
 			projectile.updateFunc = data->valuestring;

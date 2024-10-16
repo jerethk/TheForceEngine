@@ -43,6 +43,15 @@ namespace TFE_DarkForces
 	//////////////////////////////////////////////////////////////
 	static Allocator* s_projectiles = nullptr;
 
+	// Arrays to hold projectile assets
+	static JediModel* s_projectileModels[PROJ_COUNT];
+	static WaxFrame*  s_projectileFrames[PROJ_COUNT];
+	static Wax*		  s_projectileWaxes[PROJ_COUNT];
+	
+	static SoundSourceId s_projectileCameraSnd[PROJ_COUNT];
+	static SoundSourceId s_projectileReflectSnd[PROJ_COUNT];
+	static SoundSourceId s_projectileFlightSnd[PROJ_COUNT];
+
 	static JediModel* s_boltModel;
 	static JediModel* s_greenBoltModel;
 	static Wax*       s_plasmaProj;
@@ -119,6 +128,34 @@ namespace TFE_DarkForces
 	//////////////////////////////////////////////////////////////
 	void projectile_startup()
 	{
+		TFE_ExternalData::ExternalProjectile* externalProjectiles = TFE_ExternalData::getExternalProjectiles();
+
+		for (u32 p = 0; p < PROJ_COUNT; p++)
+		{
+			// Frame
+			if (strcasecmp(externalProjectiles[p].assetType, "frame") == 0)
+			{
+				s_projectileFrames[p] = TFE_Sprite_Jedi::getFrame(externalProjectiles[p].asset, POOL_GAME);
+			}
+
+			// Wax
+			if (strcasecmp(externalProjectiles[p].assetType, "sprite") == 0)
+			{
+				s_projectileWaxes[p] = TFE_Sprite_Jedi::getWax(externalProjectiles[p].asset, POOL_GAME);
+			}
+
+			// 3D model
+			if (strcasecmp(externalProjectiles[p].assetType, "3d") == 0)
+			{
+				s_projectileModels[p] = TFE_Model_Jedi::get(externalProjectiles[p].asset, POOL_GAME);
+			}
+
+			// Sounds
+			s_projectileCameraSnd[p] = sound_load(externalProjectiles[p].cameraPassSound, SOUND_PRIORITY_LOW3);
+			s_projectileReflectSnd[p] = sound_load(externalProjectiles[p].reflectSound, SOUND_PRIORITY_LOW1);
+			s_projectileFlightSnd[p] = sound_load(externalProjectiles[p].flightSound, SOUND_PRIORITY_LOW3);
+		}
+
 		s_boltModel         = TFE_Model_Jedi::get("wrbolt.3do", POOL_GAME);
 		s_thermalDetProj    = TFE_Sprite_Jedi::getFrame("wdet.fme", POOL_GAME);
 		s_repeaterProj      = TFE_Sprite_Jedi::getFrame("bullet.fme", POOL_GAME);
@@ -158,6 +195,41 @@ namespace TFE_DarkForces
 		s_projectileTask = createSubTask("projectiles", projectileTaskFunc);
 	}
 
+	void setProjectileObject(SecObject*& projObj, u32 projectileIndex, TFE_ExternalData::ExternalProjectile* externalProjectiles)
+	{
+		if (strcasecmp(externalProjectiles[projectileIndex].assetType, "spirit") == 0)
+		{
+			spirit_setData(projObj);
+		}
+		else if (strcasecmp(externalProjectiles[projectileIndex].assetType, "frame") == 0)
+		{
+			if (s_projectileFrames[projectileIndex])
+			{
+				frame_setData(projObj, s_projectileFrames[projectileIndex]);
+			}
+		}
+		else if (strcasecmp(externalProjectiles[projectileIndex].assetType, "sprite") == 0)
+		{
+			if (s_projectileWaxes[projectileIndex])
+			{
+				sprite_setData(projObj, s_projectileWaxes[projectileIndex]);
+				// Setup the looping wax animation.
+				obj_setSpriteAnim(projObj);
+			}
+		}
+		else if (strcasecmp(externalProjectiles[projectileIndex].assetType, "3d") == 0)
+		{
+			if (s_projectileModels[projectileIndex])
+			{
+				obj3d_setData(projObj, s_projectileModels[projectileIndex]);
+			}
+		}
+		else
+		{
+			spirit_setData(projObj);	// default to spirit
+		}
+	}
+	
 	void setProjectileLogic(ProjectileLogic* &projLogic, u32 projectileIndex, TFE_ExternalData::ExternalProjectile* externalProjectiles)
 	{
 		projLogic->updateFunc = getUpdateFunc(externalProjectiles[projectileIndex].updateFunc);
@@ -176,8 +248,10 @@ namespace TFE_DarkForces
 		projLogic->reflectEffectId = (HitEffectID)externalProjectiles[projectileIndex].reflectEffectId;
 		projLogic->hitEffectId = (HitEffectID)externalProjectiles[projectileIndex].hitEffectId;;
 		projLogic->duration = s_curTick + externalProjectiles[projectileIndex].duration;
-		projLogic->cameraPassSnd = sound_load(externalProjectiles[projectileIndex].cameraPassSound, SOUND_PRIORITY_LOW3);
-		projLogic->reflectSnd = sound_load(externalProjectiles[projectileIndex].reflectSound, SOUND_PRIORITY_LOW1);
+		
+		projLogic->cameraPassSnd = s_projectileCameraSnd[projectileIndex];
+		projLogic->reflectSnd = s_projectileReflectSnd[projectileIndex];
+		projLogic->flightSndSource = s_projectileFlightSnd[projectileIndex];
 	}
 
 	// TODO: Move projectile data to an external file to avoid hardcoding it for TFE.
@@ -219,17 +293,15 @@ namespace TFE_DarkForces
 		{
 			case PROJ_PUNCH:
 			{
-				spirit_setData(projObj);
+				setProjectileObject(projObj, 0, externalProjectiles);
 
 				projLogic->type = PROJ_PUNCH;
 				setProjectileLogic(projLogic, 0, externalProjectiles);
 			} break;
 			case PROJ_PISTOL_BOLT:
 			{
-				if (s_boltModel)
-				{
-					obj3d_setData(projObj, s_boltModel);
-				}
+				setProjectileObject(projObj, 1, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
 
@@ -238,10 +310,8 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_RIFLE_BOLT:
 			{
-				if (s_boltModel)
-				{
-					obj3d_setData(projObj, s_boltModel);
-				}
+				setProjectileObject(projObj, 2, externalProjectiles);
+				
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
 
@@ -250,10 +320,8 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_THERMAL_DET:
 			{
-				if (s_thermalDetProj)
-				{
-					frame_setData(projObj, s_thermalDetProj);
-				}
+				setProjectileObject(projObj, 3, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_MOVABLE;
 				projObj->worldWidth = 0;
 
@@ -263,10 +331,8 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_REPEATER:
 			{
-				if (s_repeaterProj)
-				{
-					frame_setData(projObj, s_repeaterProj);
-				}
+				setProjectileObject(projObj, 4, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
 
@@ -275,26 +341,18 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_PLASMA:
 			{
-				if (s_plasmaProj)
-				{
-					sprite_setData(projObj, s_plasmaProj);
-				}
+				setProjectileObject(projObj, 5, externalProjectiles); 
+
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
-				// Setup the looping wax animation.
-				obj_setSpriteAnim(projObj);
 
 				projLogic->type = PROJ_PLASMA;
 				setProjectileLogic(projLogic, 5, externalProjectiles);
 			} break;
 			case PROJ_MORTAR:
 			{
-				if (s_mortarProj)
-				{
-					sprite_setData(projObj, s_mortarProj);
-				}
-				// Setup the looping wax animation.
-				obj_setSpriteAnim(projObj);
+				setProjectileObject(projObj, 6, externalProjectiles);
+
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_MORTAR;
@@ -302,10 +360,8 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_LAND_MINE:
 			{
-				if (s_landmineWpnFrame)
-				{
-					frame_setData(projObj, s_landmineWpnFrame);
-				}
+				setProjectileObject(projObj, 7, externalProjectiles);
+
 				projObj->entityFlags |= ETFLAG_LANDMINE_WPN;
 				projObj->flags |= OBJ_FLAG_MOVABLE;
 				projObj->worldWidth = 0;
@@ -316,10 +372,8 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_LAND_MINE_PROX:
 			{
-				if (s_landmineWpnFrame)
-				{
-					frame_setData(projObj, s_landmineWpnFrame);
-				}
+				setProjectileObject(projObj, 8, externalProjectiles);
+
 				projObj->entityFlags |= ETFLAG_LANDMINE_WPN;
 				projObj->flags |= OBJ_FLAG_MOVABLE;
 				projObj->worldWidth = 0;
@@ -330,10 +384,8 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_LAND_MINE_PLACED:
 			{
-				if (s_landmineFrame)
-				{
-					frame_setData(projObj, s_landmineFrame);
-				}
+				setProjectileObject(projObj, 9, externalProjectiles);
+
 				projLogic->type = PROJ_LAND_MINE_PLACED;
 				projObj->flags |= OBJ_FLAG_MOVABLE;
 				projObj->worldWidth = 0;
@@ -343,7 +395,8 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_CONCUSSION:
 			{
-				spirit_setData(projObj);
+				setProjectileObject(projObj, 10, externalProjectiles);
+
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_CONCUSSION;
@@ -351,38 +404,28 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_CANNON:
 			{
-				if (s_cannonProj)
-				{
-					sprite_setData(projObj, s_cannonProj);
-				}
+				setProjectileObject(projObj, 11, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
-				// Setup the looping wax animation.
-				obj_setSpriteAnim(projObj);
 
 				projLogic->type = PROJ_CANNON;
 				setProjectileLogic(projLogic, 11, externalProjectiles);
 			} break;
 			case PROJ_MISSILE:
 			{
-				if (s_missileProj)
-				{
-					sprite_setData(projObj, s_missileProj);
-				}
-				// Setup the looping wax animation.
-				obj_setSpriteAnim(projObj);
+				setProjectileObject(projObj, 12, externalProjectiles);
+
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_MISSILE;
 				setProjectileLogic(projLogic, 12, externalProjectiles);
-				projLogic->flightSndSource = s_missileLoopingSnd;
+				// projLogic->flightSndSource = s_missileLoopingSnd;
 			} break;
 			case PROJ_TURRET_BOLT:
 			{
-				if (s_greenBoltModel)
-				{
-					obj3d_setData(projObj, s_greenBoltModel);
-				}
+				setProjectileObject(projObj, 13, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
 
@@ -390,11 +433,8 @@ namespace TFE_DarkForces
 				setProjectileLogic(projLogic, 13, externalProjectiles);
 			} break;
 			case PROJ_REMOTE_BOLT:
-			{
-				if (s_greenBoltModel)
-				{
-					obj3d_setData(projObj, s_greenBoltModel);
-				}
+			{setProjectileObject(projObj, 14, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
 
@@ -403,7 +443,7 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_EXP_BARREL:
 			{
-				spirit_setData(projObj);
+				setProjectileObject(projObj, 15, externalProjectiles);
 
 				projLogic->type = PROJ_EXP_BARREL;
 				setProjectileLogic(projLogic, 15, externalProjectiles);
@@ -411,44 +451,33 @@ namespace TFE_DarkForces
 			} break;
 			case PROJ_HOMING_MISSILE:
 			{
-				if (s_homingMissileProj)
-				{
-					sprite_setData(projObj, s_homingMissileProj);
-				}
-				obj_setSpriteAnim(projObj);
+				setProjectileObject(projObj, 16, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_AIM;
 
 				projLogic->flags |= PROJFLAG_EXPLODE;
 				projLogic->type = PROJ_HOMING_MISSILE;
 				setProjectileLogic(projLogic, 16, externalProjectiles);
 
-				projLogic->flightSndSource = s_homingMissileFlightSnd;
+				// projLogic->flightSndSource = s_homingMissileFlightSnd;
 				projLogic->homingAngleSpd = 455;	// Starting homing rate = 10 degrees / second
 				projLogic->speed = FIXED(58) / 2; // try slowing them down...; the value is correct according to the code, but they are slower in DOS.
 
 			} break;
 			case PROJ_PROBE_PROJ:
 			{
-				if (s_probeProj)
-				{
-					sprite_setData(projObj, s_probeProj);
-				}
+				setProjectileObject(projObj, 17, externalProjectiles);
+
 				projObj->flags |= OBJ_FLAG_FULLBRIGHT;
 				projObj->worldWidth = 0;
-				// Setup the looping wax animation.
-				obj_setSpriteAnim(projObj);
 
 				projLogic->type = PROJ_PROBE_PROJ;
 				setProjectileLogic(projLogic, 17, externalProjectiles);
 			} break;
 			case PROJ_BOBAFET_BALL:
 			{
-				if (s_bobafetBall)
-				{
-					sprite_setData(projObj, s_bobafetBall);
-				}
-				// Setup the looping wax animation.
-				obj_setSpriteAnim(projObj);
+				setProjectileObject(projObj, 18, externalProjectiles);
+
 				projObj->worldWidth = 0;
 
 				projLogic->type = PROJ_BOBAFET_BALL;
