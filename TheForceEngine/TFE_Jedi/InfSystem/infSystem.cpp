@@ -1943,6 +1943,11 @@ namespace TFE_Jedi
 					*type = MSG_TRIGGER;
 				}
 		}
+
+		if (strcasecmp(infArg0, "camera") == 0)
+		{
+			*type = MSG_CAMERA;
+		}
 	}
 
 	s32 inf_parseScriptCallArg(InfElevator* elev, Stop* stop, TFE_ForceScript::ScriptArg* arg, s32 maxArgCount, const char* arg0, const char* arg1, const char* arg2, const char* arg3)
@@ -3228,6 +3233,38 @@ namespace TFE_Jedi
 						i++;
 					}
 				}
+			} break;
+			case MSG_CAMERA:
+			{
+				if (s_eyeIsPlayer == JTRUE)
+				{
+					// Change EYE to external camera if there is one
+					s32 objCount = sector->objectCount;
+					s32 objCapacity = sector->objectCapacity;
+					SecObject** objList = sector->objectList;
+
+					for (s32 i = 0; i < objCount && i < objCapacity; objList++)
+					{
+						SecObject* obj = *objList;
+						if (obj)
+						{
+							if (obj->flags & OBJ_FLAG_CAMERA)
+							{
+								player_setupEyeObject(obj);
+								s_eyeIsPlayer = JFALSE;
+								break;
+							}
+							i++;
+						}
+					}
+				}
+				else
+				{
+					// Move EYE back to player
+					player_setupEyeObject(s_playerObject);
+					s_eyeIsPlayer = JTRUE;
+				}
+				
 			} break;
 			case MSG_SET_BITS:
 			{

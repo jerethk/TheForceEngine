@@ -81,7 +81,7 @@ namespace TFE_DarkForces
 		}
 	}
 
-	JBool logic_defaultSetupFunc(SecObject* obj, KEYWORD key)
+	JBool logic_defaultSetupFunc(SecObject* obj, KEYWORD key, const char* arg0 = nullptr)
 	{
 		char* endPtr;
 		JBool retValue = JTRUE;
@@ -100,6 +100,11 @@ namespace TFE_DarkForces
 		else if (key == KW_RADIUS)
 		{
 			obj->worldWidth = floatToFixed16(strtof(s_objSeqArg1, &endPtr));
+		}
+		else if (strcasecmp(arg0, "camera") == 0)
+		{
+			// New in TFE
+			obj->flags |= OBJ_FLAG_CAMERA;
 		}
 		else  // Invalid key.
 		{
@@ -199,7 +204,7 @@ namespace TFE_DarkForces
 				{
 					continue;
 				}
-				logic_defaultSetupFunc(obj, key);
+				logic_defaultSetupFunc(obj, key, s_objSeqArg0);
 			}
 		}
 

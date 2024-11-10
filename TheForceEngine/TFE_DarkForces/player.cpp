@@ -221,6 +221,7 @@ namespace TFE_DarkForces
 	SecObject* s_playerEye = nullptr;
 	vec3_fixed s_eyePos = { 0 };	// s_camX, s_camY, s_camZ in the DOS code.
 	angle14_32 s_eyePitch = 0, s_eyeYaw = 0, s_eyeRoll = 0;
+	JBool s_eyeIsPlayer = JTRUE;
 	u32 s_playerEyeFlags = OBJ_FLAG_NEEDS_TRANSFORM;
 	Tick s_playerTick;
 	Tick s_prevPlayerTick;
