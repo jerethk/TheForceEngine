@@ -1031,6 +1031,15 @@ namespace TFE_DarkForces
 
 	void weapon_playerWeaponTaskFunc(MessageType msg)
 	{
+		// Do not allow weapon switching or firing while in external camera mode
+		if (msg == MSG_SWITCH_WPN || s_queWeaponSwitch || msg == MSG_START_FIRING || msg == MSG_STOP_FIRING)
+		{
+			if (s_externalCameraMode)
+			{
+				return;
+			}
+		}
+		
 		struct LocalContext
 		{
 			JBool secondaryFire;
@@ -1107,6 +1116,7 @@ namespace TFE_DarkForces
 
 				if (!s_weaponOffAnim)
 				{
+					// Remove weapon from screen
 					weapon_prepareToFire();
 					
 					s_weaponAnimState =
@@ -1119,8 +1129,9 @@ namespace TFE_DarkForces
 					task_callTaskFunc(weapon_animateOnOrOffscreen);
 					s_weaponOffAnim = JTRUE;
 				}
-				else
+				else if (!s_externalCameraMode)
 				{
+					// Return weapon to screen
 					s_weaponOffAnim = JFALSE;
 					if (s_curWeapon == WPN_PISTOL || s_curWeapon == WPN_RIFLE || s_curWeapon == WPN_REPEATER || s_curWeapon == WPN_FUSION || s_curWeapon == WPN_MORTAR ||
 						s_curWeapon == WPN_CONCUSSION || s_curWeapon == WPN_CANNON)
