@@ -11,6 +11,7 @@
 #include <TFE_DarkForces/agent.h>
 #include <TFE_DarkForces/sound.h>
 #include <TFE_DarkForces/automap.h>
+#include <TFE_DarkForces/weapon.h>
 #include <TFE_FileSystem/paths.h>
 #include <TFE_Jedi/Memory/allocator.h>
 #include <TFE_Jedi/Level/level.h>
@@ -3105,7 +3106,7 @@ namespace TFE_Jedi
 			} break;
 			case MSG_CAMERA:
 			{
-				if (s_eyeIsPlayer == JTRUE)
+				if (s_externalCameraMode == JFALSE)
 				{
 					// Change EYE to external camera if there is one
 					s32 objCount = sector->objectCount;
@@ -3119,8 +3120,9 @@ namespace TFE_Jedi
 						{
 							if (obj->flags & OBJ_FLAG_CAMERA)
 							{
+								weapon_holster();
 								player_setupEyeObject(obj);
-								s_eyeIsPlayer = JFALSE;
+								s_externalCameraMode = JTRUE;
 								break;
 							}
 							i++;
@@ -3131,7 +3133,8 @@ namespace TFE_Jedi
 				{
 					// Move EYE back to player
 					player_setupEyeObject(s_playerObject);
-					s_eyeIsPlayer = JTRUE;
+					s_externalCameraMode = JFALSE;
+					weapon_holster();
 				}
 				
 			} break;

@@ -220,7 +220,7 @@ namespace TFE_DarkForces
 	SecObject* s_playerEye = nullptr;
 	vec3_fixed s_eyePos = { 0 };	// s_camX, s_camY, s_camZ in the DOS code.
 	angle14_32 s_eyePitch = 0, s_eyeYaw = 0, s_eyeRoll = 0;
-	JBool s_eyeIsPlayer = JTRUE;
+	JBool s_externalCameraMode = JFALSE;
 	u32 s_playerEyeFlags = OBJ_FLAG_NEEDS_TRANSFORM;
 	Tick s_playerTick;
 	Tick s_prevPlayerTick;
@@ -1316,11 +1316,16 @@ namespace TFE_DarkForces
 		{
 			ProjectileLogic* proj = (ProjectileLogic*)s_msgEntity;
 			vec3_fixed pushVel;
-			computeDamagePushVelocity(proj, &pushVel);
+			
+			// Don't move the player if in external camera mode
+			if (!s_externalCameraMode)
+			{
+				computeDamagePushVelocity(proj, &pushVel);
 
-			s_playerVelX   += pushVel.x;
-			s_playerUpVel2 += pushVel.y;
-			s_playerVelZ   += pushVel.z;
+				s_playerVelX += pushVel.x;
+				s_playerUpVel2 += pushVel.y;
+				s_playerVelZ += pushVel.z;
+			}
 
 			if (s_invincibility || s_config.superShield)
 			{
@@ -1341,10 +1346,14 @@ namespace TFE_DarkForces
 			vec3_fixed pushDir;
 			computeExplosionPushDir(&pos, &pushDir);
 
-			fixed16_16 force = s_msgArg2;
-			s_playerVelX   += mul16(force, pushDir.x);
-			s_playerUpVel2 += mul16(force, pushDir.y);
-			s_playerVelZ   += mul16(force, pushDir.z);
+			// Don't move the player if in external camera mode
+			if (!s_externalCameraMode)
+			{
+				fixed16_16 force = s_msgArg2;
+				s_playerVelX += mul16(force, pushDir.x);
+				s_playerUpVel2 += mul16(force, pushDir.y);
+				s_playerVelZ += mul16(force, pushDir.z);
+			}
 
 			if (s_invincibility || s_config.superShield)
 			{
@@ -1553,6 +1562,12 @@ namespace TFE_DarkForces
 
 	void handlePlayerMoveControls()
 	{
+		// If the player is in external camera mode, the only control we allow is use
+		if (!inputMapping_getActionState(IADF_USE) && s_externalCameraMode)
+		{
+			return;
+		}
+		
 		TFE_Settings_Game* settings = TFE_Settings::getGameSettings();
 
 		s_externalYawSpd = 0;
@@ -1866,6 +1881,13 @@ namespace TFE_DarkForces
 				
 	void handlePlayerPhysics()
 	{
+		// If the player is in external camera mode, do not handle physics
+		// Because we don't want the player to be moved from their position
+		if (s_externalCameraMode)
+		{
+			return;
+		}
+		
 		SecObject* player = s_playerObject;
 		RSector* origSector = player->sector;
 		fixed16_16 yVel = s_playerUpVel;
