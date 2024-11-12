@@ -811,6 +811,7 @@ namespace TFE_DarkForces
 		s_playerPrimaryFire = JFALSE;
 		s_playerSecFire     = JFALSE;
 		s_playerJumping     = JFALSE;
+		s_externalCameraMode = JFALSE;
 
 		s_crushSoundId = 0;
 		s_kyleScreamSoundId = 0;
@@ -1460,6 +1461,8 @@ namespace TFE_DarkForces
 		s_playerCrouchSpd = 0;
 		s_prevDistFromFloor = 0;
 		s_playerObject->worldHeight = 0x5cccc;	// 5.8
+		s_externalCameraMode = JFALSE;
+		player_setupEyeObject(s_playerObject);
 	}
 
 	void player_changeSector(RSector* newSector)
