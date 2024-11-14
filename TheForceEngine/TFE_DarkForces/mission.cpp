@@ -952,7 +952,7 @@ namespace TFE_DarkForces
 
 	void enableNightVision()
 	{
-		if (!s_playerInfo.itemGoggles) { return; }
+		if (!s_playerInfo.itemGoggles || s_externalCameraMode) { return; }
 
 		if (!s_batteryPower)
 		{
@@ -1001,7 +1001,7 @@ namespace TFE_DarkForces
 
 	void enableMask()
 	{
-		if (!s_playerInfo.itemMask) { return; }
+		if (!s_playerInfo.itemMask || s_externalCameraMode) { return; }
 
 		if (!s_batteryPower)
 		{
