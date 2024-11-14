@@ -12,6 +12,7 @@
 #include <TFE_DarkForces/sound.h>
 #include <TFE_DarkForces/automap.h>
 #include <TFE_DarkForces/weapon.h>
+#include <TFE_DarkForces/mission.h>
 #include <TFE_FileSystem/paths.h>
 #include <TFE_Jedi/Memory/allocator.h>
 #include <TFE_Jedi/Level/level.h>
@@ -3251,7 +3252,11 @@ namespace TFE_Jedi
 						{
 							if (obj->flags & OBJ_FLAG_CAMERA)
 							{
+								// Holster weapon, disable night vision and gasmask
 								weapon_holster();
+								if (s_nightVisionActive) { disableNightVision(); }
+								if (s_wearingGasmask) { disableMask(); }
+
 								player_setupEyeObject(obj);
 								s_externalCameraMode = JTRUE;
 								break;
