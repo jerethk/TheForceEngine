@@ -1031,7 +1031,7 @@ namespace TFE_DarkForces
 
 	void weapon_playerWeaponTaskFunc(MessageType msg)
 	{
-		// Do not allow weapon switching or firing while in external camera mode
+		// TFE: Do not allow weapon switching or firing while in external camera mode
 		if (msg == MSG_SWITCH_WPN || s_queWeaponSwitch || msg == MSG_START_FIRING || msg == MSG_STOP_FIRING)
 		{
 			if (s_externalCameraMode)

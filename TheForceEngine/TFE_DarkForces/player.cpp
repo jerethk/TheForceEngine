@@ -1368,7 +1368,7 @@ namespace TFE_DarkForces
 			ProjectileLogic* proj = (ProjectileLogic*)s_msgEntity;
 			vec3_fixed pushVel;
 			
-			// Don't move the player if in external camera mode
+			// TFE: Don't move the player if in external camera mode
 			if (!s_externalCameraMode)
 			{
 				computeDamagePushVelocity(proj, &pushVel);
@@ -1397,7 +1397,7 @@ namespace TFE_DarkForces
 			vec3_fixed pushDir;
 			computeExplosionPushDir(&pos, &pushDir);
 
-			// Don't move the player if in external camera mode
+			// TFE: Don't move the player if in external camera mode
 			if (!s_externalCameraMode)
 			{
 				fixed16_16 force = s_msgArg2;
@@ -1615,7 +1615,7 @@ namespace TFE_DarkForces
 
 	void handlePlayerMoveControls()
 	{
-		// If the player is in external camera mode, the only control we allow is use
+		// TFE: If external camera mode, the only control allowed is use
 		if (!inputMapping_getActionState(IADF_USE) && s_externalCameraMode)
 		{
 			return;
@@ -1934,7 +1934,7 @@ namespace TFE_DarkForces
 				
 	void handlePlayerPhysics()
 	{
-		// If the player is in external camera mode, do not handle physics
+		// TFE: If external camera mode, do not handle physics
 		// Because we don't want the player to be moved from their position
 		if (s_externalCameraMode)
 		{
