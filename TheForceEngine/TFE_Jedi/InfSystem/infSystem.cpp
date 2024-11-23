@@ -1923,6 +1923,10 @@ namespace TFE_Jedi
 			case KW_LIGHTS:
 				*type = MSG_LIGHTS;
 				break;
+			// TFE - camera feature
+			case KW_CAMERA:
+				*type = MSG_CAMERA;
+				break;
 			case KW_M_TRIGGER:
 			default:
 				if (elevator)
@@ -1944,11 +1948,6 @@ namespace TFE_Jedi
 				{
 					*type = MSG_TRIGGER;
 				}
-		}
-
-		if (strcasecmp(infArg0, "camera") == 0)
-		{
-			*type = MSG_CAMERA;
 		}
 	}
 
@@ -3236,6 +3235,7 @@ namespace TFE_Jedi
 					}
 				}
 			} break;
+			// TFE - camera feature
 			case MSG_CAMERA:
 			{
 				if (s_externalCameraMode == JFALSE)
