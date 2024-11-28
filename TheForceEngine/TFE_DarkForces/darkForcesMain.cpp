@@ -1327,7 +1327,6 @@ namespace TFE_DarkForces
 		actor_loadSounds();
 		actor_allocatePhysicsActorList();
 		loadCutsceneList();
-		weapon_startup();
 		loadLangHotkeys();
 
 		TFE_ExternalData::loadCustomLogics();
@@ -1350,8 +1349,15 @@ namespace TFE_DarkForces
 			TFE_System::logWrite(LOG_ERROR, "EXTERNAL_DATA", "Warning: Effect data is incomplete. EFFECTS.JSON may have been altered. Effects may not behave as expected.");
 		}
 
+		TFE_ExternalData::loadExternalWeapons();
+		if (!TFE_ExternalData::validateExternalWeapons())
+		{
+			TFE_System::logWrite(LOG_ERROR, "EXTERNAL_DATA", "Warning: Weapon data is incomplete. WEAPONS.JSON may have been altered. Weapons may not behave as expected.");
+		}
+
 		projectile_startup();
 		hitEffect_startup();
+		weapon_startup();
 		item_loadData();
 		player_init();
 
