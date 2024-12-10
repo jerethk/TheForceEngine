@@ -83,7 +83,7 @@ namespace TFE_DarkForces
 	void weapon_setFireRateInternal(WeaponFireMode mode, Tick delay, s32* canFire);
 	void weapon_playerWeaponTaskFunc(MessageType msg);
 	void weapon_handleOnAnimation(MessageType msg);
-	void weapon_prepareToFire();
+	void weapon_setIdle();
 	
 	static WeaponFireFunc s_weaponFireFunc[WPN_COUNT] =
 	{
@@ -463,8 +463,9 @@ namespace TFE_DarkForces
 		s_superchargeTask = nullptr;
 	}
 
-	void weapon_fixupAnim()
+	void weapon_emptyAnim()
 	{
+		// If using TDs or mines and no ammo, show empty right hand
 		PlayerWeapon* weapon = s_curPlayerWeapon;
 		s32 ammo = weapon->ammo ? *weapon->ammo : 0;
 
@@ -586,7 +587,7 @@ namespace TFE_DarkForces
 		if (msg == MSG_STOP_FIRING)
 		{
 			s_isShooting = JFALSE;
-			weapon_prepareToFire();
+			weapon_setIdle();
 			s_curPlayerWeapon->flags |= 2;
 		}
 		else if (msg == MSG_START_FIRING)
@@ -781,8 +782,9 @@ namespace TFE_DarkForces
 		}
 	}
 
-	void weapon_prepareToFire()
+	void weapon_setIdle()
 	{
+		// Set weapons back to their idle frame; stop looping sound
 		PlayerWeapon* weapon = s_curPlayerWeapon;
 		if (s_prevWeapon == WPN_REPEATER)
 		{
@@ -863,13 +865,13 @@ namespace TFE_DarkForces
 				}
 				s_curPlayerWeapon->flags &= ~2;
 
-				weapon_prepareToFire();
+				weapon_setIdle();
 				weapon_setFireRate();
 			}
 			else if (msg == MSG_STOP_FIRING)
 			{
 				s_isShooting = JFALSE;
-				weapon_prepareToFire();
+				weapon_setIdle();
 				s_curPlayerWeapon->flags |= 2;
 			}
 			else if (msg == MSG_HOLSTER)
@@ -880,7 +882,7 @@ namespace TFE_DarkForces
 
 				if (!s_weaponOffAnim)
 				{
-					weapon_prepareToFire();
+					weapon_setIdle();
 					
 					s_weaponAnimState =
 					{
@@ -901,7 +903,7 @@ namespace TFE_DarkForces
 						sound_play(s_weaponChangeSnd);
 					}
 
-					weapon_fixupAnim();
+					weapon_emptyAnim();
 
 					s_weaponAnimState =
 					{
