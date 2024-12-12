@@ -177,9 +177,10 @@ namespace TFE_DarkForces
 		s_playerWeaponList[id].frameCount = min(extWeapons[id].frameCount, WEAPON_NUM_TEXTURES);
 		s_playerWeaponList[id].frame = 0;
 		
-		for (s32 f = 0; f < s_playerWeaponList[id].frameCount; f++)
+		for (s32 f = 0; f < WEAPON_NUM_TEXTURES; f++)
 		{
-			s_playerWeaponList[id].frames[f] = loadWeaponTexture(extWeapons[id].textures[f]);
+			const char* tex = extWeapons[id].textures[f];
+			s_playerWeaponList[id].frames[f] = tex ? loadWeaponTexture(tex) : nullptr;
 			s_playerWeaponList[id].xPos[f] = extWeapons[id].xPos[f];
 			s_playerWeaponList[id].yPos[f] = extWeapons[id].yPos[f];
 		}
