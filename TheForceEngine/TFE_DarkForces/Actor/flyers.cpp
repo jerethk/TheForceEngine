@@ -121,6 +121,7 @@ namespace TFE_DarkForces
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->fov = 0x4000;	// 360 degrees
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_INTDROID];
+		dispatch->team = TEAM_IMPERIAL;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(45);
@@ -173,6 +174,7 @@ namespace TFE_DarkForces
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->fov = 0x4000;	// 360 degrees
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_PROBE];
+		dispatch->team = TEAM_IMPERIAL;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(45);
@@ -223,6 +225,7 @@ namespace TFE_DarkForces
 		obj->entityFlags = ETFLAG_AI_ACTOR | ETFLAG_FLYING | ETFLAG_REMOTE;
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->fov = 0x4000;
+		dispatch->team = TEAM_IMPERIAL;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->dieSndSrc = s_agentSndSrc[AGENTSND_TINY_EXPLOSION];

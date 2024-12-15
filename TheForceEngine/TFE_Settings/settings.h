@@ -219,6 +219,7 @@ struct TFE_Settings_Game
 	bool df_solidWallFlagFix = true;	// Solid wall flag is enforced for collision with moving walls.
 	bool df_enableUnusedItem = true;	// Enables the unused item in the inventory (delt 10).
 	bool df_jsonAiLogics = true;		// AI logics can be loaded from external JSON files
+	bool df_aiTeams = false;			// Team based AI
 	PitchLimit df_pitchLimit  = PITCH_VANILLA_PLUS;
 };
 
@@ -369,6 +370,7 @@ struct TFE_ModSettings
 	ModSettingOverride normalFix3do      = MSO_NOT_SET;
 	ModSettingOverride enableUnusedItem  = MSO_NOT_SET;
 	ModSettingOverride jsonAiLogics      = MSO_NOT_SET;
+	ModSettingOverride aiTeams			 = MSO_NOT_SET;
 
 	std::map<std::string, ModSettingLevelOverride> levelOverrides;
 	std::vector<ModHdIgnoreList> ignoreList;
@@ -408,6 +410,7 @@ namespace TFE_Settings
 	bool normalFix3do();
 	bool enableUnusedItem();
 	bool jsonAiLogics();
+	bool aiTeams();
 
 	// Settings for level mod overrides.
 	ModSettingLevelOverride getLevelOverrides(string levelName);

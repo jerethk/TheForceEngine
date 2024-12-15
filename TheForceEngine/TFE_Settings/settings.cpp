@@ -546,6 +546,7 @@ namespace TFE_Settings
 				writeKeyValue_Bool(settings, "solidWallFlagFix", s_gameSettings.df_solidWallFlagFix);
 				writeKeyValue_Bool(settings, "enableUnusedItem", s_gameSettings.df_enableUnusedItem);
 				writeKeyValue_Bool(settings, "jsonAiLogics", s_gameSettings.df_jsonAiLogics);
+				writeKeyValue_Bool(settings, "aiTeams", s_gameSettings.df_aiTeams);
 			}
 		}
 	}
@@ -1162,6 +1163,10 @@ namespace TFE_Settings
 		{
 			s_gameSettings.df_jsonAiLogics = parseBool(value);
 		}
+		else if (strcasecmp("aiTeams", key) == 0)
+		{
+			s_gameSettings.df_aiTeams = parseBool(value);
+		}
 	}
 
 	void parseOutlawsSettings(const char* key, const char* value)
@@ -1357,6 +1362,15 @@ namespace TFE_Settings
 		return s_gameSettings.df_jsonAiLogics;
 	}
 		
+	bool aiTeams()
+	{
+		if (s_modSettings.aiTeams != MSO_NOT_SET)
+		{
+			return s_modSettings.aiTeams == MSO_TRUE ? true : false;
+		}
+		return s_gameSettings.df_aiTeams;
+	}
+
 	//////////////////////////////////////////////////
 	// Mod Settings/Overrides.
 	//////////////////////////////////////////////////
@@ -1450,6 +1464,10 @@ namespace TFE_Settings
 		else if (strcasecmp(tfeOverride->string, "jsonAiLogics") == 0)
 		{
 			modSettings->jsonAiLogics = parseJSonBoolToOverride(tfeOverride);
+		}
+		else if (strcasecmp(tfeOverride->string, "aiTeams") == 0)
+		{
+			modSettings->aiTeams = parseJSonBoolToOverride(tfeOverride);
 		}
 		else if (strcasecmp(tfeOverride->string, "levelOverrides") == 0)
 		{

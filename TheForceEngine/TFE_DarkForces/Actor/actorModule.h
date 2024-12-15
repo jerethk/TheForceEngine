@@ -179,7 +179,7 @@ struct ThinkerModule
 	LogicAnimation anim;
 
 	Tick nextTick;
-	Tick playerLastSeen;
+	Tick targetObjLastSeen;
 	Tick prevColTick;
 
 	fixed16_16 targetOffset;
