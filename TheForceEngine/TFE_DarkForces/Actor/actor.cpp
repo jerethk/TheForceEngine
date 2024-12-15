@@ -669,6 +669,7 @@ namespace TFE_DarkForces
 		AttackModule* attackMod = &damageMod->attackMod;
 		SecObject* obj = attackMod->header.obj;
 		RSector* sector = obj->sector;
+		ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 
 		if (msg == MSG_DAMAGE)
 		{
@@ -683,7 +684,8 @@ namespace TFE_DarkForces
 					u32 moduleCur = obj->entityFlags & ETFLAG_AI_ACTOR;
 					if (moduleProj == moduleCur)
 					{
-						dmg = proj->dmg >> 1;
+						dmg = 0; /// proj->dmg >> 1;
+						logic->targetObject = proj->prevObj;
 					}
 				}
 				damageMod->hp -= dmg;
@@ -697,7 +699,7 @@ namespace TFE_DarkForces
 				computeDamagePushVelocity(proj, &pushVel);
 				if (damageMod->hp <= 0)
 				{
-					ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
+					
 					actor_addVelocity(pushVel.x*4, pushVel.y*2, pushVel.z*4);
 					actor_setDeathCollisionFlags();
 					sound_stop(logic->alertSndID);
@@ -993,8 +995,12 @@ namespace TFE_DarkForces
 					if (dist < attackMod->meleeRange)
 					{
 						sound_playCued(attackMod->attackSecSndSrc, obj->posWS);
-						// TODO apply damage to target rather than player!!   
-						player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
+						// TODO apply damage to other enemies
+						if (logic->targetObject == s_playerObject)
+						{
+							player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
+						}
+						
 						if (attackMod->attackFlags & ATTFLAG_LIT_MELEE)
 						{
 							obj->flags |= OBJ_FLAG_FULLBRIGHT;
