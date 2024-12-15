@@ -193,8 +193,6 @@ namespace TFE_DarkForces
 		dispatch->freeTask = nullptr;
 		dispatch->flags = 4;
 
-		dispatch->targetObject = s_playerObject;	// default the target object to the player object
-
 		if (obj)
 		{
 			obj_addLogic(obj, (Logic*)dispatch, LOGIC_DISPATCH, s_istate.actorTask, actorLogicCleanupFunc);
@@ -846,6 +844,11 @@ namespace TFE_DarkForces
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
 
+		if (!logic->targetObject)
+		{
+			logic->targetObject = s_playerObject;
+		}
+
 		switch (state)
 		{
 			case STATE_DELAY:
@@ -1211,6 +1214,11 @@ namespace TFE_DarkForces
 		else if (thinkerMod->anim.state == STATE_TURN)
 		{
 			ActorDispatch* logic = actor_getCurrentLogic();
+			if (!logic->targetObject)
+			{
+				logic->targetObject = s_playerObject;
+			}
+
 			fixed16_16 targetX, targetZ;
 			if (thinkerMod->targetObjLastSeen < s_curTick)
 			{
