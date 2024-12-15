@@ -1163,7 +1163,6 @@ namespace TFE_DarkForces
 	{
 		ThinkerModule* thinkerMod = (ThinkerModule*)module;
 		SecObject* obj = thinkerMod->header.obj;
-		ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 
 		if (thinkerMod->anim.state == STATE_MOVE)
 		{
