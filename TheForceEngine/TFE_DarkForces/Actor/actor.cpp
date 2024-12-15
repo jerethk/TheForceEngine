@@ -29,6 +29,7 @@
 #include <TFE_Jedi/Memory/list.h>
 #include <TFE_Jedi/Memory/allocator.h>
 #include <TFE_Jedi/Serialization/serialization.h>
+#include <TFE_Settings/settings.h>
 
 using namespace TFE_Jedi;
 
@@ -56,6 +57,7 @@ namespace TFE_DarkForces
 	void actorLogicMsgFunc(MessageType msg);
 	void actorPhysicsTaskFunc(MessageType msg);
 	u32  actorLogicSetupFunc(Logic* logic, KEYWORD key);
+	SecObject* findNewTargetObject(SecObject* sourceObj, s32 team);
 
 	extern ThinkerModule* actor_createFlyingModule(Logic* logic);
 	extern ThinkerModule* actor_createFlyingModule_Remote(Logic* logic);
@@ -189,7 +191,7 @@ namespace TFE_DarkForces
 		dispatch->fov = 9557;			// ~210 degrees
 		dispatch->awareRange = FIXED(20);
 		dispatch->vel = { 0 };
-		dispatch->lastPlayerPos = { 0 };
+		dispatch->lastTargetObjPos = { 0 };
 		dispatch->freeTask = nullptr;
 		dispatch->flags = ACTOR_NPC;	// this is later removed for barrels and scenery
 
@@ -487,6 +489,7 @@ namespace TFE_DarkForces
 		physicsActor->vel.z = mul16(cosPitch, physicsActor->vel.z);
 	}
 
+	// Used by Boba Fett, Phase 2 and Phase 3
 	void actor_leadTarget(ProjectileLogic* proj)
 	{
 		SecObject* projObj = proj->logic.obj;
@@ -561,18 +564,18 @@ namespace TFE_DarkForces
 		}
 	}
 
-	void actor_updatePlayerVisiblity(JBool playerVis, fixed16_16 posX, fixed16_16 posZ)
+	void actor_updateTargetObjectVisiblity(JBool targetVis, fixed16_16 posX, fixed16_16 posZ)
 	{
 		ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 
-		// Update player visibility flag.
+		// Update target visibility flag.
 		logic->flags &= ~ACTOR_PLAYER_VISIBLE;
-		logic->flags |= ((playerVis & 1) << 3);	// flag 8 = player visible.
+		logic->flags |= ((targetVis & 1) << 3);	// flag 8 = target visible.
 
-		if (playerVis)
+		if (targetVis)
 		{
-			logic->lastPlayerPos.x = posX;
-			logic->lastPlayerPos.z = posZ;
+			logic->lastTargetObjPos.x = posX;
+			logic->lastTargetObjPos.z = posZ;
 		}
 	}
 
@@ -671,6 +674,7 @@ namespace TFE_DarkForces
 		AttackModule* attackMod = &damageMod->attackMod;
 		SecObject* obj = attackMod->header.obj;
 		RSector* sector = obj->sector;
+		ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 
 		if (msg == MSG_DAMAGE)
 		{
@@ -699,7 +703,6 @@ namespace TFE_DarkForces
 				computeDamagePushVelocity(proj, &pushVel);
 				if (damageMod->hp <= 0)
 				{
-					ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 					actor_addVelocity(pushVel.x*4, pushVel.y*2, pushVel.z*4);
 					actor_setDeathCollisionFlags();
 					sound_stop(logic->alertSndID);
@@ -846,6 +849,17 @@ namespace TFE_DarkForces
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
 
+		// Killed AIs have sector = nullptr, so need to be reassigned
+		if (!logic->targetObject || !logic->targetObject->sector)
+		{
+			logic->targetObject = findNewTargetObject(obj, logic->team);
+
+			if (!logic->targetObject)
+			{
+				return attackMod->timing.delay;
+			}
+		}
+
 		switch (state)
 		{
 			case STATE_DELAY:
@@ -880,6 +894,13 @@ namespace TFE_DarkForces
 			} break;
 			case STATE_DECIDE:
 			{
+				// Don't attack the player if on player's team. Try finding another target.
+				if (logic->team == TEAM_PLAYER && logic->targetObject == s_playerObject)
+				{
+					logic->targetObject = findNewTargetObject(obj, logic->team);
+					return attackMod->timing.delay;
+				}
+				
 				gameMusic_sustainFight();
 				if (s_playerDying)
 				{
@@ -891,10 +912,9 @@ namespace TFE_DarkForces
 					}
 				}
 
-				// Check for player visibility
-				if (!actor_canSeeObjFromDist(obj, s_playerObject))
+				if (!actor_canSeeObjFromDist(obj, logic->targetObject))
 				{
-					actor_updatePlayerVisiblity(JFALSE, 0, 0);
+					actor_updateTargetObjectVisiblity(JFALSE, 0, 0);
 					attackMod->anim.flags |= AFLAG_READY;
 					attackMod->anim.state = STATE_DELAY;
 					if (attackMod->timing.nextTick < s_curTick)
@@ -907,13 +927,18 @@ namespace TFE_DarkForces
 				}
 				else  // Player is visible
 				{
-					actor_updatePlayerVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+					bool vanillaDF = !TFE_Settings::aiTeams();		// vanilla code used s_eyePos for these calculations (enemies would target the eye rather than the player)
+					
+					actor_updateTargetObjectVisiblity(
+						JTRUE,
+						vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x,
+						vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
-					fixed16_16 dist = distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
-					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - s_eyePos.y);
+					fixed16_16 dist = distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 yDiff = TFE_Jedi::abs((obj->posWS.y - obj->worldHeight) - vanillaDF ? s_eyePos.y : (logic->targetObject->posWS.y - logic->targetObject->worldHeight));
 					angle14_32 vertAngle = vec2ToAngle(yDiff, dist);
 
-					fixed16_16 baseYDiff = TFE_Jedi::abs(s_playerObject->posWS.y - obj->posWS.y);
+					fixed16_16 baseYDiff = TFE_Jedi::abs(logic->targetObject->posWS.y - obj->posWS.y);
 					dist += baseYDiff;
 
 					if (vertAngle < 2275 && dist <= attackMod->maxDist)	// ~50 degrees
@@ -971,7 +996,9 @@ namespace TFE_DarkForces
 
 						attackMod->target.pos.x = obj->posWS.x;
 						attackMod->target.pos.z = obj->posWS.z;
-						attackMod->target.yaw   = vec2ToAngle(s_eyePos.x - obj->posWS.x, s_eyePos.z - obj->posWS.z);
+						attackMod->target.yaw   = vec2ToAngle(
+							(vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x) - obj->posWS.x,
+							(vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z) - obj->posWS.z);
 						attackMod->target.pitch = obj->pitch;
 						attackMod->target.roll  = obj->roll;
 						attackMod->target.flags |= (TARGET_MOVE_XZ | TARGET_MOVE_ROT);
@@ -995,12 +1022,25 @@ namespace TFE_DarkForces
 				if (attackMod->attackFlags & ATTFLAG_MELEE)
 				{
 					attackMod->anim.state = STATE_ANIMATE1;
-					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - s_playerObject->posWS.y);
-					fixed16_16 dist = dy + distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - logic->targetObject->posWS.y);
+					fixed16_16 dist = dy + distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
 					if (dist < attackMod->meleeRange)
 					{
 						sound_playCued(attackMod->attackSecSndSrc, obj->posWS);
-						player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
+						if (logic->targetObject == s_playerObject)
+						{
+							player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
+						}
+						else  
+						{
+							// Inflict damage on non-player object
+							// reduce by half, same as with projectiles
+							// use MSG_EXPLOSION (a hack, but it works)
+							s_msgArg1 = attackMod->meleeDmg >> 1;
+							s_msgArg2 = FIXED(5);	// force
+							message_sendToObj(logic->targetObject, MSG_EXPLOSION, nullptr);
+						}
+						
 						if (attackMod->attackFlags & ATTFLAG_LIT_MELEE)
 						{
 							obj->flags |= OBJ_FLAG_FULLBRIGHT;
@@ -1025,14 +1065,25 @@ namespace TFE_DarkForces
 
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
-				
+
+				bool vanillaDF = !TFE_Settings::aiTeams();
+				fixed16_16 targetY;
+				if (logic->targetObject == s_playerObject)
+				{
+					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head" like usual
+				}
+				else
+				{
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// AI - aim a bit lower than the head
+				}
+
 				// Vanilla DF did not handle arcing projectiles with STATE_ATTACK1; this has been added
 				if (attackMod->projType == PROJ_THERMAL_DET || attackMod->projType == PROJ_MORTAR)
 				{
 					// TDs are lobbed at an angle that depends on distance from target
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1053,7 +1104,12 @@ namespace TFE_DarkForces
 					}
 
 					// Aim at the target.
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target =
+					{ 
+						vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x,
+						targetY + ONE_16,
+						vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z
+					};
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1090,11 +1146,23 @@ namespace TFE_DarkForces
 
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
+
+				bool vanillaDF = !TFE_Settings::aiTeams();
+				fixed16_16 targetY;
+				if (logic->targetObject == s_playerObject)
+				{
+					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head" like usual
+				}
+				else
+				{
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// AI - aim a bit lower than the head
+				}
+
 				if (attackMod->projType == PROJ_THERMAL_DET || attackMod->projType == PROJ_MORTAR)
 				{
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1112,7 +1180,11 @@ namespace TFE_DarkForces
 						proj->delta.z = attackMod->fireOffset.z;
 						proj_handleMovement(proj);
 					}
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target = {
+						vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x,
+						targetY + ONE_16,
+						vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z
+					};
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1181,7 +1253,7 @@ namespace TFE_DarkForces
 			{
 				if (arrivedAtTarget)
 				{
-					thinkerMod->playerLastSeen = 0xffffffff;
+					thinkerMod->targetObjLastSeen = 0xffffffff;
 				}
 				thinkerMod->anim.state = STATE_TURN;
 			}
@@ -1189,16 +1261,16 @@ namespace TFE_DarkForces
 			{
 				if (actorLogic_isVisibleFlagSet())
 				{
-					if (thinkerMod->playerLastSeen != 0xffffffff)
+					if (thinkerMod->targetObjLastSeen != 0xffffffff)
 					{
 						thinkerMod->nextTick = 0;
 						thinkerMod->maxWalkTime = thinkerMod->startDelay;
-						thinkerMod->playerLastSeen = 0xffffffff;
+						thinkerMod->targetObjLastSeen = 0xffffffff;
 					}
 				}
 				else
 				{
-					thinkerMod->playerLastSeen = s_curTick + 0x1111;
+					thinkerMod->targetObjLastSeen = s_curTick + 0x1111;
 				}
 
 				ActorTarget* target = &thinkerMod->target;
@@ -1220,25 +1292,40 @@ namespace TFE_DarkForces
 		else if (thinkerMod->anim.state == STATE_TURN)
 		{
 			ActorDispatch* logic = actor_getCurrentLogic();
-			fixed16_16 targetX, targetZ;
-			if (thinkerMod->playerLastSeen < s_curTick)
+			if (!logic->targetObject || !logic->targetObject->sector || !actor_canSeeObject(obj, logic->targetObject))
 			{
-				targetX = logic->lastPlayerPos.x;
-				targetZ = logic->lastPlayerPos.z;
+				logic->targetObject = findNewTargetObject(obj, logic->team);
+			}
+
+			fixed16_16 targetX, targetZ;
+			if (thinkerMod->targetObjLastSeen < s_curTick)
+			{
+				targetX = logic->lastTargetObjPos.x;
+				targetZ = logic->lastTargetObjPos.z;
 			}
 			else
 			{
-				targetX = s_eyePos.x;
-				targetZ = s_eyePos.z;
+				if (logic->targetObject)
+				{
+					bool vanillaDF = !TFE_Settings::aiTeams();
+					targetX = vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x;
+					targetZ = vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z;
+				}
+				else
+				{
+					// Provide a random location to target if there is no targetObject (neutral AIs)
+					targetX = obj->posWS.x + FIXED(random(100) - 50);
+					targetZ = obj->posWS.z + FIXED(random(100) - 50);
+				}
 			}
 
 			fixed16_16 targetOffset;
-			if (!actorLogic_isVisibleFlagSet())
+			if (!actorLogic_isVisibleFlagSet() && logic->targetObject)
 			{
 				// Offset the target by |dx| / 4
 				// This is obviously a typo and bug in the DOS code and should be min(|dx|, |dz|)
 				// but the original code is min(|dx|, |dx|) => |dx|
-				fixed16_16 dx = TFE_Jedi::abs(s_playerObject->posWS.x - obj->posWS.x);
+				fixed16_16 dx = TFE_Jedi::abs(logic->targetObject->posWS.x - obj->posWS.x);
 				targetOffset = dx >> 2;
 			}
 			else
@@ -1300,7 +1387,7 @@ namespace TFE_DarkForces
 		thinkerMod->target.speedVert = FIXED(10);
 		thinkerMod->delay = 72;
 		thinkerMod->nextTick = 0;
-		thinkerMod->playerLastSeen = 0xffffffff;
+		thinkerMod->targetObjLastSeen = 0xffffffff;
 		thinkerMod->anim.state = STATE_TURN;
 		thinkerMod->maxWalkTime = 728;	// ~5 seconds between decision points.
 		thinkerMod->anim.frameRate = 5;
@@ -2183,4 +2270,93 @@ namespace TFE_DarkForces
 		}
 		task_end;
 	}
+
+	// Finds and returns a new target object for an actor to seek & attack
+	// Note: Dispatch actors in vanilla DF would attack the EYE object rather than the PLAYER object. This behaviour
+	// is preserved when the Teams setting is disabled. When the Teams setting is enabled, actors will target the PLAYER
+	// object, not the EYE object.
+	SecObject* findNewTargetObject(SecObject* sourceObj, s32 sourceTeam)
+	{
+		// If AI Teams settings is disabled, the target must always be the player
+		if (!TFE_Settings::aiTeams())
+		{
+			return s_playerObject;
+		}
+		
+		if (sourceTeam == TEAM_DEFAULT)
+		{
+			return s_playerObject;	// team "default" always targets the player (vanilla DF behaviour)
+		}
+
+		if (sourceTeam == TEAM_NEUTRAL)
+		{
+			return nullptr;		// team neutral does not target anybody
+		}
+
+		// preferentially target the player if it can be seen
+		if (sourceTeam != TEAM_PLAYER && actor_canSeeObject(sourceObj, s_playerObject))
+		{
+			return s_playerObject;
+		}
+
+		RSector* sector = s_levelState.sectors;
+		for (u32 i = 0; i < s_levelState.sectorCount; i++, sector++)
+		{
+			for (s32 objIndex = 0, objListIndex = 0; objIndex < sector->objectCount && objListIndex < sector->objectCapacity; objListIndex++)
+			{
+				SecObject* obj = sector->objectList[objListIndex];
+				if (!obj) { continue; }
+				objIndex++;
+
+				if (sourceObj == obj) { continue; }	// don't target self!
+				
+				if (!(obj->entityFlags & ETFLAG_AI_ACTOR))
+				{ 
+					continue;	// only target AI actors
+				}
+
+				// don't target actors > 200 DFU distant
+				fixed16_16 dx = TFE_Jedi::abs(sourceObj->posWS.x - obj->posWS.x);
+				fixed16_16 dz = TFE_Jedi::abs(sourceObj->posWS.z - obj->posWS.z);
+				if (dx > FIXED(200) || dz > FIXED(200))
+				{
+					continue;
+				}
+
+				// Search for dispatch logic
+				ActorDispatch* dispatch = nullptr;
+				Logic** logicList = (Logic**)allocator_getHead((Allocator*)obj->logic);
+				while (logicList)
+				{
+					Logic* logic = *logicList;
+					if (logic->type == LOGIC_DISPATCH)
+					{
+						dispatch = (ActorDispatch*)logic;
+						break;
+					}
+
+					logicList = (Logic**)allocator_getNext((Allocator*)obj->logic);
+				}
+				if (!dispatch) { continue; }
+
+				if (dispatch->team == TEAM_NEUTRAL) { continue; }	// don't target objects on "team neutral"
+
+				if (sourceTeam != TEAM_NONE && sourceTeam == dispatch->team)
+				{
+					continue;	// don't target AI on the same team
+				}
+
+				if (!actor_canSeeObject(sourceObj, obj))
+				{ 
+					continue;	// don't target an object that can't be seen
+				}
+
+				return obj;
+			}
+		}
+
+		// return the player if above fails
+		return s_playerObject;
+	}
+
 }  // namespace TFE_DarkForces

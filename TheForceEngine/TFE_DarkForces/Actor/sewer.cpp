@@ -147,7 +147,7 @@ namespace TFE_DarkForces
 				gameMusic_sustainFight();
 				if (!actor_canSeeObjFromDist(obj, s_playerObject))
 				{
-					actor_updatePlayerVisiblity(JFALSE, 0, 0);
+					actor_updateTargetObjectVisiblity(JFALSE, 0, 0);
 					attackMod->anim.flags |= AFLAG_READY;
 					attackMod->anim.state = STATE_DELAY;
 					if (s_curTick > attackMod->timing.nextTick)
@@ -158,7 +158,7 @@ namespace TFE_DarkForces
 					return attackMod->timing.delay;
 				}
 
-				actor_updatePlayerVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+				actor_updateTargetObjectVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
 				moveMod->collisionFlags &= ~ACTORCOL_NO_Y_MOVE;
 
 				obj->posWS.y = sector->floorHeight;
@@ -236,6 +236,7 @@ namespace TFE_DarkForces
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_CREATURE];
 		dispatch->fov = ANGLE_MAX;
+		dispatch->team = TEAM_NONE;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->attackMod.header.func = sewerCreatureAiFunc;

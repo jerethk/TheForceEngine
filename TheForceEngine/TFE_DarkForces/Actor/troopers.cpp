@@ -44,6 +44,7 @@ namespace TFE_DarkForces
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->flags |= ACTOR_OFFIC_ALERT;	// Use Officer alert table.
 		dispatch->alertSndSrc = 0;
+		dispatch->team = TEAM_IMPERIAL;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(9);
@@ -85,6 +86,7 @@ namespace TFE_DarkForces
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->flags |= ACTOR_TROOP_ALERT;	// Use Stormtrooper alert table.
 		dispatch->alertSndSrc = 0;
+		dispatch->team = TEAM_IMPERIAL;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(18);
@@ -125,6 +127,7 @@ namespace TFE_DarkForces
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->flags |= ACTOR_TROOP_ALERT;	// Use Stormtrooper alert table.
 		dispatch->alertSndSrc = 0;
+		dispatch->team = TEAM_IMPERIAL;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(27);

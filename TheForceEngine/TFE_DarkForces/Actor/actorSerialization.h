@@ -39,10 +39,17 @@
 
 namespace TFE_DarkForces
 {
+	enum ActorStateVersion : u32
+	{
+		ActorState_InitVersion = 1,
+		ActorState_Teams = 2,
+		ActorState_CurVersion = ActorState_Teams,
+	};
+	
 	void actorDispatch_serialize(Logic*& logic, SecObject* obj, Stream* stream);
 
 	// Helper Functions
-	void actor_serializeObject(Stream* stream, SecObject*& obj);
+	void actor_serializeObject(Stream* stream, SecObject*& obj, s32 saveVersion);
 	void actor_serializeWall(Stream* stream, RWall*& wall);
 	void actor_serializeCollisionInfo(Stream* stream, CollisionInfo* colInfo);
 	void actor_serializeTarget(Stream* stream, ActorTarget* target);

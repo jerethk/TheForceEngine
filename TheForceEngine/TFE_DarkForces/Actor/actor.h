@@ -94,6 +94,17 @@ enum ActorDispatchFlags
 	ACTOR_TROOP_ALERT		= FLAG_BIT(5),	// use stormtrooper alert sounds
 };
 
+// New TFE Feature - AI teams
+enum ActorTeam
+{
+	TEAM_NEUTRAL = -1,	// won't target anyone, and won't be targeted (useful for civilians); applied to barrels to prevent them being attacked
+	TEAM_DEFAULT = 0,	// default behaviour - will only target the player
+	TEAM_NONE = 1,		// not on any team, can be attacked by any team including others on "team none"; applied to sewer creature
+	TEAM_PLAYER = 2,	// same team as the player, won't attack the player
+	TEAM_IMPERIAL = 3,	// applied to troopers and flyers
+	TEAM_SMUGGLERS = 4,	// applied to Bossk, Reeyees and Gamorrean
+};
+
 // Forward Declarations.
 struct ActorModule;
 struct MovementModule;
@@ -125,10 +136,14 @@ struct ActorDispatch
 	fixed16_16 awareRange;
 
 	vec3_fixed vel;
-	vec2_fixed lastPlayerPos;
+	vec2_fixed lastTargetObjPos;
 
 	Task* freeTask;
 	u32 flags;
+
+	// New TFE actor properties
+	SecObject* targetObject;	// target object for Attack Module and Thinker Module
+	s32 team = TEAM_DEFAULT;
 };
 
 struct ActorState
@@ -179,7 +194,7 @@ namespace TFE_DarkForces
 	void actor_removeLogics(SecObject* obj);
 	void actor_setupSmartObj(MovementModule* moveMod);
 	void actor_setCurAnimation(LogicAnimation* aiAnim);
-	void actor_updatePlayerVisiblity(JBool playerVis, fixed16_16 posX, fixed16_16 posZ);
+	void actor_updateTargetObjectVisiblity(JBool targetVis, fixed16_16 posX, fixed16_16 posZ);
 	void actor_changeDirFromCollision(MovementModule* moveMod, ActorTarget* target, Tick* prevColTick);
 	void actor_jumpToTarget(PhysicsActor* physicsActor, SecObject* obj, vec3_fixed target, fixed16_16 speed, angle14_32 angleOffset);
 	void actor_leadTarget(ProjectileLogic* proj);

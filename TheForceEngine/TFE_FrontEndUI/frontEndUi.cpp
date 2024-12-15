@@ -1231,6 +1231,12 @@ namespace TFE_FrontEndUI
 			gameSettings->df_jsonAiLogics = jsonAiLogics;
 		}
 
+		bool aiTeams = gameSettings->df_aiTeams;
+		if (ImGui::Checkbox("Enable team based AI", &aiTeams))
+		{
+			gameSettings->df_aiTeams = aiTeams;
+		}
+
 		if (s_drawNoGameDataMsg)
 		{
 			ImGui::Separator();
@@ -3419,6 +3425,7 @@ namespace TFE_FrontEndUI
 				gameSettings->df_solidWallFlagFix = true;
 				gameSettings->df_enableUnusedItem = true;
 				gameSettings->df_jsonAiLogics = true;
+				gameSettings->df_aiTeams = true;
 				// Graphics
 				graphicsSettings->rendererIndex = RENDERER_HARDWARE;
 				graphicsSettings->skyMode = SKYMODE_CYLINDER;
@@ -3470,6 +3477,7 @@ namespace TFE_FrontEndUI
 				gameSettings->df_solidWallFlagFix = false;
 				gameSettings->df_enableUnusedItem = false;
 				gameSettings->df_jsonAiLogics = false;
+				gameSettings->df_aiTeams = false;
 				// Graphics
 				graphicsSettings->rendererIndex = RENDERER_SOFTWARE;
 				graphicsSettings->widescreen = false;
