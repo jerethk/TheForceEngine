@@ -75,7 +75,7 @@ namespace TFE_DarkForces
 		SERIALIZE(SaveVersionInit, dispatch->fov, 9557);			// ~210 degrees
 		SERIALIZE(SaveVersionInit, dispatch->awareRange, FIXED(20));
 		SERIALIZE(SaveVersionInit, dispatch->vel, {0});
-		SERIALIZE(SaveVersionInit, dispatch->lastPlayerPos, {0});
+		SERIALIZE(SaveVersionInit, dispatch->lastTargetObjPos, {0});
 		SERIALIZE(SaveVersionInit, dispatch->flags, 4);
 		// Animation Table.
 		s32 animTableIndex = -1;
@@ -440,7 +440,7 @@ namespace TFE_DarkForces
 		actor_serializeLogicAnim(stream, &thinkerMod->anim);
 
 		SERIALIZE(SaveVersionInit, thinkerMod->nextTick, 0);
-		SERIALIZE(SaveVersionInit, thinkerMod->playerLastSeen, 0);
+		SERIALIZE(SaveVersionInit, thinkerMod->targetObjLastSeen, 0);
 		SERIALIZE(SaveVersionInit, thinkerMod->prevColTick, 0);
 
 		SERIALIZE(SaveVersionInit, thinkerMod->targetOffset, 0);

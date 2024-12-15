@@ -120,10 +120,12 @@ struct ActorDispatch
 	fixed16_16 awareRange;
 
 	vec3_fixed vel;
-	vec2_fixed lastPlayerPos;
+	vec2_fixed lastTargetObjPos;
 
 	Task* freeTask;
 	u32 flags;
+
+	SecObject* targetObject;	// target object
 };
 
 struct ActorState
@@ -174,7 +176,7 @@ namespace TFE_DarkForces
 	void actor_removeLogics(SecObject* obj);
 	void actor_setupSmartObj(MovementModule* moveMod);
 	void actor_setCurAnimation(LogicAnimation* aiAnim);
-	void actor_updatePlayerVisiblity(JBool playerVis, fixed16_16 posX, fixed16_16 posZ);
+	void actor_updateTargetObjectVisiblity(JBool targetVis, fixed16_16 posX, fixed16_16 posZ);
 	void actor_changeDirFromCollision(MovementModule* moveMod, ActorTarget* target, Tick* prevColTick);
 	void actor_jumpToTarget(PhysicsActor* physicsActor, SecObject* obj, vec3_fixed target, fixed16_16 speed, angle14_32 angleOffset);
 	void actor_leadTarget(ProjectileLogic* proj);

@@ -189,9 +189,11 @@ namespace TFE_DarkForces
 		dispatch->fov = 9557;			// ~210 degrees
 		dispatch->awareRange = FIXED(20);
 		dispatch->vel = { 0 };
-		dispatch->lastPlayerPos = { 0 };
+		dispatch->lastTargetObjPos = { 0 };
 		dispatch->freeTask = nullptr;
 		dispatch->flags = 4;
+
+		dispatch->targetObject = s_playerObject;	// default the target object to the player object
 
 		if (obj)
 		{
@@ -484,6 +486,7 @@ namespace TFE_DarkForces
 		physicsActor->vel.z = mul16(cosPitch, physicsActor->vel.z);
 	}
 
+	// Used by Boba Fett, Phase 2 and Phase 3
 	void actor_leadTarget(ProjectileLogic* proj)
 	{
 		SecObject* projObj = proj->logic.obj;
@@ -558,18 +561,18 @@ namespace TFE_DarkForces
 		}
 	}
 
-	void actor_updatePlayerVisiblity(JBool playerVis, fixed16_16 posX, fixed16_16 posZ)
+	void actor_updateTargetObjectVisiblity(JBool targetVis, fixed16_16 posX, fixed16_16 posZ)
 	{
 		ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 
-		// Update player visibility flag.
+		// Update target visibility flag.
 		logic->flags &= ~8;
-		logic->flags |= ((playerVis & 1) << 3);	// flag 8 = player visible.
+		logic->flags |= ((targetVis & 1) << 3);	// flag 8 = target visible.
 
-		if (playerVis)
+		if (targetVis)
 		{
-			logic->lastPlayerPos.x = posX;
-			logic->lastPlayerPos.z = posZ;
+			logic->lastTargetObjPos.x = posX;
+			logic->lastTargetObjPos.z = posZ;
 		}
 	}
 
@@ -888,9 +891,9 @@ namespace TFE_DarkForces
 					}
 				}
 
-				if (!actor_canSeeObjFromDist(obj, s_playerObject))
+				if (!actor_canSeeObjFromDist(obj, logic->targetObject))
 				{
-					actor_updatePlayerVisiblity(JFALSE, 0, 0);
+					actor_updateTargetObjectVisiblity(JFALSE, 0, 0);
 					attackMod->anim.flags |= 2;
 					attackMod->anim.state = STATE_DELAY;
 					if (attackMod->timing.nextTick < s_curTick)
@@ -902,13 +905,13 @@ namespace TFE_DarkForces
 				}
 				else
 				{
-					actor_updatePlayerVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+					actor_updateTargetObjectVisiblity(JTRUE, logic->targetObject->posWS.x, logic->targetObject->posWS.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
-					fixed16_16 dist = distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
-					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - s_eyePos.y);
+					fixed16_16 dist = distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - logic->targetObject->posWS.y);
 					angle14_32 vertAngle = vec2ToAngle(yDiff, dist);
 
-					fixed16_16 baseYDiff = TFE_Jedi::abs(s_playerObject->posWS.y - obj->posWS.y);
+					fixed16_16 baseYDiff = TFE_Jedi::abs(logic->targetObject->posWS.y - obj->posWS.y);
 					dist += baseYDiff;
 
 					if (vertAngle < 2275 && dist <= attackMod->maxDist)	// ~50 degrees
@@ -958,7 +961,7 @@ namespace TFE_DarkForces
 
 						attackMod->target.pos.x = obj->posWS.x;
 						attackMod->target.pos.z = obj->posWS.z;
-						attackMod->target.yaw   = vec2ToAngle(s_eyePos.x - obj->posWS.x, s_eyePos.z - obj->posWS.z);
+						attackMod->target.yaw   = vec2ToAngle(logic->targetObject->posWS.x - obj->posWS.x, logic->targetObject->posWS.z - obj->posWS.z);
 						attackMod->target.pitch = obj->pitch;
 						attackMod->target.roll  = obj->roll;
 						attackMod->target.flags |= (TARGET_MOVE_XZ | TARGET_MOVE_ROT);
@@ -982,11 +985,12 @@ namespace TFE_DarkForces
 				if (attackMod->attackFlags & ATTFLAG_MELEE)
 				{
 					attackMod->anim.state = STATE_ANIMATE1;
-					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - s_playerObject->posWS.y);
-					fixed16_16 dist = dy + distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - logic->targetObject->posWS.y);
+					fixed16_16 dist = dy + distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
 					if (dist < attackMod->meleeRange)
 					{
 						sound_playCued(attackMod->attackSecSndSrc, obj->posWS);
+						// TODO apply damage to target rather than player!!   
 						player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
 						if (attackMod->attackFlags & ATTFLAG_LIT_MELEE)
 						{
@@ -1019,7 +1023,7 @@ namespace TFE_DarkForces
 					// TDs are lobbed at an angle that depends on distance from target
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1040,7 +1044,7 @@ namespace TFE_DarkForces
 					}
 
 					// Aim at the target.
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1081,7 +1085,7 @@ namespace TFE_DarkForces
 				{
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x,logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1099,7 +1103,7 @@ namespace TFE_DarkForces
 						proj->delta.z = attackMod->fireOffset.z;
 						proj_handleMovement(proj);
 					}
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1159,6 +1163,7 @@ namespace TFE_DarkForces
 	{
 		ThinkerModule* thinkerMod = (ThinkerModule*)module;
 		SecObject* obj = thinkerMod->header.obj;
+		ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 
 		if (thinkerMod->anim.state == STATE_MOVE)
 		{
@@ -1168,7 +1173,7 @@ namespace TFE_DarkForces
 			{
 				if (arrivedAtTarget)
 				{
-					thinkerMod->playerLastSeen = 0xffffffff;
+					thinkerMod->targetObjLastSeen = 0xffffffff;
 				}
 				thinkerMod->anim.state = STATE_TURN;
 			}
@@ -1176,16 +1181,16 @@ namespace TFE_DarkForces
 			{
 				if (actorLogic_isStopFlagSet())
 				{
-					if (thinkerMod->playerLastSeen != 0xffffffff)
+					if (thinkerMod->targetObjLastSeen != 0xffffffff)
 					{
 						thinkerMod->nextTick = 0;
 						thinkerMod->maxWalkTime = thinkerMod->startDelay;
-						thinkerMod->playerLastSeen = 0xffffffff;
+						thinkerMod->targetObjLastSeen = 0xffffffff;
 					}
 				}
 				else
 				{
-					thinkerMod->playerLastSeen = s_curTick + 0x1111;
+					thinkerMod->targetObjLastSeen = s_curTick + 0x1111;
 				}
 
 				ActorTarget* target = &thinkerMod->target;
@@ -1208,15 +1213,15 @@ namespace TFE_DarkForces
 		{
 			ActorDispatch* logic = actor_getCurrentLogic();
 			fixed16_16 targetX, targetZ;
-			if (thinkerMod->playerLastSeen < s_curTick)
+			if (thinkerMod->targetObjLastSeen < s_curTick)
 			{
-				targetX = logic->lastPlayerPos.x;
-				targetZ = logic->lastPlayerPos.z;
+				targetX = logic->lastTargetObjPos.x;
+				targetZ = logic->lastTargetObjPos.z;
 			}
 			else
 			{
-				targetX = s_eyePos.x;
-				targetZ = s_eyePos.z;
+				targetX = logic->targetObject->posWS.x;
+				targetZ = logic->targetObject->posWS.z;
 			}
 
 			fixed16_16 targetOffset;
@@ -1225,7 +1230,7 @@ namespace TFE_DarkForces
 				// Offset the target by |dx| / 4
 				// This is obviously a typo and bug in the DOS code and should be min(|dx|, |dz|)
 				// but the original code is min(|dx|, |dx|) => |dx|
-				fixed16_16 dx = TFE_Jedi::abs(s_playerObject->posWS.x - obj->posWS.x);
+				fixed16_16 dx = TFE_Jedi::abs(logic->targetObject->posWS.x - obj->posWS.x);
 				targetOffset = dx >> 2;
 			}
 			else
@@ -1287,7 +1292,7 @@ namespace TFE_DarkForces
 		thinkerMod->target.speedVert = FIXED(10);
 		thinkerMod->delay = 72;
 		thinkerMod->nextTick = 0;
-		thinkerMod->playerLastSeen = 0xffffffff;
+		thinkerMod->targetObjLastSeen = 0xffffffff;
 		thinkerMod->anim.state = STATE_FIRE1;
 		thinkerMod->maxWalkTime = 728;	// ~5 seconds between decision points.
 		thinkerMod->anim.frameRate = 5;

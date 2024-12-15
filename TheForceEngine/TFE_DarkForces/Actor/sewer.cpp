@@ -147,7 +147,7 @@ namespace TFE_DarkForces
 				gameMusic_sustainFight();
 				if (!actor_canSeeObjFromDist(obj, s_playerObject))
 				{
-					actor_updatePlayerVisiblity(JFALSE, 0, 0);
+					actor_updateTargetObjectVisiblity(JFALSE, 0, 0);
 					attackMod->anim.flags |= 2;
 					attackMod->anim.state = STATE_DELAY;
 					if (s_curTick > attackMod->timing.nextTick)
@@ -158,7 +158,7 @@ namespace TFE_DarkForces
 					return attackMod->timing.delay;
 				}
 
-				actor_updatePlayerVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+				actor_updateTargetObjectVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
 				moveMod->collisionFlags &= ~1;
 
 				obj->posWS.y = sector->floorHeight;
