@@ -684,7 +684,7 @@ namespace TFE_DarkForces
 					u32 moduleCur = obj->entityFlags & ETFLAG_AI_ACTOR;
 					if (moduleProj == moduleCur)
 					{
-						dmg = 0; /// proj->dmg >> 1;
+						dmg = proj->dmg >> 1;
 						logic->targetObject = proj->prevObj;
 					}
 				}
@@ -846,7 +846,7 @@ namespace TFE_DarkForces
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
 
-		if (!logic->targetObject)
+		if (!logic->targetObject || !logic->targetObject->sector)
 		{
 			logic->targetObject = s_playerObject;
 		}
@@ -995,10 +995,17 @@ namespace TFE_DarkForces
 					if (dist < attackMod->meleeRange)
 					{
 						sound_playCued(attackMod->attackSecSndSrc, obj->posWS);
-						// TODO apply damage to other enemies
 						if (logic->targetObject == s_playerObject)
 						{
 							player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
+						}
+						else  
+						{
+							// Inflict damage on non-player object
+							// reduce by half, same as with projectiles
+							// use MSG_EXPLOSION (a hack, but it works)
+							s_msgArg1 = attackMod->meleeDmg >> 1;
+							message_sendToObj(logic->targetObject, MSG_EXPLOSION, nullptr);
 						}
 						
 						if (attackMod->attackFlags & ATTFLAG_LIT_MELEE)
@@ -1016,6 +1023,7 @@ namespace TFE_DarkForces
 				}
 
 				attackMod->anim.state = STATE_ANIMATE1;
+				
 				ProjectileLogic* proj = (ProjectileLogic*)createProjectile(attackMod->projType, obj->sector, obj->posWS.x, attackMod->fireOffset.y + obj->posWS.y, obj->posWS.z, obj);
 				sound_playCued(attackMod->attackPrimSndSrc, obj->posWS);
 
@@ -1025,14 +1033,28 @@ namespace TFE_DarkForces
 
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
-				
+
+				fixed16_16 targetY;
+				if (logic->targetObject == s_playerObject)
+				{
+					targetY = s_eyePos.y;	// player - aim at the eye
+				}
+				else if (obj->entityFlags & ETFLAG_FLYING)
+				{
+					targetY = logic->targetObject->posWS.y;		// flying AI - aim directly at it
+				}
+				else
+				{
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight;	// non-flying AI - aim at its head
+				}
+
 				// Vanilla DF did not handle arcing projectiles with STATE_FIRE1; this has been added
 				if (attackMod->projType == PROJ_THERMAL_DET || attackMod->projType == PROJ_MORTAR)
 				{
 					// TDs are lobbed at an angle that depends on distance from target
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { logic->targetObject->posWS.x, logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1053,7 +1075,7 @@ namespace TFE_DarkForces
 					}
 
 					// Aim at the target.
-					vec3_fixed target = { logic->targetObject->posWS.x, logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1090,11 +1112,26 @@ namespace TFE_DarkForces
 
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
+
+				fixed16_16 targetY;
+				if (logic->targetObject == s_playerObject)
+				{
+					targetY = s_eyePos.y;	// player - aim at the eye
+				}
+				else if (obj->entityFlags & ETFLAG_FLYING)
+				{
+					targetY = logic->targetObject->posWS.y;		// flying AI - aim directly at it
+				}
+				else
+				{
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight;	// non-flying AI - aim at its head
+				}
+
 				if (attackMod->projType == PROJ_THERMAL_DET || attackMod->projType == PROJ_MORTAR)
 				{
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { logic->targetObject->posWS.x,logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 
 					if (attackMod->fireOffset.x | attackMod->fireOffset.z)
@@ -1112,7 +1149,7 @@ namespace TFE_DarkForces
 						proj->delta.z = attackMod->fireOffset.z;
 						proj_handleMovement(proj);
 					}
-					vec3_fixed target = { logic->targetObject->posWS.x, logic->targetObject->posWS.y + ONE_16, logic->targetObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
