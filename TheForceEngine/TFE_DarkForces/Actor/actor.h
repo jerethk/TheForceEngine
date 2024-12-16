@@ -89,6 +89,14 @@ enum ActorCollisionFlags
 	ACTORCOL_GRAVITY = FLAG_BIT(1),
 };
 
+enum ActorTeam
+{
+	TEAM_NONE = -1,
+	TEAM_PLAYER = 0,
+	TEAM_IMPERIAL = 1,
+	TEAM_OTHER = 2,
+};
+
 // Forward Declarations.
 struct ActorModule;
 struct MovementModule;
@@ -126,6 +134,7 @@ struct ActorDispatch
 	u32 flags;
 
 	SecObject* targetObject;	// target object
+	s32 team = TEAM_NONE;
 };
 
 struct ActorState
