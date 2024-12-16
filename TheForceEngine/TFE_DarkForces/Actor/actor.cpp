@@ -1045,7 +1045,7 @@ namespace TFE_DarkForces
 				}
 				else
 				{
-					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight;	// non-flying AI - aim at its head
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// non-flying AI - aim a bit lower than the head
 				}
 
 				// Vanilla DF did not handle arcing projectiles with STATE_FIRE1; this has been added
@@ -1124,7 +1124,7 @@ namespace TFE_DarkForces
 				}
 				else
 				{
-					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight;	// non-flying AI - aim at its head
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// non-flying AI - aim a bit lower than the head
 				}
 
 				if (attackMod->projType == PROJ_THERMAL_DET || attackMod->projType == PROJ_MORTAR)
