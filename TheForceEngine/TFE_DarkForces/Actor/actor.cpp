@@ -913,7 +913,7 @@ namespace TFE_DarkForces
 					actor_updateTargetObjectVisiblity(JTRUE, logic->targetObject->posWS.x, logic->targetObject->posWS.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
 					fixed16_16 dist = distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
-					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - logic->targetObject->posWS.y);
+					fixed16_16 yDiff = TFE_Jedi::abs((obj->posWS.y - obj->worldHeight) - (logic->targetObject->posWS.y - logic->targetObject->worldHeight));
 					angle14_32 vertAngle = vec2ToAngle(yDiff, dist);
 
 					fixed16_16 baseYDiff = TFE_Jedi::abs(logic->targetObject->posWS.y - obj->posWS.y);
