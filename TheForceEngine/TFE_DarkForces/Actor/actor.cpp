@@ -685,7 +685,7 @@ namespace TFE_DarkForces
 					u32 moduleCur = obj->entityFlags & ETFLAG_AI_ACTOR;
 					if (moduleProj == moduleCur)
 					{
-						dmg = proj->dmg >> 10;
+						dmg = proj->dmg >> 3;
 					}
 				}
 				damageMod->hp -= dmg;
@@ -744,7 +744,7 @@ namespace TFE_DarkForces
 		{
 			if (damageMod->hp > 0)
 			{
-				fixed16_16 dmg   = s_msgArg1 >> 10;
+				fixed16_16 dmg   = s_msgArg1 >> 3;
 				fixed16_16 force = s_msgArg2;
 				damageMod->hp -= dmg;
 				if (damageMod->stopOnHit || damageMod->hp <= 0)
@@ -886,6 +886,13 @@ namespace TFE_DarkForces
 			} break;
 			case STATE_ANIMATEATTACK:
 			{
+				// Don't attack the player if on player's team. Try finding another target.
+				if (logic->team == TEAM_PLAYER && logic->targetObject == s_playerObject)
+				{
+					logic->targetObject = findNewTargetObject(obj, logic->team);
+					return attackMod->timing.delay;
+				}
+				
 				gameMusic_sustainFight();
 				if (s_playerDying)
 				{
