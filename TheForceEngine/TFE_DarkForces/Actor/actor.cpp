@@ -56,6 +56,7 @@ namespace TFE_DarkForces
 	void actorLogicMsgFunc(MessageType msg);
 	void actorPhysicsTaskFunc(MessageType msg);
 	u32  actorLogicSetupFunc(Logic* logic, KEYWORD key);
+	SecObject* findNewTargetObject(SecObject* sourceObj, s32 team);
 
 	extern ThinkerModule* actor_createFlyingModule(Logic* logic);
 	extern ThinkerModule* actor_createFlyingModule_Remote(Logic* logic);
@@ -684,8 +685,7 @@ namespace TFE_DarkForces
 					u32 moduleCur = obj->entityFlags & ETFLAG_AI_ACTOR;
 					if (moduleProj == moduleCur)
 					{
-						dmg = proj->dmg >> 1;
-						logic->targetObject = proj->prevObj;
+						dmg = proj->dmg >> 10;
 					}
 				}
 				damageMod->hp -= dmg;
@@ -744,7 +744,7 @@ namespace TFE_DarkForces
 		{
 			if (damageMod->hp > 0)
 			{
-				fixed16_16 dmg   = s_msgArg1;
+				fixed16_16 dmg   = s_msgArg1 >> 10;
 				fixed16_16 force = s_msgArg2;
 				damageMod->hp -= dmg;
 				if (damageMod->stopOnHit || damageMod->hp <= 0)
@@ -846,9 +846,10 @@ namespace TFE_DarkForces
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
 
+		// Safety check
 		if (!logic->targetObject || !logic->targetObject->sector)
 		{
-			logic->targetObject = s_playerObject;
+			logic->targetObject = findNewTargetObject(obj, logic->team);
 		}
 
 		switch (state)
@@ -1005,6 +1006,7 @@ namespace TFE_DarkForces
 							// reduce by half, same as with projectiles
 							// use MSG_EXPLOSION (a hack, but it works)
 							s_msgArg1 = attackMod->meleeDmg >> 1;
+							s_msgArg2 = FIXED(5);	// force
 							message_sendToObj(logic->targetObject, MSG_EXPLOSION, nullptr);
 						}
 						
@@ -1257,9 +1259,9 @@ namespace TFE_DarkForces
 		else if (thinkerMod->anim.state == STATE_TURN)
 		{
 			ActorDispatch* logic = actor_getCurrentLogic();
-			if (!logic->targetObject)
+			if (!logic->targetObject || !logic->targetObject->sector || !actor_canSeeObject(obj, logic->targetObject))
 			{
-				logic->targetObject = s_playerObject;
+				logic->targetObject = findNewTargetObject(obj, logic->team);
 			}
 
 			fixed16_16 targetX, targetZ;
@@ -2217,4 +2219,58 @@ namespace TFE_DarkForces
 		}
 		task_end;
 	}
+
+	SecObject* findNewTargetObject(SecObject* sourceObj, s32 sourceTeam)
+	{
+		RSector* sector = s_levelState.sectors;
+		for (u32 i = 0; i < s_levelState.sectorCount; i++, sector++)
+		{
+			for (s32 objIndex = 0, objListIndex = 0; objIndex < sector->objectCount && objListIndex < sector->objectCapacity; objListIndex++)
+			{
+				SecObject* obj = sector->objectList[objListIndex];
+				if (!obj) { continue; }
+				objIndex++;
+
+				if (sourceObj == obj) { continue; }	// don't target self!
+				
+				if (!(obj->entityFlags & ETFLAG_AI_ACTOR) && !(obj->entityFlags & ETFLAG_PLAYER))
+				{ 
+					continue;	// only target AI actors or the player
+				}
+
+				// Search for dispatch logic
+				ActorDispatch* dispatch = nullptr;
+				Logic** logicList = (Logic**)allocator_getHead((Allocator*)obj->logic);
+				while (logicList)
+				{
+					Logic* logic = *logicList;
+					if (logic->type == LOGIC_DISPATCH)
+					{
+						dispatch = (ActorDispatch*)logic;
+						break;
+					}
+
+					logicList = (Logic**)allocator_getNext((Allocator*)obj->logic);
+				}
+
+				if (!dispatch) { continue; }
+
+				if (sourceTeam != TEAM_NONE && sourceTeam == dispatch->team)
+				{
+					continue;	// don't target AI on the same team
+				}
+
+				if (!actor_canSeeObject(sourceObj, obj))
+				{ 
+					continue;	// don't target an object that can't be seen
+				}
+
+				return obj;
+			}
+		}
+
+		// return the player if above fails
+		return s_playerObject;
+	}
+
 }  // namespace TFE_DarkForces
