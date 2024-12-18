@@ -29,6 +29,7 @@
 #include <TFE_Jedi/Memory/list.h>
 #include <TFE_Jedi/Memory/allocator.h>
 #include <TFE_Jedi/Serialization/serialization.h>
+#include <TFE_Settings/settings.h>
 
 using namespace TFE_Jedi;
 
@@ -2241,8 +2242,15 @@ namespace TFE_DarkForces
 		task_end;
 	}
 
+	// Finds and returns a new target object for an actor
 	SecObject* findNewTargetObject(SecObject* sourceObj, s32 sourceTeam)
 	{
+		// If AI Teams settings is disabled, the target must always be the player
+		if (!TFE_Settings::aiTeams())
+		{
+			return s_playerObject;
+		}
+		
 		if (sourceTeam == TEAM_DEFAULT)
 		{
 			return s_playerObject;	// team "default" always targets the player (vanilla DF behaviour)
