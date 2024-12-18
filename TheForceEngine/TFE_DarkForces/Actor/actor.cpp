@@ -2253,6 +2253,12 @@ namespace TFE_DarkForces
 			return nullptr;		// team neutral does not target anybody
 		}
 
+		// preferentially target the player if it can be seen
+		if (sourceTeam != TEAM_PLAYER && actor_canSeeObject(sourceObj, s_playerObject))
+		{
+			return s_playerObject;
+		}
+
 		RSector* sector = s_levelState.sectors;
 		for (u32 i = 0; i < s_levelState.sectorCount; i++, sector++)
 		{
@@ -2264,12 +2270,12 @@ namespace TFE_DarkForces
 
 				if (sourceObj == obj) { continue; }	// don't target self!
 				
-				if (!(obj->entityFlags & ETFLAG_AI_ACTOR) && !(obj->entityFlags & ETFLAG_PLAYER))
+				if (!(obj->entityFlags & ETFLAG_AI_ACTOR))
 				{ 
-					continue;	// only target AI actors or the player
+					continue;	// only target AI actors
 				}
 
-				// don't target objects > 200 DFU distant
+				// don't target actors > 200 DFU distant
 				fixed16_16 dx = TFE_Jedi::abs(sourceObj->posWS.x - obj->posWS.x);
 				fixed16_16 dz = TFE_Jedi::abs(sourceObj->posWS.z - obj->posWS.z);
 				if (dx > FIXED(200) || dz > FIXED(200))
