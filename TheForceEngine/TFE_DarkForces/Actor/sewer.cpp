@@ -236,6 +236,7 @@ namespace TFE_DarkForces
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_CREATURE];
 		dispatch->fov = ANGLE_MAX;
+		dispatch->team = TEAM_NONE;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->attackMod.header.func = sewerCreatureAiFunc;

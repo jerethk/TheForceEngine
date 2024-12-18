@@ -91,10 +91,12 @@ enum ActorCollisionFlags
 
 enum ActorTeam
 {
-	TEAM_NONE = -1,
-	TEAM_PLAYER = 0,
-	TEAM_IMPERIAL = 1,
-	TEAM_OTHER = 2,
+	TEAM_NEUTRAL = -1,	// won't attack anyone, and won't be targeted (useful for civilians)
+	TEAM_DEFAULT = 0,	// default behaviour - will only target the player
+	TEAM_NONE = 1,		// not on any team, can be attacked by any team including others on "team none"
+	TEAM_PLAYER = 2,	// same team as the player, won't attack the player
+	TEAM_IMPERIAL = 3,	
+	TEAM_SMUGGLERS = 4,
 };
 
 // Forward Declarations.
@@ -134,7 +136,7 @@ struct ActorDispatch
 	u32 flags;
 
 	SecObject* targetObject;	// target object
-	s32 team = TEAM_NONE;
+	s32 team = TEAM_DEFAULT;
 };
 
 struct ActorState

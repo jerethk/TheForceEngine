@@ -846,10 +846,15 @@ namespace TFE_DarkForces
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
 
-		// Safety check
+		// Killed AIs have sector = nullptr, so need to be reassigned
 		if (!logic->targetObject || !logic->targetObject->sector)
 		{
 			logic->targetObject = findNewTargetObject(obj, logic->team);
+
+			if (!logic->targetObject)
+			{
+				return attackMod->timing.delay;
+			}
 		}
 
 		switch (state)
@@ -1279,12 +1284,21 @@ namespace TFE_DarkForces
 			}
 			else
 			{
-				targetX = logic->targetObject->posWS.x;
-				targetZ = logic->targetObject->posWS.z;
+				if (logic->targetObject)
+				{
+					targetX = logic->targetObject->posWS.x;
+					targetZ = logic->targetObject->posWS.z;
+				}
+				else
+				{
+					// Provide a random location to target if there is no targetObject (neutral AIs)
+					targetX = obj->posWS.x + FIXED(random(100) - 50);
+					targetZ = obj->posWS.z + FIXED(random(100) - 50);
+				}
 			}
 
 			fixed16_16 targetOffset;
-			if (!actorLogic_isStopFlagSet())
+			if (!actorLogic_isStopFlagSet() && logic->targetObject)
 			{
 				// Offset the target by |dx| / 4
 				// This is obviously a typo and bug in the DOS code and should be min(|dx|, |dz|)
@@ -2229,6 +2243,16 @@ namespace TFE_DarkForces
 
 	SecObject* findNewTargetObject(SecObject* sourceObj, s32 sourceTeam)
 	{
+		if (sourceTeam == TEAM_DEFAULT)
+		{
+			return s_playerObject;	// team "default" always targets the player (vanilla DF behaviour)
+		}
+
+		if (sourceTeam == TEAM_NEUTRAL)
+		{
+			return nullptr;		// team neutral does not target anybody
+		}
+
 		RSector* sector = s_levelState.sectors;
 		for (u32 i = 0; i < s_levelState.sectorCount; i++, sector++)
 		{
@@ -2245,6 +2269,14 @@ namespace TFE_DarkForces
 					continue;	// only target AI actors or the player
 				}
 
+				// don't target objects > 200 DFU distant
+				fixed16_16 dx = TFE_Jedi::abs(sourceObj->posWS.x - obj->posWS.x);
+				fixed16_16 dz = TFE_Jedi::abs(sourceObj->posWS.z - obj->posWS.z);
+				if (dx > FIXED(200) || dz > FIXED(200))
+				{
+					continue;
+				}
+
 				// Search for dispatch logic
 				ActorDispatch* dispatch = nullptr;
 				Logic** logicList = (Logic**)allocator_getHead((Allocator*)obj->logic);
@@ -2259,8 +2291,9 @@ namespace TFE_DarkForces
 
 					logicList = (Logic**)allocator_getNext((Allocator*)obj->logic);
 				}
-
 				if (!dispatch) { continue; }
+
+				if (dispatch->team == TEAM_NEUTRAL) { continue; }	// don't target objects on "team neutral"
 
 				if (sourceTeam != TEAM_NONE && sourceTeam == dispatch->team)
 				{

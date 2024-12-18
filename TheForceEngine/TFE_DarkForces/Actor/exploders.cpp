@@ -126,6 +126,7 @@ namespace TFE_DarkForces
 
 		dispatch->flags &= ~(1 | 4);
 		dispatch->animTable = s_mineBarrelAnimTable;
+		dispatch->team = TEAM_NEUTRAL;	// we don't want AIs attacking barrels
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->attackMod.header.func = exploderFunc;

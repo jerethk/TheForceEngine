@@ -25,7 +25,7 @@ namespace TFE_DarkForces
 	{
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_REEYEE];
-		dispatch->team = TEAM_OTHER;
+		dispatch->team = TEAM_SMUGGLERS;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(36);
@@ -69,7 +69,7 @@ namespace TFE_DarkForces
 	{
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_REEYEE];
-		dispatch->team = TEAM_OTHER;
+		dispatch->team = TEAM_SMUGGLERS;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(36);
@@ -108,7 +108,7 @@ namespace TFE_DarkForces
 	{
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_GAMOR];
-		dispatch->team = TEAM_OTHER;
+		dispatch->team = TEAM_SMUGGLERS;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(90);
@@ -151,7 +151,7 @@ namespace TFE_DarkForces
 	{
 		ActorDispatch* dispatch = actor_createDispatch(obj, setupFunc);
 		dispatch->alertSndSrc = s_alertSndSrc[ALERT_BOSSK];
-		dispatch->team = TEAM_OTHER;
+		dispatch->team = TEAM_SMUGGLERS;
 
 		DamageModule* module = actor_createDamageModule(dispatch);
 		module->hp = FIXED(45);
@@ -196,7 +196,7 @@ namespace TFE_DarkForces
 		dispatch->alertSndSrc = sound_load(cust->alertSound, SOUND_PRIORITY_MED5);
 		dispatch->fov = cust->fov;
 		dispatch->awareRange = FIXED(cust->awareRange);
-		dispatch->team = TEAM_OTHER; // TODO************************
+		dispatch->team = TEAM_SMUGGLERS; // TODO************************
 
 		// Damage Module
 		DamageModule* damageMod = actor_createDamageModule(dispatch);
