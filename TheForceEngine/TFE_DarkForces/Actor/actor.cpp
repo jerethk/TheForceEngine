@@ -29,6 +29,7 @@
 #include <TFE_Jedi/Memory/list.h>
 #include <TFE_Jedi/Memory/allocator.h>
 #include <TFE_Jedi/Serialization/serialization.h>
+#include <TFE_Settings/settings.h>
 
 using namespace TFE_Jedi;
 
@@ -699,7 +700,6 @@ namespace TFE_DarkForces
 				computeDamagePushVelocity(proj, &pushVel);
 				if (damageMod->hp <= 0)
 				{
-					
 					actor_addVelocity(pushVel.x*4, pushVel.y*2, pushVel.z*4);
 					actor_setDeathCollisionFlags();
 					sound_stop(logic->alertSndID);
@@ -1037,7 +1037,6 @@ namespace TFE_DarkForces
 				}
 
 				attackMod->anim.state = STATE_ANIMATE1;
-				
 				ProjectileLogic* proj = (ProjectileLogic*)createProjectile(attackMod->projType, obj->sector, obj->posWS.x, attackMod->fireOffset.y + obj->posWS.y, obj->posWS.z, obj);
 				sound_playCued(attackMod->attackPrimSndSrc, obj->posWS);
 
@@ -1055,7 +1054,7 @@ namespace TFE_DarkForces
 				}
 				else if (obj->entityFlags & ETFLAG_FLYING)
 				{
-					targetY = logic->targetObject->posWS.y;		// flying AI - aim directly at it
+					targetY = logic->targetObject->posWS.y - ONE_16;		// flying AI - aim directly at it
 				}
 				else
 				{
@@ -1134,7 +1133,7 @@ namespace TFE_DarkForces
 				}
 				else if (obj->entityFlags & ETFLAG_FLYING)
 				{
-					targetY = logic->targetObject->posWS.y;		// flying AI - aim directly at it
+					targetY = logic->targetObject->posWS.y - ONE_16;		// flying AI - aim directly at it
 				}
 				else
 				{
@@ -2241,8 +2240,15 @@ namespace TFE_DarkForces
 		task_end;
 	}
 
+	// Finds and returns a new target object for an actor
 	SecObject* findNewTargetObject(SecObject* sourceObj, s32 sourceTeam)
 	{
+		// If AI Teams settings is disabled, the target must always be the player
+		if (!TFE_Settings::aiTeams())
+		{
+			return s_playerObject;
+		}
+		
 		if (sourceTeam == TEAM_DEFAULT)
 		{
 			return s_playerObject;	// team "default" always targets the player (vanilla DF behaviour)

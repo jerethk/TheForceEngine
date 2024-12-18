@@ -89,14 +89,15 @@ enum ActorCollisionFlags
 	ACTORCOL_GRAVITY = FLAG_BIT(1),
 };
 
+// New TFE Feature - AI teams
 enum ActorTeam
 {
-	TEAM_NEUTRAL = -1,	// won't attack anyone, and won't be targeted (useful for civilians)
+	TEAM_NEUTRAL = -1,	// won't target anyone, and won't be targeted (useful for civilians); applied to barrels to prevent them being attacked
 	TEAM_DEFAULT = 0,	// default behaviour - will only target the player
-	TEAM_NONE = 1,		// not on any team, can be attacked by any team including others on "team none"
+	TEAM_NONE = 1,		// not on any team, can be attacked by any team including others on "team none"; applied to sewer creature
 	TEAM_PLAYER = 2,	// same team as the player, won't attack the player
-	TEAM_IMPERIAL = 3,	
-	TEAM_SMUGGLERS = 4,
+	TEAM_IMPERIAL = 3,	// applied to troopers and flyers
+	TEAM_SMUGGLERS = 4,	// applied to Bossk, Reeyees and Gamorrean
 };
 
 // Forward Declarations.
@@ -135,7 +136,8 @@ struct ActorDispatch
 	Task* freeTask;
 	u32 flags;
 
-	SecObject* targetObject;	// target object
+	// New TFE actor properties
+	SecObject* targetObject;	// target object for Attack Module and Thinker Module
 	s32 team = TEAM_DEFAULT;
 };
 
