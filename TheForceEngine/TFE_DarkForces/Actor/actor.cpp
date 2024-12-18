@@ -923,10 +923,15 @@ namespace TFE_DarkForces
 				}
 				else
 				{
-					actor_updateTargetObjectVisiblity(JTRUE, logic->targetObject->posWS.x, logic->targetObject->posWS.z);
+					bool vanillaDF = !TFE_Settings::aiTeams();		// vanilla code used s_eyePos for these calculations
+					
+					actor_updateTargetObjectVisiblity(
+						JTRUE,
+						vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x,
+						vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
 					fixed16_16 dist = distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
-					fixed16_16 yDiff = TFE_Jedi::abs((obj->posWS.y - obj->worldHeight) - (logic->targetObject->posWS.y - logic->targetObject->worldHeight));
+					fixed16_16 yDiff = TFE_Jedi::abs((obj->posWS.y - obj->worldHeight) - vanillaDF ? s_eyePos.y : (logic->targetObject->posWS.y - logic->targetObject->worldHeight));
 					angle14_32 vertAngle = vec2ToAngle(yDiff, dist);
 
 					fixed16_16 baseYDiff = TFE_Jedi::abs(logic->targetObject->posWS.y - obj->posWS.y);
@@ -979,7 +984,9 @@ namespace TFE_DarkForces
 
 						attackMod->target.pos.x = obj->posWS.x;
 						attackMod->target.pos.z = obj->posWS.z;
-						attackMod->target.yaw   = vec2ToAngle(logic->targetObject->posWS.x - obj->posWS.x, logic->targetObject->posWS.z - obj->posWS.z);
+						attackMod->target.yaw   = vec2ToAngle(
+							(vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x) - obj->posWS.x,
+							(vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z) - obj->posWS.z);
 						attackMod->target.pitch = obj->pitch;
 						attackMod->target.roll  = obj->roll;
 						attackMod->target.flags |= (TARGET_MOVE_XZ | TARGET_MOVE_ROT);
@@ -1047,10 +1054,11 @@ namespace TFE_DarkForces
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
 
+				bool vanillaDF = !TFE_Settings::aiTeams();
 				fixed16_16 targetY;
 				if (logic->targetObject == s_playerObject)
 				{
-					targetY = s_eyePos.y;	// player - aim at the eye
+					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head"
 				}
 				else if (obj->entityFlags & ETFLAG_FLYING)
 				{
@@ -1088,7 +1096,12 @@ namespace TFE_DarkForces
 					}
 
 					// Aim at the target.
-					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
+					vec3_fixed target =
+					{ 
+						vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x,
+						targetY + ONE_16,
+						vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z
+					};
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1126,10 +1139,11 @@ namespace TFE_DarkForces
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
 
+				bool vanillaDF = !TFE_Settings::aiTeams();
 				fixed16_16 targetY;
 				if (logic->targetObject == s_playerObject)
 				{
-					targetY = s_eyePos.y;	// player - aim at the eye
+					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head"
 				}
 				else if (obj->entityFlags & ETFLAG_FLYING)
 				{
@@ -1162,7 +1176,11 @@ namespace TFE_DarkForces
 						proj->delta.z = attackMod->fireOffset.z;
 						proj_handleMovement(proj);
 					}
-					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
+					vec3_fixed target = {
+						vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x,
+						targetY + ONE_16,
+						vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z
+					};
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -1285,8 +1303,9 @@ namespace TFE_DarkForces
 			{
 				if (logic->targetObject)
 				{
-					targetX = logic->targetObject->posWS.x;
-					targetZ = logic->targetObject->posWS.z;
+					bool vanillaDF = !TFE_Settings::aiTeams();
+					targetX = vanillaDF ? s_eyePos.x : logic->targetObject->posWS.x;
+					targetZ = vanillaDF ? s_eyePos.z : logic->targetObject->posWS.z;
 				}
 				else
 				{
