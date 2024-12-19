@@ -45,6 +45,8 @@ namespace TFE_ExternalData
 		u32 verticalSpeed = 10;
 		u32 rotationSpeed = 0x7fff;
 
+		s32 team = TEAM_DEFAULT;
+
 		/*  JK: Leaving these out for now until we have a better understanding of what they mean
 		u32 delay = 72;
 		u32 startDelay = 2;

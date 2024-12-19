@@ -334,13 +334,13 @@ namespace TFE_ExternalData
 			return true;
 		}
 
-		/* JK: Leaving these out for now until we have a better understanding of what they mean
-		if (cJSON_IsNumber(data) && strcasecmp(data->string, "delay") == 0)
+		if (cJSON_IsNumber(data) && strcasecmp(data->string, "team") == 0)
 		{
-			customLogic.delay = data->valueint;
+			customLogic.team = data->valueint;
 			return true;
 		}
 
+		/* JK: Leaving these out for now until we have a better understanding of what they mean
 		if (cJSON_IsNumber(data) && strcasecmp(data->string, "startDelay") == 0)
 		{
 			customLogic.startDelay = data->valueint;

@@ -686,7 +686,7 @@ namespace TFE_DarkForces
 					u32 moduleCur = obj->entityFlags & ETFLAG_AI_ACTOR;
 					if (moduleProj == moduleCur)
 					{
-						dmg = proj->dmg >> 3;
+						dmg = proj->dmg >> 1;
 					}
 				}
 				damageMod->hp -= dmg;
@@ -744,7 +744,7 @@ namespace TFE_DarkForces
 		{
 			if (damageMod->hp > 0)
 			{
-				fixed16_16 dmg   = s_msgArg1 >> 3;
+				fixed16_16 dmg   = s_msgArg1;
 				fixed16_16 force = s_msgArg2;
 				damageMod->hp -= dmg;
 				if (damageMod->stopOnHit || damageMod->hp <= 0)
@@ -923,7 +923,7 @@ namespace TFE_DarkForces
 				}
 				else
 				{
-					bool vanillaDF = !TFE_Settings::aiTeams();		// vanilla code used s_eyePos for these calculations
+					bool vanillaDF = !TFE_Settings::aiTeams();		// vanilla code used s_eyePos for these calculations (enemies would target the eye rather than the player)
 					
 					actor_updateTargetObjectVisiblity(
 						JTRUE,
@@ -2259,7 +2259,10 @@ namespace TFE_DarkForces
 		task_end;
 	}
 
-	// Finds and returns a new target object for an actor
+	// Finds and returns a new target object for an actor to seek & attack
+	// Note: Dispatch actors in vanilla DF would attack the EYE object rather than the PLAYER object. This behaviour
+	// is preserved when the Teams setting is disabled. When the Teams setting is enabled, actors will target the PLAYER
+	// object, not the EYE object.
 	SecObject* findNewTargetObject(SecObject* sourceObj, s32 sourceTeam)
 	{
 		// If AI Teams settings is disabled, the target must always be the player
