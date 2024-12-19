@@ -77,6 +77,11 @@ namespace TFE_DarkForces
 		SERIALIZE(SaveVersionInit, dispatch->vel, {0});
 		SERIALIZE(SaveVersionInit, dispatch->lastTargetObjPos, {0});
 		SERIALIZE(SaveVersionInit, dispatch->flags, 4);
+
+		// Serialize teams
+		SERIALIZE(ActorState_Teams, dispatch->team, TEAM_DEFAULT);
+		actor_serializeObject(stream, dispatch->targetObject, ActorState_Teams);
+
 		// Animation Table.
 		s32 animTableIndex = -1;
 		if (serialization_getMode() == SMODE_WRITE)
@@ -142,14 +147,14 @@ namespace TFE_DarkForces
 		}
 	}
 		
-	void actor_serializeObject(Stream* stream, SecObject*& obj)
+	void actor_serializeObject(Stream* stream, SecObject*& obj, s32 saveVersion)
 	{
 		s32 objId;
 		if (serialization_getMode() == SMODE_WRITE)
 		{
 			objId = obj ? obj->serializeIndex : -1;
 		}
-		SERIALIZE(SaveVersionInit, objId, -1);
+		SERIALIZE(saveVersion, objId, -1);
 		if (serialization_getMode() == SMODE_READ)
 		{
 			obj = objId >= 0 ? objData_getObjectBySerializationId(objId) : nullptr;
@@ -179,8 +184,8 @@ namespace TFE_DarkForces
 
 	void actor_serializeCollisionInfo(Stream* stream, CollisionInfo* colInfo)
 	{
-		actor_serializeObject(stream, colInfo->obj);
-		actor_serializeObject(stream, colInfo->collidedObj);
+		actor_serializeObject(stream, colInfo->obj, SaveVersionInit);
+		actor_serializeObject(stream, colInfo->collidedObj, SaveVersionInit);
 		actor_serializeWall(stream, colInfo->wall);
 
 		SERIALIZE(SaveVersionInit, colInfo->offsetX, 0);
