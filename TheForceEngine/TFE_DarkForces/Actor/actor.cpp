@@ -1058,15 +1058,11 @@ namespace TFE_DarkForces
 				fixed16_16 targetY;
 				if (logic->targetObject == s_playerObject)
 				{
-					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head"
-				}
-				else if (obj->entityFlags & ETFLAG_FLYING)
-				{
-					targetY = logic->targetObject->posWS.y - ONE_16;		// flying AI - aim directly at it
+					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head" like usual
 				}
 				else
 				{
-					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// non-flying AI - aim a bit lower than the head
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// AI - aim a bit lower than the head
 				}
 
 				// Vanilla DF did not handle arcing projectiles with STATE_FIRE1; this has been added
@@ -1143,15 +1139,11 @@ namespace TFE_DarkForces
 				fixed16_16 targetY;
 				if (logic->targetObject == s_playerObject)
 				{
-					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head"
-				}
-				else if (obj->entityFlags & ETFLAG_FLYING)
-				{
-					targetY = logic->targetObject->posWS.y - ONE_16;		// flying AI - aim directly at it
+					targetY = vanillaDF ? s_eyePos.y : s_playerObject->posWS.y - s_playerObject->worldHeight;	// player - aim at "head" like usual
 				}
 				else
 				{
-					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// non-flying AI - aim a bit lower than the head
+					targetY = logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// AI - aim a bit lower than the head
 				}
 
 				if (attackMod->projType == PROJ_THERMAL_DET || attackMod->projType == PROJ_MORTAR)
