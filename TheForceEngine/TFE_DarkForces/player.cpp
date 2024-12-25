@@ -44,8 +44,6 @@ namespace TFE_Jedi
 
 namespace TFE_DarkForces
 {
-	void setupPlayerAnim(s32 animId);
-
 	///////////////////////////////////////////
 	// Constants
 	///////////////////////////////////////////
@@ -186,6 +184,8 @@ namespace TFE_DarkForces
 	static angle14_32 s_playerObjYaw;
 	static RSector* s_playerObjSector;
 	static RWall* s_playerSlideWall;
+
+	static bool s_playerMovingAnim;
 	
 	///////////////////////////////////////////
 	// Shared State
@@ -312,7 +312,8 @@ namespace TFE_DarkForces
 	// TFE
 	void player_warp(const ConsoleArgList& args);
 	void player_sector(const ConsoleArgList& args);
-		
+	void setupPlayerAnim(s32 animId);
+
 	///////////////////////////////////////////
 	// API Implentation
 	///////////////////////////////////////////
@@ -941,7 +942,7 @@ namespace TFE_DarkForces
 		s_playerSecMoved = JFALSE;
 		s_playerSector = obj->sector;
 
-		setupPlayerAnim(1);
+		setupPlayerAnim(5);
 	}
 
 	void player_setupEyeObject(SecObject* obj)
@@ -1497,6 +1498,8 @@ namespace TFE_DarkForces
 		s_playerSecFire = JFALSE;
 		s_playerPrimaryFire = JFALSE;
 
+		setupPlayerAnim(2);
+
 		if (inputMapping_getActionState(IADF_JUMP) || inputMapping_getActionState(IADF_MENU_TOGGLE) || inputMapping_getActionState(IADF_USE))
 		{
 			inputMapping_removeState(IADF_JUMP);
@@ -1505,6 +1508,7 @@ namespace TFE_DarkForces
 
 			if (s_lifeCount != 0 && s_curSafe)
 			{
+				setupPlayerAnim(5);
 				s_lifeCount -= 1;
 				player_revive();
 				player_reset();
@@ -1588,7 +1592,14 @@ namespace TFE_DarkForces
 					{
 						handlePlayerDying();
 					}
-					actor_advanceAnimation(&s_playerLogic.anim, s_playerObject);
+					
+					if (s_playerObject->wax)
+					{
+						if (actor_advanceAnimation(&s_playerLogic.anim, s_playerObject))
+						{
+							s_playerLogic.anim.flags |= AFLAG_READY;
+						}
+					}
 				}
 			}
 						
@@ -1606,7 +1617,6 @@ namespace TFE_DarkForces
 		if (s_playerObject->wax)
 		{
 			LogicAnimation* logicAnim = &s_playerLogic.anim;
-			logicAnim->flags |= AFLAG_READY;
 			logicAnim->prevTick = 0;
 			logicAnim->animId = animId;
 			logicAnim->startFrame = 0;
@@ -1869,15 +1879,6 @@ namespace TFE_DarkForces
 					s_strafeSpd = max(speed, s_strafeSpd);
 				}
 			}
-
-			if (s_forwardSpd > FIXED(1) && s_playerLogic.anim.flags & AFLAG_READY)
-			{
-				setupPlayerAnim(0);
-			}
-			else
-			{
-				setupPlayerAnim(5);
-			}
 		}
 
 		if (inputMapping_getActionState(IADF_USE))
@@ -1902,6 +1903,23 @@ namespace TFE_DarkForces
 			// In the original DOS code, airControl = 8.
 			s_forwardSpd >>= airControl;
 			s_strafeSpd  >>= airControl;
+		}
+
+		if (!s_playerDying && (s_forwardSpd > HALF_16 || s_strafeSpd < -HALF_16 || s_strafeSpd > HALF_16))
+		{
+			if (!s_playerMovingAnim)
+			{
+				setupPlayerAnim(0);
+				s_playerMovingAnim = true;
+			}
+		}
+		else
+		{
+			if (s_playerMovingAnim)
+			{
+				setupPlayerAnim(5);
+				s_playerMovingAnim = false;
+			}
 		}
 	}
 
@@ -2827,6 +2845,8 @@ namespace TFE_DarkForces
 				s_weaponFiring = JTRUE;
 				// This causes the weapon to fire.
 				s_msgArg1 = WFIRETYPE_PRIMARY;
+				s_playerLogic.anim.flags |= AFLAG_PLAYED;
+				setupPlayerAnim(1);
 				task_runAndReturn(s_playerWeaponTask, MSG_START_FIRING);
 			}
 		}
