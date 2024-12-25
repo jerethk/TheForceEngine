@@ -18,6 +18,7 @@
 #include <TFE_Input/inputMapping.h>
 #include <TFE_Game/igame.h>
 #include <TFE_DarkForces/mission.h>
+#include <TFE_DarkForces/actor/actor.h>
 #include <TFE_Jedi/Level/level.h>
 #include <TFE_Jedi/Level/levelData.h>
 #include <TFE_Jedi/InfSystem/infSystem.h>
@@ -43,6 +44,8 @@ namespace TFE_Jedi
 
 namespace TFE_DarkForces
 {
+	void setupPlayerAnim(s32 animId);
+
 	///////////////////////////////////////////
 	// Constants
 	///////////////////////////////////////////
@@ -937,6 +940,8 @@ namespace TFE_DarkForces
 
 		s_playerSecMoved = JFALSE;
 		s_playerSector = obj->sector;
+
+		setupPlayerAnim(1);
 	}
 
 	void player_setupEyeObject(SecObject* obj)
@@ -1583,6 +1588,7 @@ namespace TFE_DarkForces
 					{
 						handlePlayerDying();
 					}
+					actor_advanceAnimation(&s_playerLogic.anim, s_playerObject);
 				}
 			}
 						
@@ -1595,6 +1601,30 @@ namespace TFE_DarkForces
 	///////////////////////////////////////////
 	// Internal Implentation
 	///////////////////////////////////////////
+	void setupPlayerAnim(s32 animId)
+	{
+		if (s_playerObject->wax)
+		{
+			LogicAnimation* logicAnim = &s_playerLogic.anim;
+			logicAnim->flags |= AFLAG_READY;
+			logicAnim->prevTick = 0;
+			logicAnim->animId = animId;
+			logicAnim->startFrame = 0;
+			logicAnim->frame = 0;
+
+			WaxAnim* waxAnim = WAX_AnimPtr(s_playerObject->wax, logicAnim->animId);
+			assert(waxAnim);
+			if (waxAnim)
+			{
+				logicAnim->frameCount = intToFixed16(waxAnim->frameCount);
+				logicAnim->frameRate = min(waxAnim->frameRate, 30);
+				logicAnim->flags &= ~AFLAG_READY;
+			}
+
+			s_playerObject->anim = logicAnim->animId;
+		}
+	}
+	
 	void setPlayerLight(s32 atten)
 	{
 		s_playerLight = atten;
@@ -1838,6 +1868,15 @@ namespace TFE_DarkForces
 				{
 					s_strafeSpd = max(speed, s_strafeSpd);
 				}
+			}
+
+			if (s_forwardSpd > FIXED(1) && s_playerLogic.anim.flags & AFLAG_READY)
+			{
+				setupPlayerAnim(0);
+			}
+			else
+			{
+				setupPlayerAnim(5);
 			}
 		}
 
