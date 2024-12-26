@@ -1498,7 +1498,13 @@ namespace TFE_DarkForces
 		s_playerSecFire = JFALSE;
 		s_playerPrimaryFire = JFALSE;
 
-		setupPlayerAnim(2);
+		if (s_playerObject->wax)
+		{
+			if (actor_advanceAnimation(&s_playerLogic.anim, s_playerObject))
+			{
+				s_playerLogic.anim.flags |= AFLAG_READY;
+			}
+		}
 
 		if (inputMapping_getActionState(IADF_JUMP) || inputMapping_getActionState(IADF_MENU_TOGGLE) || inputMapping_getActionState(IADF_USE))
 		{
@@ -1909,6 +1915,7 @@ namespace TFE_DarkForces
 		{
 			if (!s_playerMovingAnim)
 			{
+				s_playerLogic.anim.flags &= ~AFLAG_PLAYED;
 				setupPlayerAnim(0);
 				s_playerMovingAnim = true;
 			}
@@ -1917,6 +1924,7 @@ namespace TFE_DarkForces
 		{
 			if (s_playerMovingAnim)
 			{
+				s_playerLogic.anim.flags &= ~AFLAG_PLAYED;
 				setupPlayerAnim(5);
 				s_playerMovingAnim = false;
 			}
@@ -2632,6 +2640,9 @@ namespace TFE_DarkForces
 		fixed16_16 health  = intToFixed16(s_playerInfo.health);
 		health += s_playerInfo.healthFract;
 
+		s_playerLogic.anim.flags |= AFLAG_PLAYED;
+		setupPlayerAnim(12);
+
 		s32 applyDmg = s_invincibility ? 0 : 1;
 		if (applyDmg && health && shieldDmg >= 0)
 		{
@@ -2679,6 +2690,8 @@ namespace TFE_DarkForces
 				s_gasSectorTask = nullptr;
 				s_playerDying = JTRUE;
 				s_reviveTick = s_curTick + 436;
+
+				setupPlayerAnim(2);
 			}
 			else
 			{
