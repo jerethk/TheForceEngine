@@ -1915,7 +1915,7 @@ namespace TFE_DarkForces
 		{
 			if (!s_playerMovingAnim)
 			{
-				s_playerLogic.anim.flags &= ~AFLAG_PLAYED;
+				s_playerLogic.anim.flags &= ~AFLAG_PLAYONCE;
 				setupPlayerAnim(0);
 				s_playerMovingAnim = true;
 			}
@@ -1924,7 +1924,7 @@ namespace TFE_DarkForces
 		{
 			if (s_playerMovingAnim)
 			{
-				s_playerLogic.anim.flags &= ~AFLAG_PLAYED;
+				s_playerLogic.anim.flags &= ~AFLAG_PLAYONCE;
 				setupPlayerAnim(5);
 				s_playerMovingAnim = false;
 			}
@@ -2640,7 +2640,7 @@ namespace TFE_DarkForces
 		fixed16_16 health  = intToFixed16(s_playerInfo.health);
 		health += s_playerInfo.healthFract;
 
-		s_playerLogic.anim.flags |= AFLAG_PLAYED;
+		s_playerLogic.anim.flags |= AFLAG_PLAYONCE;
 		setupPlayerAnim(12);
 
 		s32 applyDmg = s_invincibility ? 0 : 1;
@@ -2858,7 +2858,7 @@ namespace TFE_DarkForces
 				s_weaponFiring = JTRUE;
 				// This causes the weapon to fire.
 				s_msgArg1 = WFIRETYPE_PRIMARY;
-				s_playerLogic.anim.flags |= AFLAG_PLAYED;
+				s_playerLogic.anim.flags |= AFLAG_PLAYONCE;
 				setupPlayerAnim(1);
 				task_runAndReturn(s_playerWeaponTask, MSG_START_FIRING);
 			}
