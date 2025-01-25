@@ -183,6 +183,11 @@ namespace TFE_DarkForces
 	static angle14_32 s_playerObjYaw;
 	static RSector* s_playerObjSector;
 	static RWall* s_playerSlideWall;
+
+	// TFE - constants which can be overridden
+	static s32 s_lowFloorDamage = PLAYER_DMG_FLOOR_LOW;
+	static s32 s_highFloorDamage = PLAYER_DMG_FLOOR_HIGH;
+	static s32 s_wallDamage = PLAYER_DMG_WALL;
 	
 	///////////////////////////////////////////
 	// Shared State
@@ -571,6 +576,20 @@ namespace TFE_DarkForces
 		if (intMap.find("fogLevel") != intMap.end())
 		{
 			s_levelAtten = pickup_addToValue(0, intMap["fogLevel"], 100);
+		}
+
+		// Constants
+		if (intMap.find("sectorDamageLow") != intMap.end())
+		{
+			s_lowFloorDamage = intMap["sectorDamageLow"];
+		}
+		if (intMap.find("sectorDamageHigh") != intMap.end())
+		{
+			s_highFloorDamage = intMap["sectorDamageHigh"];
+		}
+		if (intMap.find("wallDamage") != intMap.end())
+		{
+			s_wallDamage = intMap["wallDamage"];
 		}
 
 		// Handle Boolean Overrides
@@ -2465,17 +2484,17 @@ namespace TFE_DarkForces
 		// Handle damage floors.
 		if (dmgFlags == SEC_FLAGS1_LOW_DAMAGE && s_onFloor)
 		{
-			fixed16_16 dmg = mul16(PLAYER_DMG_FLOOR_LOW, s_deltaTime);
+			fixed16_16 dmg = mul16(s_lowFloorDamage, s_deltaTime);
 			player_applyDamage(dmg, 0, JTRUE);
 		}
 		else if (dmgFlags == SEC_FLAGS1_HIGH_DAMAGE && s_onFloor)
 		{
-			fixed16_16 dmg = mul16(PLAYER_DMG_FLOOR_HIGH, s_deltaTime);
+			fixed16_16 dmg = mul16(s_highFloorDamage, s_deltaTime);
 			player_applyDamage(dmg, 0, JTRUE);
 		}
 		else if (dmgFlags == lowAndHighFlag && !s_wearingGasmask && !s_playerDying)
 		{
-			fixed16_16 dmg = mul16(PLAYER_DMG_FLOOR_LOW, s_deltaTime);
+			fixed16_16 dmg = mul16(s_lowFloorDamage, s_deltaTime);
 			player_applyDamage(dmg, 0, JFALSE);
 
 			if (!s_gasSectorTask)
@@ -2493,7 +2512,7 @@ namespace TFE_DarkForces
 		// Handle damage walls.
 		if (s_playerSlideWall && (s_playerSlideWall->flags1 & WF1_DAMAGE_WALL))
 		{
-			fixed16_16 dmg = mul16(PLAYER_DMG_WALL, s_deltaTime);
+			fixed16_16 dmg = mul16(s_wallDamage, s_deltaTime);
 			player_applyDamage(dmg, 0, JTRUE);
 		}
 
