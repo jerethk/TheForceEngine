@@ -581,15 +581,23 @@ namespace TFE_DarkForces
 		// Constants
 		if (intMap.find("sectorDamageLow") != intMap.end())
 		{
-			s_lowFloorDamage = intMap["sectorDamageLow"];
+			s_lowFloorDamage = FIXED(intMap["sectorDamageLow"]);
 		}
 		if (intMap.find("sectorDamageHigh") != intMap.end())
 		{
-			s_highFloorDamage = intMap["sectorDamageHigh"];
+			s_highFloorDamage = FIXED(intMap["sectorDamageHigh"]);
 		}
 		if (intMap.find("wallDamage") != intMap.end())
 		{
-			s_wallDamage = intMap["wallDamage"];
+			s_wallDamage = FIXED(intMap["wallDamage"]);
+		}
+		if (intMap.find("gravity") != intMap.end())
+		{
+			s_gravityAccel = FIXED(intMap["gravity"]);
+		}
+		if (intMap.find("projectileGravity") != intMap.end())
+		{
+			setProjectileGravityAccel(FIXED(intMap["projectileGravity"]));
 		}
 
 		// Handle Boolean Overrides
