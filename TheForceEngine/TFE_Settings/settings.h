@@ -307,8 +307,8 @@ static const char* modIntOverrides[] =
 	"defaultWeapon",
 	"fogLevel",
 
-	"floorDamageLow",
-	"floorDamageHigh",
+	"sectorDamageLow",
+	"sectorDamageHigh",
 	"wallDamage",
 	"gravity",
 	"projectileGravity",
