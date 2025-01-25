@@ -305,7 +305,23 @@ static const char* modIntOverrides[] =
 
 	// Custom int overrides
 	"defaultWeapon",
-	"fogLevel"
+	"fogLevel",
+
+	"floorDamageLow",
+	"floorDamageHigh",
+	"wallDamage",
+	"gravity",
+	"projectileGravity",
+	"shieldSuperchargeDuration",
+	"weaponSuperchargeDuration",
+};
+
+// Float overrides for mod levels
+static const char* modFloatOverrides[] =
+{
+	"headlampBatteryConsumption",
+	"gogglesBatteryConsumption",
+	"maskBatteryConsumption",
 };
 
 // Boolean overrides for mod levels 
@@ -356,6 +372,7 @@ struct ModSettingLevelOverride
 {
 	std::string levName;
 	std::map<std::string, int>  intOverrideMap = {};
+	std::map<std::string, float> floatOverrideMap = {};
 	std::map<std::string, bool> boolOverrideMap = {};
 };
 
