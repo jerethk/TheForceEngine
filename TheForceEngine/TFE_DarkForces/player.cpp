@@ -189,6 +189,9 @@ namespace TFE_DarkForces
 	static s32 s_highFloorDamage = PLAYER_DMG_FLOOR_HIGH;
 	static s32 s_gasDamage = PLAYER_DMG_FLOOR_LOW;
 	static s32 s_wallDamage = PLAYER_DMG_WALL;
+	static s32 s_headlampConsumption = HEADLAMP_ENERGY_CONSUMPTION;
+	static s32 s_gogglesConsumption = GOGGLES_ENERGY_CONSUMPTION;
+	static s32 s_gasmaskConsumption = GASMASK_ENERGY_CONSUMPTION;
 	
 	///////////////////////////////////////////
 	// Shared State
@@ -271,7 +274,7 @@ namespace TFE_DarkForces
 	// Other
 	s32 s_playerCrouch = 0;
 
-	// Pointers to player ammo stores
+	// TFE - Pointers to player ammo stores
 	s32* s_playerAmmoEnergy;
 	s32* s_playerAmmoPower;
 	s32* s_playerAmmoPlasma;
@@ -283,7 +286,7 @@ namespace TFE_DarkForces
 	s32* s_playerHealth;
 	fixed16_16* s_playerBatteryPower;
 
-	// Maximum values for ammo, etc.
+	// TFE - Maximum values for ammo, etc.
 	s32 s_ammoEnergyMax;
 	s32 s_ammoPowerMax;
 	s32 s_ammoShellMax;
@@ -294,6 +297,8 @@ namespace TFE_DarkForces
 	s32 s_shieldsMax;
 	fixed16_16 s_batteryPowerMax;
 	s32 s_healthMax;
+
+	// TFE - constants which can be overridden
 			   
 	///////////////////////////////////////////
 	// Forward Declarations
@@ -506,8 +511,9 @@ namespace TFE_DarkForces
 
 	void player_handleLevelOverrides(ModSettingLevelOverride modLevelOverride)
 	{
-		// Handle Integer Overrides
+		// Handle Numeric Overrides
 		std::map<std::string, int> intMap = modLevelOverride.intOverrideMap;
+		std::map<std::string, float> floatMap = modLevelOverride.floatOverrideMap;
 
 		// Handle Ammo/Shields/Lives/Battery
 		if (intMap.find("energy") != intMap.end())
@@ -603,6 +609,24 @@ namespace TFE_DarkForces
 		if (intMap.find("projectileGravity") != intMap.end())
 		{
 			setProjectileGravityAccel(FIXED(intMap["projectileGravity"]));
+		}
+		
+		if (floatMap.find("headlampBatteryConsumption") != floatMap.end())
+		{
+			float* value = &floatMap["headlampBatteryConsumption"];
+			s_headlampConsumption = (s32) ((*value / 100.00) * FIXED(2));
+		}
+
+		if (floatMap.find("gogglesBatteryConsumption") != floatMap.end())
+		{
+			float* value = &floatMap["gogglesBatteryConsumption"];
+			s_gogglesConsumption = (s32)((*value / 100.00) * FIXED(2));
+		}
+
+		if (floatMap.find("maskBatteryConsumption") != floatMap.end())
+		{
+			float* value = &floatMap["maskBatteryConsumption"];
+			s_gasmaskConsumption = (s32)((*value / 100.00) * FIXED(2));
 		}
 
 		// Handle Boolean Overrides
@@ -811,6 +835,15 @@ namespace TFE_DarkForces
 		s_playerStopAccel     = PLAYER_STOP_ACCEL;
 		s_minEyeDistFromFloor = PLAYER_MIN_EYE_DIST_FLOOR;
 		s_gravityAccel        = PLAYER_GRAVITY_ACCEL;
+
+		// TFE - reset constants that may have been previously overridden
+		s_lowFloorDamage		= PLAYER_DMG_FLOOR_LOW;
+		s_highFloorDamage		= PLAYER_DMG_FLOOR_HIGH;
+		s_gasDamage				= PLAYER_DMG_FLOOR_LOW;
+		s_wallDamage			= PLAYER_DMG_WALL;
+		s_headlampConsumption	= HEADLAMP_ENERGY_CONSUMPTION;
+		s_gogglesConsumption	= GOGGLES_ENERGY_CONSUMPTION;
+		s_gasmaskConsumption	= GASMASK_ENERGY_CONSUMPTION;
 
 		// Initialize values.
 		s_postLandVel = 0;
@@ -2759,17 +2792,17 @@ namespace TFE_DarkForces
 		{
 			if (s_headlampActive)
 			{
-				fixed16_16 powerDelta = mul16(HEADLAMP_ENERGY_CONSUMPTION, s_deltaTime);
+				fixed16_16 powerDelta = mul16(s_headlampConsumption, s_deltaTime);
 				s_batteryPower -= powerDelta;
 			}
 			if (s_wearingGasmask)
 			{
-				fixed16_16 powerDelta = mul16(GASMASK_ENERGY_CONSUMPTION, s_deltaTime);
+				fixed16_16 powerDelta = mul16(s_gasmaskConsumption, s_deltaTime);
 				s_batteryPower -= powerDelta;
 			}
 			if (s_nightVisionActive)
 			{
-				fixed16_16 powerDelta = mul16(GOGGLES_ENERGY_CONSUMPTION, s_deltaTime);
+				fixed16_16 powerDelta = mul16(s_gogglesConsumption, s_deltaTime);
 				s_batteryPower -= powerDelta;
 			}
 			if (s_batteryPower <= 0)
