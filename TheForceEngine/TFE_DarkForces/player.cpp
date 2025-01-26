@@ -187,6 +187,7 @@ namespace TFE_DarkForces
 	// TFE - constants which can be overridden
 	static s32 s_lowFloorDamage = PLAYER_DMG_FLOOR_LOW;
 	static s32 s_highFloorDamage = PLAYER_DMG_FLOOR_HIGH;
+	static s32 s_gasDamage = PLAYER_DMG_FLOOR_LOW;
 	static s32 s_wallDamage = PLAYER_DMG_WALL;
 	
 	///////////////////////////////////////////
@@ -586,6 +587,10 @@ namespace TFE_DarkForces
 		if (intMap.find("sectorDamageHigh") != intMap.end())
 		{
 			s_highFloorDamage = FIXED(intMap["sectorDamageHigh"]);
+		}
+		if (intMap.find("gasDamage") != intMap.end())
+		{
+			s_gasDamage = FIXED(intMap["gasDamage"]);
 		}
 		if (intMap.find("wallDamage") != intMap.end())
 		{
@@ -2502,7 +2507,7 @@ namespace TFE_DarkForces
 		}
 		else if (dmgFlags == lowAndHighFlag && !s_wearingGasmask && !s_playerDying)
 		{
-			fixed16_16 dmg = mul16(s_lowFloorDamage, s_deltaTime);
+			fixed16_16 dmg = mul16(s_gasDamage, s_deltaTime);
 			player_applyDamage(dmg, 0, JFALSE);
 
 			if (!s_gasSectorTask)

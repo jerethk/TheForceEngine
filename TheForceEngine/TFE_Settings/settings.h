@@ -309,6 +309,7 @@ static const char* modIntOverrides[] =
 
 	"sectorDamageLow",
 	"sectorDamageHigh",
+	"gasDamage",
 	"wallDamage",
 	"gravity",
 	"projectileGravity",
