@@ -284,6 +284,13 @@ namespace TFE_DarkForces
 		}
 	}
 
+	// TFE
+	void resetProjectileGravityAccel()
+	{
+		s_projGravityAccel = PROJ_GRAVITY_ACCEL;
+	}
+	
+	// TFE
 	void setProjectileGravityAccel(s32 accel)
 	{
 		s_projGravityAccel = accel;

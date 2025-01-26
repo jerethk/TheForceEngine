@@ -124,6 +124,7 @@ namespace TFE_DarkForces
 	void proj_aimArcing(ProjectileLogic* proj, vec3_fixed target, fixed16_16 speed);
 
 	// TFE: Set projectile gravity
+	void resetProjectileGravityAccel();
 	void setProjectileGravityAccel(s32 accel);
 
 	// TFE: Serialization functionality.

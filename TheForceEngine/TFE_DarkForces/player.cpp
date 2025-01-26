@@ -858,6 +858,7 @@ namespace TFE_DarkForces
 		s_gasmaskConsumption		= GASMASK_ENERGY_CONSUMPTION;
 		s_shieldSuperchargeDuration = SUPERCHARGE_DURATION;
 		s_weaponSuperchargeDuration = SUPERCHARGE_DURATION;
+		resetProjectileGravityAccel();
 
 		// Initialize values.
 		s_postLandVel = 0;
