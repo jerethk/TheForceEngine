@@ -185,8 +185,6 @@ namespace TFE_DarkForces
 	static RSector* s_playerObjSector;
 	static RWall* s_playerSlideWall;
 
-	static bool s_playerMovingAnim;
-	
 	///////////////////////////////////////////
 	// Shared State
 	///////////////////////////////////////////
@@ -1498,14 +1496,6 @@ namespace TFE_DarkForces
 		s_playerSecFire = JFALSE;
 		s_playerPrimaryFire = JFALSE;
 
-		if (s_playerObject->wax)
-		{
-			if (actor_advanceAnimation(&s_playerLogic.anim, s_playerObject))
-			{
-				s_playerLogic.anim.flags |= AFLAG_READY;
-			}
-		}
-
 		if (inputMapping_getActionState(IADF_JUMP) || inputMapping_getActionState(IADF_MENU_TOGGLE) || inputMapping_getActionState(IADF_USE))
 		{
 			inputMapping_removeState(IADF_JUMP);
@@ -1623,8 +1613,15 @@ namespace TFE_DarkForces
 		if (s_playerObject->wax)
 		{
 			LogicAnimation* logicAnim = &s_playerLogic.anim;
-			logicAnim->prevTick = 0;
+
+			// If this is one of the looping animations, don't reset it
+			if (!(logicAnim->flags & AFLAG_PLAYONCE))
+			{
+				if (logicAnim->animId == animId) { return; }
+			}
+
 			logicAnim->animId = animId;
+			logicAnim->prevTick = 0;
 			logicAnim->startFrame = 0;
 			logicAnim->frame = 0;
 
@@ -1911,22 +1908,22 @@ namespace TFE_DarkForces
 			s_strafeSpd  >>= airControl;
 		}
 
+		// Moving forward or strafing
 		if (!s_playerDying && (s_forwardSpd > HALF_16 || s_strafeSpd < -HALF_16 || s_strafeSpd > HALF_16))
 		{
-			if (!s_playerMovingAnim)
+			if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
 			{
 				s_playerLogic.anim.flags &= ~AFLAG_PLAYONCE;
 				setupPlayerAnim(0);
-				s_playerMovingAnim = true;
 			}
 		}
+		// Standing still
 		else
 		{
-			if (s_playerMovingAnim)
+			if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
 			{
 				s_playerLogic.anim.flags &= ~AFLAG_PLAYONCE;
 				setupPlayerAnim(5);
-				s_playerMovingAnim = false;
 			}
 		}
 	}
@@ -2691,6 +2688,7 @@ namespace TFE_DarkForces
 				s_playerDying = JTRUE;
 				s_reviveTick = s_curTick + 436;
 
+				s_playerLogic.anim.flags |= AFLAG_PLAYONCE;
 				setupPlayerAnim(2);
 			}
 			else
