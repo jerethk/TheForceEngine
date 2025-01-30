@@ -184,7 +184,7 @@ namespace TFE_DarkForces
 	static angle14_32 s_playerObjYaw;
 	static RSector* s_playerObjSector;
 	static RWall* s_playerSlideWall;
-
+	
 	///////////////////////////////////////////
 	// Shared State
 	///////////////////////////////////////////
@@ -310,7 +310,7 @@ namespace TFE_DarkForces
 	// TFE
 	void player_warp(const ConsoleArgList& args);
 	void player_sector(const ConsoleArgList& args);
-	void setupPlayerAnim(s32 animId);
+	void setupPlayerAnim(s32 animId, JBool looping);
 
 	///////////////////////////////////////////
 	// API Implentation
@@ -940,7 +940,7 @@ namespace TFE_DarkForces
 		s_playerSecMoved = JFALSE;
 		s_playerSector = obj->sector;
 
-		setupPlayerAnim(5);
+		setupPlayerAnim(5, JTRUE);
 	}
 
 	void player_setupEyeObject(SecObject* obj)
@@ -1504,7 +1504,7 @@ namespace TFE_DarkForces
 
 			if (s_lifeCount != 0 && s_curSafe)
 			{
-				setupPlayerAnim(5);
+				setupPlayerAnim(5, JTRUE);
 				s_lifeCount -= 1;
 				player_revive();
 				player_reset();
@@ -1608,18 +1608,24 @@ namespace TFE_DarkForces
 	///////////////////////////////////////////
 	// Internal Implentation
 	///////////////////////////////////////////
-	void setupPlayerAnim(s32 animId)
+	void setupPlayerAnim(s32 animId, JBool looping)
 	{
 		if (s_playerObject->wax)
 		{
 			LogicAnimation* logicAnim = &s_playerLogic.anim;
 
-			// If this is one of the looping animations, don't reset it
-			if (!(logicAnim->flags & AFLAG_PLAYONCE))
+			if (looping == JTRUE)
 			{
+				logicAnim->flags &= ~AFLAG_PLAYONCE;
+			
+				// If this is a looping animation, don't reset it
 				if (logicAnim->animId == animId) { return; }
 			}
-
+			else
+			{
+				logicAnim->flags |= AFLAG_PLAYONCE;
+			}
+			
 			logicAnim->animId = animId;
 			logicAnim->prevTick = 0;
 			logicAnim->startFrame = 0;
@@ -1913,8 +1919,7 @@ namespace TFE_DarkForces
 		{
 			if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
 			{
-				s_playerLogic.anim.flags &= ~AFLAG_PLAYONCE;
-				setupPlayerAnim(0);
+				setupPlayerAnim(0, JTRUE);
 			}
 		}
 		// Standing still
@@ -1922,8 +1927,7 @@ namespace TFE_DarkForces
 		{
 			if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
 			{
-				s_playerLogic.anim.flags &= ~AFLAG_PLAYONCE;
-				setupPlayerAnim(5);
+				setupPlayerAnim(5, JTRUE);
 			}
 		}
 	}
@@ -2637,8 +2641,7 @@ namespace TFE_DarkForces
 		fixed16_16 health  = intToFixed16(s_playerInfo.health);
 		health += s_playerInfo.healthFract;
 
-		s_playerLogic.anim.flags |= AFLAG_PLAYONCE;
-		setupPlayerAnim(12);
+		setupPlayerAnim(12, JFALSE);
 
 		s32 applyDmg = s_invincibility ? 0 : 1;
 		if (applyDmg && health && shieldDmg >= 0)
@@ -2688,8 +2691,7 @@ namespace TFE_DarkForces
 				s_playerDying = JTRUE;
 				s_reviveTick = s_curTick + 436;
 
-				s_playerLogic.anim.flags |= AFLAG_PLAYONCE;
-				setupPlayerAnim(2);
+				setupPlayerAnim(2, JFALSE);
 			}
 			else
 			{
@@ -2856,8 +2858,7 @@ namespace TFE_DarkForces
 				s_weaponFiring = JTRUE;
 				// This causes the weapon to fire.
 				s_msgArg1 = WFIRETYPE_PRIMARY;
-				s_playerLogic.anim.flags |= AFLAG_PLAYONCE;
-				setupPlayerAnim(1);
+				setupPlayerAnim(1, JFALSE);
 				task_runAndReturn(s_playerWeaponTask, MSG_START_FIRING);
 			}
 		}
