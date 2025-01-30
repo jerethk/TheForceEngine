@@ -1924,10 +1924,17 @@ namespace TFE_DarkForces
 		{ 
 			return;
 		}
-		
+
 		// Only change animation if we are on a looping animation, or if a non-looping animation has finished playing
 		if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
 		{
+			// In the air
+			if (!s_onFloor)
+			{
+				setupPlayerAnim(11, JTRUE);
+				return;
+			}
+
 			// Standing
 			if (s_playerObject->worldHeight > FIXED(4))
 			{
