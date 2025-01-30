@@ -189,6 +189,9 @@ namespace TFE_DarkForces
 	void cheat_maxout();
 	void cheat_godMode();
 
+	// TFE
+	void setupPlayerAnim(s32 animId, JBool looping);
+
 	// New TFE Cheats
 	void cheat_fly();
 	void cheat_noclip();

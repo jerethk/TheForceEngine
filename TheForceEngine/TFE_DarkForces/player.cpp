@@ -310,7 +310,6 @@ namespace TFE_DarkForces
 	// TFE
 	void player_warp(const ConsoleArgList& args);
 	void player_sector(const ConsoleArgList& args);
-	void setupPlayerAnim(s32 animId, JBool looping);
 
 	///////////////////////////////////////////
 	// API Implentation
@@ -1604,10 +1603,7 @@ namespace TFE_DarkForces
 		}
 		task_end;
 	}
-	
-	///////////////////////////////////////////
-	// Internal Implentation
-	///////////////////////////////////////////
+
 	void setupPlayerAnim(s32 animId, JBool looping)
 	{
 		if (s_playerObject->wax)
@@ -1617,7 +1613,7 @@ namespace TFE_DarkForces
 			if (looping == JTRUE)
 			{
 				logicAnim->flags &= ~AFLAG_PLAYONCE;
-			
+
 				// If this is a looping animation, don't reset it
 				if (logicAnim->animId == animId) { return; }
 			}
@@ -1625,7 +1621,7 @@ namespace TFE_DarkForces
 			{
 				logicAnim->flags |= AFLAG_PLAYONCE;
 			}
-			
+
 			logicAnim->animId = animId;
 			logicAnim->prevTick = 0;
 			logicAnim->startFrame = 0;
@@ -1643,7 +1639,10 @@ namespace TFE_DarkForces
 			s_playerObject->anim = logicAnim->animId;
 		}
 	}
-	
+
+	///////////////////////////////////////////
+	// Internal Implentation
+	///////////////////////////////////////////
 	void setPlayerLight(s32 atten)
 	{
 		s_playerLight = atten;
@@ -2858,7 +2857,6 @@ namespace TFE_DarkForces
 				s_weaponFiring = JTRUE;
 				// This causes the weapon to fire.
 				s_msgArg1 = WFIRETYPE_PRIMARY;
-				setupPlayerAnim(1, JFALSE);
 				task_runAndReturn(s_playerWeaponTask, MSG_START_FIRING);
 			}
 		}
