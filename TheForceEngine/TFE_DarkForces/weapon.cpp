@@ -1162,11 +1162,7 @@ namespace TFE_DarkForces
 					{
 						setupPlayerAnim(1, JFALSE);
 					}
-					else if (s_prevWeapon == 3)		// detonator
-					{
-						setupPlayerAnim(1, JFALSE);
-					}
-					else if (s_prevWeapon != 7)		// guns
+					else if (s_prevWeapon != 3 && s_prevWeapon != 7)	// guns
 					{
 						setupPlayerAnim(7, JFALSE);
 					}
