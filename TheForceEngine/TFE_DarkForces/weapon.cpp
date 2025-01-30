@@ -1160,11 +1160,11 @@ namespace TFE_DarkForces
 					// Fire the weapon.
 					if (s_prevWeapon == 0)	// punch
 					{
-						setupPlayerAnim(1, JFALSE);
+						setupPlayerAnim(7, JFALSE);
 					}
 					else if (s_prevWeapon != 3 && s_prevWeapon != 7)	// guns
 					{
-						setupPlayerAnim(7, JFALSE);
+						setupPlayerAnim(1, JFALSE);
 					}
 					
 					task_callTaskFunc(s_weaponFireFunc[s_prevWeapon]);

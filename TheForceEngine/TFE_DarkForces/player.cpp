@@ -310,6 +310,7 @@ namespace TFE_DarkForces
 	// TFE
 	void player_warp(const ConsoleArgList& args);
 	void player_sector(const ConsoleArgList& args);
+	void handlePlayerAnimation();
 
 	///////////////////////////////////////////
 	// API Implentation
@@ -1583,6 +1584,7 @@ namespace TFE_DarkForces
 					handlePlayerPhysics();
 					handlePlayerActions();
 					handlePlayerScreenFx();
+					handlePlayerAnimation();
 					if (s_playerDying)
 					{
 						handlePlayerDying();
@@ -1794,6 +1796,8 @@ namespace TFE_DarkForces
 				s_playerJumping = JTRUE;
 				s_playerUpVel  = speed;
 				s_playerUpVel2 = speed;
+
+				setupPlayerAnim(6, JFALSE);
 			}
 		}
 		else if (s_flyMode && s_playerUpVel < 0)
@@ -1912,21 +1916,54 @@ namespace TFE_DarkForces
 			s_forwardSpd >>= airControl;
 			s_strafeSpd  >>= airControl;
 		}
+	}
 
-		// Moving forward or strafing
-		if (!s_playerDying && (s_forwardSpd > HALF_16 || s_strafeSpd < -HALF_16 || s_strafeSpd > HALF_16))
-		{
-			if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
-			{
-				setupPlayerAnim(0, JTRUE);
-			}
+	void handlePlayerAnimation()
+	{
+		if (s_playerDying)
+		{ 
+			return;
 		}
-		// Standing still
-		else
+		
+		// Only change animation if we are on a looping animation, or if a non-looping animation has finished playing
+		if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
 		{
-			if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
+			// Standing
+			if (s_playerObject->worldHeight > FIXED(4))
 			{
-				setupPlayerAnim(5, JTRUE);
+				// Moving forward or strafing
+				if (s_forwardSpd > HALF_16 || s_strafeSpd < -HALF_16 || s_strafeSpd > HALF_16)
+				{
+					setupPlayerAnim(0, JTRUE);
+				}
+				// Moving backwards
+				else if (s_forwardSpd < -HALF_16)
+				{
+					setupPlayerAnim(0, JTRUE);
+				}
+				// Stationary
+				else
+				{
+					setupPlayerAnim(5, JTRUE);
+				}
+			}
+			// Crouching
+			else 
+			{
+				if (s_forwardSpd > HALF_16 || s_strafeSpd < -HALF_16 || s_strafeSpd > HALF_16)
+				{
+					setupPlayerAnim(8, JTRUE);
+				}
+				// Moving backwards
+				else if (s_forwardSpd < -HALF_16)
+				{
+					setupPlayerAnim(8, JTRUE);
+				}
+				// Stationary
+				else
+				{
+					setupPlayerAnim(8, JTRUE);
+				}
 			}
 		}
 	}
@@ -2837,6 +2874,7 @@ namespace TFE_DarkForces
 		}
 		if (s_playerUse)
 		{
+			setupPlayerAnim(7, JFALSE);
 			s_playerUse = JFALSE;
 			if (!s_playerActionUse)
 			{
