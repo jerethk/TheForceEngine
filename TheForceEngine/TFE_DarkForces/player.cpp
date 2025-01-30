@@ -1614,10 +1614,10 @@ namespace TFE_DarkForces
 
 			if (looping == JTRUE)
 			{
-				logicAnim->flags &= ~AFLAG_PLAYONCE;
-
-				// If this is a looping animation, don't reset it
+				// If this is a looping animation that is already playing, don't reset it
 				if (logicAnim->animId == animId) { return; }
+
+				logicAnim->flags &= ~AFLAG_PLAYONCE;
 			}
 			else
 			{
