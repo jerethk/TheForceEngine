@@ -1031,15 +1031,6 @@ namespace TFE_DarkForces
 
 	void weapon_playerWeaponTaskFunc(MessageType msg)
 	{
-		// TFE: Do not allow weapon switching or firing while in external camera mode
-		if (msg == MSG_SWITCH_WPN || s_queWeaponSwitch || msg == MSG_START_FIRING || msg == MSG_STOP_FIRING)
-		{
-			if (s_externalCameraMode)
-			{
-				return;
-			}
-		}
-		
 		struct LocalContext
 		{
 			JBool secondaryFire;
@@ -1129,7 +1120,7 @@ namespace TFE_DarkForces
 					task_callTaskFunc(weapon_animateOnOrOffscreen);
 					s_weaponOffAnim = JTRUE;
 				}
-				else if (!s_externalCameraMode)
+				else
 				{
 					// Return weapon to screen
 					s_weaponOffAnim = JFALSE;
@@ -1212,6 +1203,12 @@ namespace TFE_DarkForces
 	// for TFE I split it out to limit the amount of game code in the renderer.
 	void weapon_draw(u8* display, DrawRect* rect)
 	{
+		// TFE - don't draw weapon in external camera mode
+		if (s_externalCameraMode)
+		{
+			return;
+		}
+
 		const fixed16_16 weaponLightingZDist  = FIXED(6);
 		const fixed16_16 gasmaskLightingZDist = FIXED(2);
 
@@ -1235,7 +1232,7 @@ namespace TFE_DarkForces
 				x += weapon->xOffset;
 				y += weapon->yOffset;
 			}
-						
+			
 			const u8* atten = RClassic_Fixed::computeLighting(weaponLightingZDist, 0);
 			TextureData* tex = weapon->frames[weapon->frame];
 			if (weapon->ammo && *weapon->ammo == 0 && (weapon->ammo == &s_playerInfo.ammoDetonator || weapon->ammo == &s_playerInfo.ammoMine))

@@ -3252,10 +3252,8 @@ namespace TFE_Jedi
 						{
 							if (obj->flags & OBJ_FLAG_CAMERA)
 							{
-								// Holster weapon, disable night vision and gasmask
-								weapon_holster();
+								// Disable night vision
 								if (s_nightVisionActive) { disableNightVision(); }
-								if (s_wearingGasmask) { disableMask(); }
 
 								player_setupEyeObject(obj);
 								s_externalCameraMode = JTRUE;
@@ -3270,7 +3268,6 @@ namespace TFE_Jedi
 					// Move EYE back to player
 					player_setupEyeObject(s_playerObject);
 					s_externalCameraMode = JFALSE;
-					weapon_holster();
 				}
 				
 			} break;
