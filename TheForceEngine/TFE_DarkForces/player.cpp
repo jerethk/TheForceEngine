@@ -222,6 +222,7 @@ namespace TFE_DarkForces
 	vec3_fixed s_eyePos = { 0 };	// s_camX, s_camY, s_camZ in the DOS code.
 	angle14_32 s_eyePitch = 0, s_eyeYaw = 0, s_eyeRoll = 0;
 	JBool s_externalCameraMode = JFALSE;
+	JBool s_playerFrozen = JFALSE;
 	u32 s_playerEyeFlags = OBJ_FLAG_NEEDS_TRANSFORM;
 	Tick s_playerTick;
 	Tick s_prevPlayerTick;
@@ -812,6 +813,7 @@ namespace TFE_DarkForces
 		s_playerSecFire     = JFALSE;
 		s_playerJumping     = JFALSE;
 		s_externalCameraMode = JFALSE;
+		s_playerFrozen      = JFALSE;
 
 		s_crushSoundId = 0;
 		s_kyleScreamSoundId = 0;
@@ -1368,8 +1370,8 @@ namespace TFE_DarkForces
 			ProjectileLogic* proj = (ProjectileLogic*)s_msgEntity;
 			vec3_fixed pushVel;
 			
-			// TFE: Don't move the player if in external camera mode
-			if (!s_externalCameraMode)
+			// TFE: Don't move the player if frozen
+			if (!s_playerFrozen)
 			{
 				computeDamagePushVelocity(proj, &pushVel);
 
@@ -1397,8 +1399,8 @@ namespace TFE_DarkForces
 			vec3_fixed pushDir;
 			computeExplosionPushDir(&pos, &pushDir);
 
-			// TFE: Don't move the player if in external camera mode
-			if (!s_externalCameraMode)
+			// TFE: Don't move the player if frozen
+			if (!s_playerFrozen)
 			{
 				fixed16_16 force = s_msgArg2;
 				s_playerVelX += mul16(force, pushDir.x);
@@ -1462,6 +1464,7 @@ namespace TFE_DarkForces
 		s_prevDistFromFloor = 0;
 		s_playerObject->worldHeight = 0x5cccc;	// 5.8
 		s_externalCameraMode = JFALSE;
+		s_playerFrozen = JFALSE;
 		player_setupEyeObject(s_playerObject);
 	}
 
@@ -1615,8 +1618,8 @@ namespace TFE_DarkForces
 
 	void handlePlayerMoveControls()
 	{
-		// TFE: If external camera mode, the only control allowed is use
-		if (!inputMapping_getActionState(IADF_USE) && s_externalCameraMode)
+		// TFE: If player is frozen, the only control allowed is use
+		if (!inputMapping_getActionState(IADF_USE) && s_playerFrozen)
 		{
 			return;
 		}
@@ -1934,9 +1937,9 @@ namespace TFE_DarkForces
 				
 	void handlePlayerPhysics()
 	{
-		// TFE: If external camera mode, do not handle physics
+		// TFE: If player is frozen, do not handle physics
 		// Because we don't want the player to be moved from their position
-		if (s_externalCameraMode)
+		if (s_playerFrozen)
 		{
 			return;
 		}
