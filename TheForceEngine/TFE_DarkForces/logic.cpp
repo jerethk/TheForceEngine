@@ -106,6 +106,10 @@ namespace TFE_DarkForces
 		{
 			obj->flags |= OBJ_FLAG_CAMERA;
 		}
+		else if (key == KW_FREEZE)
+		{
+			obj->flags |= OBJ_FLAG_CAMERA_FREEZE;
+		}
 		else  // Invalid key.
 		{
 			retValue = JFALSE;

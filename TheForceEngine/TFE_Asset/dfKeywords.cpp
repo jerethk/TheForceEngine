@@ -228,6 +228,7 @@ static const char* c_keywords[] =
 	// TFE
 	"SCRIPTCALL:",
 	"CAMERA",
+	"FREEZE:",
 };
 
 #define KEYWORD_COUNT TFE_ARRAYSIZE(c_keywords)

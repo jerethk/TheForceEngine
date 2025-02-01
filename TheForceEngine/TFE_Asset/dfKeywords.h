@@ -235,6 +235,7 @@ enum KEYWORD
 	// TFE ADDED
 	KW_SCRIPTCALL,
 	KW_CAMERA,				// TFE - camera feature
+	KW_FREEZE,				// TFE - camera feature
 	KW_COUNT
 };
 

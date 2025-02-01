@@ -3257,6 +3257,11 @@ namespace TFE_Jedi
 
 								player_setupEyeObject(obj);
 								s_externalCameraMode = JTRUE;
+								if (obj->flags & OBJ_FLAG_CAMERA_FREEZE)
+								{
+									s_playerFrozen = JTRUE;
+								}
+
 								break;
 							}
 							i++;
@@ -3265,9 +3270,10 @@ namespace TFE_Jedi
 				}
 				else
 				{
-					// Move EYE back to player
+					// Move EYE back to player and unfreeze
 					player_setupEyeObject(s_playerObject);
 					s_externalCameraMode = JFALSE;
+					s_playerFrozen = JFALSE;
 				}
 				
 			} break;
