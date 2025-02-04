@@ -12,6 +12,7 @@
 #include <TFE_DarkForces/pickup.h>
 #include <TFE_DarkForces/weapon.h>
 #include <TFE_DarkForces/sound.h>
+#include <TFE_DarkForces/gameMusic.h>
 #include <TFE_Game/igame.h>
 #include <TFE_Asset/modelAsset_jedi.h>
 #include <TFE_FileSystem/paths.h>
@@ -293,6 +294,11 @@ namespace TFE_DarkForces
 		local(prevColTick) = 0;
 		local(target)->flags &= ~TARGET_FREEZE;
 
+		if (local(obj)->flags & OBJ_FLAG_BOSS)
+		{
+			gameMusic_setState(MUS_STATE_BOSS);
+		}
+		
 		if (random(100) <= 40)
 		{
 			local(trooper)->rocketSndId = sound_playCued(s_shared.phase3RocketSndID, local(obj)->posWS);

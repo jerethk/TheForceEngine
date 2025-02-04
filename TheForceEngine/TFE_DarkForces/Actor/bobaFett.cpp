@@ -12,6 +12,7 @@
 #include <TFE_DarkForces/pickup.h>
 #include <TFE_DarkForces/weapon.h>
 #include <TFE_DarkForces/sound.h>
+#include <TFE_DarkForces/gameMusic.h>
 #include <TFE_Game/igame.h>
 #include <TFE_Asset/modelAsset_jedi.h>
 #include <TFE_FileSystem/paths.h>
@@ -361,6 +362,12 @@ namespace TFE_DarkForces
 		RSector* sector = obj->sector;
 		fixed16_16 targetHeight = sector->ceilingHeight + obj->worldHeight;
 		fixed16_16 minHeight = sector->floorHeight;
+
+		if (obj->flags & OBJ_FLAG_BOSS)
+		{
+			gameMusic_setState(MUS_STATE_BOSS);
+		}
+
 		RWall* wall = collision_wallCollisionFromPath(sector, obj->posWS.x, obj->posWS.z, bobaFett->moveState.target.x, bobaFett->moveState.target.z);
 		if (wall)
 		{

@@ -12,6 +12,7 @@
 #include <TFE_DarkForces/pickup.h>
 #include <TFE_DarkForces/sound.h>
 #include <TFE_DarkForces/weapon.h>
+#include <TFE_DarkForces/gameMusic.h>
 #include <TFE_Game/igame.h>
 #include <TFE_Asset/modelAsset_jedi.h>
 #include <TFE_FileSystem/paths.h>
@@ -335,6 +336,11 @@ namespace TFE_DarkForces
 		local(target) = &local(physicsActor)->moveMod.target;
 		local(prevColTick) = 0;
 		local(yawAligned) = JFALSE;
+
+		if (local(obj)->flags & OBJ_FLAG_BOSS)
+		{
+			gameMusic_setState(MUS_STATE_BOSS);
+		}
 
 		local(anim)->flags &= ~AFLAG_PLAYONCE;
 		actor_setupBossAnimation(local(obj), 0, local(anim));

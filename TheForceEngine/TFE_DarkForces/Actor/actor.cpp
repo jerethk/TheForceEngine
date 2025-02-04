@@ -558,6 +558,8 @@ namespace TFE_DarkForces
 			{
 				message_sendToSector(s_levelState.bossSector, nullptr, 0, MSG_TRIGGER);
 			}
+
+			gameMusic_setState(MUS_STATE_STALK);
 		}
 	}
 
