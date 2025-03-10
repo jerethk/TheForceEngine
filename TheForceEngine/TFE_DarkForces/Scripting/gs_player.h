@@ -11,6 +11,9 @@ namespace TFE_DarkForces
 	public:
 		bool scriptRegister(ScriptAPI api) override;
 
-		void setPlayerHealth(s32 health);
+		s32 getBatteryPercent();
+		void setHealth(s32 health);
+		void setShields(s32 value);
+		void setBattery(s32 value);
 	};
 }
