@@ -1,6 +1,7 @@
 #include "gs_player.h"
 #include "assert.h"
 #include <TFE_DarkForces/player.h>
+#include <TFE_DarkForces/mission.h>
 #include <TFE_System/system.h>
 #include <angelscript.h>
 
@@ -61,6 +62,126 @@ namespace TFE_DarkForces
 		s_playerInfo.ammoPlasma = value;
 	}
 
+	bool GS_Player::hasRedKey()
+	{
+		return s_playerInfo.itemRedKey == JTRUE;
+	}
+
+	bool GS_Player::hasBlueKey()
+	{
+		return s_playerInfo.itemBlueKey == JTRUE;
+	}
+
+	bool GS_Player::hasYellowKey()
+	{
+		return s_playerInfo.itemYellowKey == JTRUE;
+	}
+
+	bool GS_Player::hasGoggles()
+	{
+		return s_playerInfo.itemGoggles == JTRUE;
+	}
+
+	bool GS_Player::hasCleats()
+	{
+		return s_playerInfo.itemCleats == JTRUE;
+	}
+
+	bool GS_Player::hasMask()
+	{
+		return s_playerInfo.itemMask == JTRUE;
+	}
+
+	void GS_Player::giveRedKey()
+	{
+		s_playerInfo.itemRedKey = JTRUE;
+	}
+
+	void GS_Player::giveBlueKey()
+	{
+		s_playerInfo.itemBlueKey = JTRUE;
+	}
+
+	void GS_Player::giveYellowKey()
+	{
+		s_playerInfo.itemYellowKey = JTRUE;
+	}
+
+	void GS_Player::giveGoggles()
+	{
+		s_playerInfo.itemGoggles = JTRUE;
+	}
+
+	void GS_Player::giveCleats()
+	{
+		s_playerInfo.itemCleats = JTRUE;
+	}
+
+	void GS_Player::giveMask()
+	{
+		s_playerInfo.itemMask = JTRUE;
+	}
+
+	void GS_Player::removeRedKey()
+	{
+		s_playerInfo.itemRedKey = JFALSE;
+	}
+
+	void GS_Player::removeBlueKey()
+	{
+		s_playerInfo.itemBlueKey = JFALSE;
+	}
+
+	void GS_Player::removeYellowKey()
+	{
+		s_playerInfo.itemYellowKey = JFALSE;
+	}
+
+	void GS_Player::removeGoggles()
+	{
+		if (s_nightVisionActive)
+		{
+			disableNightVision();
+		}
+		
+		s_playerInfo.itemGoggles = JFALSE;
+	}
+
+	void GS_Player::removeCleats()
+	{
+		if (s_wearingCleats)
+		{
+			disableCleats();
+		}
+		
+		s_playerInfo.itemCleats = JFALSE;
+	}
+
+	void GS_Player::removeMask()
+	{
+		if (s_wearingGasmask)
+		{
+			disableMask();
+		}
+		
+		s_playerInfo.itemMask = JFALSE;
+	}
+
+	bool GS_Player::hasPistol()
+	{
+		return s_playerInfo.itemPistol == JTRUE;
+	}
+
+	void GS_Player::givePistol()
+	{
+		s_playerInfo.itemPistol = JTRUE;
+	}
+
+	void GS_Player::removePistol()
+	{
+		s_playerInfo.itemPistol = JFALSE;
+		// TODO - to implement this (and other weapons) properly, we have to make the weapon disappear from the screen if the player is currently holding it
+	}
 
 	bool GS_Player::scriptRegister(ScriptAPI api)
 	{
@@ -89,6 +210,35 @@ namespace TFE_DarkForces
 			ScriptPropertySet("void set_ammoMine(int)", setAmmoMine);
 			ScriptPropertySet("void set_ammoMissile(int)", setAmmoMissile);
 			ScriptPropertySet("void set_ammoPlasma(int)", setAmmoPlasma);
+
+			// Items
+			ScriptObjMethod("bool hasRedKey()", hasRedKey);
+			ScriptObjMethod("bool hasBlueKey()", hasBlueKey);
+			ScriptObjMethod("bool hasYellowKey()", hasYellowKey);
+			ScriptObjMethod("bool hasGoggles()", hasGoggles);
+			ScriptObjMethod("bool hasCleats()", hasCleats);
+			ScriptObjMethod("bool hasMask()", hasMask);
+			
+			ScriptObjMethod("void giveRedKey()", giveRedKey);
+			ScriptObjMethod("void giveBlueKey()", giveBlueKey);
+			ScriptObjMethod("void giveYellowKey()", giveYellowKey);
+			ScriptObjMethod("void giveGoggles()", giveGoggles);
+			ScriptObjMethod("void giveCleats()", giveCleats);
+			ScriptObjMethod("void giveMask()", giveMask);
+
+			ScriptObjMethod("void removeRedKey()", removeRedKey);
+			ScriptObjMethod("void removeBlueKey()", removeBlueKey);
+			ScriptObjMethod("void removeYellowKey()", removeYellowKey);
+			ScriptObjMethod("void removeGoggles()", removeGoggles);
+			ScriptObjMethod("void removeCleats()", removeCleats);
+			ScriptObjMethod("void removeMask()", removeMask);
+
+			// Weapons
+			ScriptObjMethod("bool hasPistol()", hasPistol);
+
+			ScriptObjMethod("void givePistol()", givePistol);
+
+			//ScriptObjMethod("void removePistol()", removePistol);
 		}
 		ScriptClassEnd();
 	}

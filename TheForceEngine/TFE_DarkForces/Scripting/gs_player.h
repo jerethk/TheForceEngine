@@ -22,5 +22,31 @@ namespace TFE_DarkForces
 		void setAmmoMine(s32 value);
 		void setAmmoMissile(s32 value);
 		void setAmmoPlasma(s32 value);
+
+		bool hasRedKey();
+		bool hasBlueKey();
+		bool hasYellowKey();
+		bool hasGoggles();
+		bool hasCleats();
+		bool hasMask();
+		
+		void giveRedKey();
+		void giveBlueKey();
+		void giveYellowKey();
+		void giveGoggles();
+		void giveCleats();
+		void giveMask();
+
+		void removeRedKey();
+		void removeBlueKey();
+		void removeYellowKey();
+		void removeGoggles();
+		void removeCleats();
+		void removeMask();
+
+		bool hasPistol();
+		void givePistol();
+		
+		void removePistol();
 	};
 }
