@@ -26,6 +26,42 @@ namespace TFE_DarkForces
 		s_batteryPower = (fixed16_16)((value / 100.0) * FIXED(2));
 	}
 
+	void GS_Player::setAmmoEnergy(s32 value)
+	{
+		s_playerInfo.ammoEnergy = value;
+	}
+
+	void GS_Player::setAmmoPower(s32 value)
+	{
+		s_playerInfo.ammoPower = value;
+	}
+
+	void GS_Player::setAmmoDetonator(s32 value)
+	{
+		s_playerInfo.ammoDetonator = value;
+	}
+
+	void GS_Player::setAmmoShell(s32 value)
+	{
+		s_playerInfo.ammoShell = value;
+	}
+
+	void GS_Player::setAmmoMine(s32 value)
+	{
+		s_playerInfo.ammoMine = value;
+	}
+
+	void GS_Player::setAmmoMissile(s32 value)
+	{
+		s_playerInfo.ammoMissile = value;
+	}
+
+	void GS_Player::setAmmoPlasma(s32 value)
+	{
+		s_playerInfo.ammoPlasma = value;
+	}
+
+
 	bool GS_Player::scriptRegister(ScriptAPI api)
 	{
 		ScriptClassBegin("Player", "player", api);
@@ -46,6 +82,13 @@ namespace TFE_DarkForces
 			ScriptPropertySet("void set_health(int)", setHealth);
 			ScriptPropertySet("void set_shields(int)", setShields);
 			ScriptPropertySet("void set_battery(int)", setBattery);
+			ScriptPropertySet("void set_ammoEnergy(int)", setAmmoEnergy);
+			ScriptPropertySet("void set_ammoPower(int)", setAmmoPower);
+			ScriptPropertySet("void set_ammoDetonator(int)", setAmmoDetonator);
+			ScriptPropertySet("void set_ammoShell(int)", setAmmoShell);
+			ScriptPropertySet("void set_ammoMine(int)", setAmmoMine);
+			ScriptPropertySet("void set_ammoMissile(int)", setAmmoMissile);
+			ScriptPropertySet("void set_ammoPlasma(int)", setAmmoPlasma);
 		}
 		ScriptClassEnd();
 	}
