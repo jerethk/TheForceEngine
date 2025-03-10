@@ -4,6 +4,7 @@
 #include "scriptWall.h"
 #include "scriptSector.h"
 #include <TFE_DarkForces/player.h>
+#include <TFE_DarkForces/projectile.h>
 #include <TFE_System/system.h>
 #include <TFE_ForceScript/ScriptAPI-Shared/scriptMath.h>
 #include <TFE_ForceScript/Angelscript/add_on/scriptarray/scriptarray.h>
@@ -153,6 +154,10 @@ namespace TFE_DarkForces
 		s_gravityAccel = FIXED(grav);
 	}
 
+	void GS_Level::setProjectileGravity(s32 pGrav)
+	{
+		setProjectileGravityAccel(FIXED(pGrav));
+	}
 
 	bool GS_Level::scriptRegister(ScriptAPI api)
 	{
@@ -226,6 +231,7 @@ namespace TFE_DarkForces
 			ScriptObjMethod("void findConnectedSectors(Sector initSector, uint, array<Sector>&)", findConnectedSectors);
 
 			ScriptObjMethod("void setGravity(int)", setGravity);
+			ScriptObjMethod("void setProjectileGravity(int)", setProjectileGravity);
 
 			// -- Getters --
 			ScriptLambdaPropertyGet("int get_minLayer()", s32, { return s_levelState.minLayer; });
