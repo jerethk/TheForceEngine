@@ -23,6 +23,9 @@ namespace TFE_DarkForces
 		void setAmmoMissile(s32 value);
 		void setAmmoPlasma(s32 value);
 
+		void addToHealth(s32 value);
+		void addToShields(s32 value);
+
 		bool hasRedKey();
 		bool hasBlueKey();
 		bool hasYellowKey();
@@ -48,5 +51,7 @@ namespace TFE_DarkForces
 		void givePistol();
 		
 		void removePistol();
+
+		void killPlayer();
 	};
 }

@@ -2,6 +2,7 @@
 #include "assert.h"
 #include <TFE_DarkForces/player.h>
 #include <TFE_DarkForces/mission.h>
+#include <TFE_DarkForces/pickup.h>
 #include <TFE_System/system.h>
 #include <angelscript.h>
 
@@ -15,6 +16,11 @@ namespace TFE_DarkForces
 	void GS_Player::setHealth(s32 value)
 	{
 		s_playerInfo.health = value;
+
+		if (s_playerInfo.health <= 0)
+		{
+			killPlayer();
+		}
 	}
 
 	void GS_Player::setShields(s32 value)
@@ -60,6 +66,21 @@ namespace TFE_DarkForces
 	void GS_Player::setAmmoPlasma(s32 value)
 	{
 		s_playerInfo.ammoPlasma = value;
+	}
+
+	void GS_Player::addToHealth(s32 value)
+	{
+		s_playerInfo.health += value;
+
+		if (s_playerInfo.health <= 0)
+		{
+			killPlayer();
+		}
+	}
+
+	void GS_Player::addToShields(s32 value)
+	{
+		s_playerInfo.shields += value;
 	}
 
 	bool GS_Player::hasRedKey()
@@ -183,10 +204,25 @@ namespace TFE_DarkForces
 		// TODO - to implement this (and other weapons) properly, we have to make the weapon disappear from the screen if the player is currently holding it
 	}
 
+	void GS_Player::killPlayer()
+	{
+		sound_play(s_playerDeathSoundSource);
+		if (s_gasSectorTask)
+		{
+			task_free(s_gasSectorTask);
+		}
+		s_playerInfo.health = 0;
+		s_gasSectorTask = nullptr;
+		s_playerDying = JTRUE;
+		s_reviveTick = s_curTick + 436;
+	}
+
 	bool GS_Player::scriptRegister(ScriptAPI api)
 	{
 		ScriptClassBegin("Player", "player", api);
 		{
+			ScriptObjMethod("void kill()", killPlayer);
+			
 			// Health / ammo getters
 			ScriptLambdaPropertyGet("int get_health()", s32, { return s_playerInfo.health; });
 			ScriptLambdaPropertyGet("int get_shields()", s32, { return s_playerInfo.shields; });
@@ -210,6 +246,9 @@ namespace TFE_DarkForces
 			ScriptPropertySet("void set_ammoMine(int)", setAmmoMine);
 			ScriptPropertySet("void set_ammoMissile(int)", setAmmoMissile);
 			ScriptPropertySet("void set_ammoPlasma(int)", setAmmoPlasma);
+
+			ScriptObjMethod("void addToHealth(int)", addToHealth);
+			ScriptObjMethod("void addToShields(int)", addToShields);
 
 			// Items
 			ScriptObjMethod("bool hasRedKey()", hasRedKey);
