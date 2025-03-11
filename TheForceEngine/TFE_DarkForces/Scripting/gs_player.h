@@ -49,7 +49,19 @@ namespace TFE_DarkForces
 
 		bool hasPistol();
 		void givePistol();
-		
+		bool hasRifle();
+		void giveRifle();
+		bool hasAutogun();
+		void giveAutogun();
+		bool hasFusion();
+		void giveFusion();
+		bool hasMortar();
+		void giveMortar();
+		bool hasConcussion();
+		void giveConcussion();
+		bool hasCannon();
+		void giveCannon();
+
 		void removePistol();
 
 		void killPlayer();

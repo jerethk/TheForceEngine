@@ -198,6 +198,66 @@ namespace TFE_DarkForces
 		s_playerInfo.itemPistol = JTRUE;
 	}
 
+	bool GS_Player::hasRifle() 
+	{
+		return s_playerInfo.itemRifle == JTRUE;
+	}
+
+	void GS_Player::giveRifle()
+	{
+		s_playerInfo.itemRifle = JTRUE;
+	}
+
+	bool GS_Player::hasAutogun()
+	{
+		return s_playerInfo.itemAutogun == JTRUE;
+	}
+
+	void GS_Player::giveAutogun()
+	{
+		s_playerInfo.itemAutogun = JTRUE;
+	}
+
+	bool GS_Player::hasFusion()
+	{
+		return s_playerInfo.itemFusion == JTRUE;
+	}
+
+	void GS_Player::giveFusion()
+	{
+		s_playerInfo.itemFusion = JTRUE;
+	}
+
+	bool GS_Player::hasMortar()
+	{
+		return s_playerInfo.itemMortar == JTRUE;
+	}
+
+	void GS_Player::giveMortar()
+	{
+		s_playerInfo.itemMortar = JTRUE;
+	}
+
+	bool GS_Player::hasConcussion()
+	{
+		return s_playerInfo.itemConcussion == JTRUE;
+	}
+
+	void GS_Player::giveConcussion()
+	{
+		s_playerInfo.itemConcussion = JTRUE;
+	}
+
+	bool GS_Player::hasCannon()
+	{
+		return s_playerInfo.itemCannon == JTRUE;
+	}
+
+	void GS_Player::giveCannon()
+	{
+		s_playerInfo.itemCannon = JTRUE;
+	}
+
 	void GS_Player::removePistol()
 	{
 		s_playerInfo.itemPistol = JFALSE;
@@ -274,8 +334,19 @@ namespace TFE_DarkForces
 
 			// Weapons
 			ScriptObjMethod("bool hasPistol()", hasPistol);
-
 			ScriptObjMethod("void givePistol()", givePistol);
+			ScriptObjMethod("bool hasRifle()", hasRifle);
+			ScriptObjMethod("void giveRifle()", giveRifle);
+			ScriptObjMethod("bool hasAutogun()", hasAutogun);
+			ScriptObjMethod("void giveAutogun()", giveAutogun);
+			ScriptObjMethod("bool hasFusion()", hasFusion);
+			ScriptObjMethod("void giveFusion()", giveFusion);
+			ScriptObjMethod("bool hasMortar()", hasMortar);
+			ScriptObjMethod("void giveMortar()", giveMortar);
+			ScriptObjMethod("bool hasConcussion()", hasConcussion);
+			ScriptObjMethod("void giveConcussion()", giveConcussion);
+			ScriptObjMethod("bool hasCannon()", hasCannon);
+			ScriptObjMethod("void giveCannon()", giveCannon);
 
 			//ScriptObjMethod("void removePistol()", removePistol);
 		}
