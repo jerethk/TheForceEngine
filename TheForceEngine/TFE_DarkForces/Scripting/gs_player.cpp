@@ -263,7 +263,7 @@ namespace TFE_DarkForces
 	{
 		if (s_playerInfo.curWeapon == WPN_PISTOL)
 		{
-			s_playerInfo.newWeapon = WPN_FIST;
+			s_playerInfo.newWeapon = s_playerInfo.itemRifle ? WPN_RIFLE : WPN_FIST;
 		}
 		s_playerInfo.itemPistol = JFALSE;
 	}
@@ -272,7 +272,7 @@ namespace TFE_DarkForces
 	{
 		if (s_playerInfo.curWeapon == WPN_RIFLE)
 		{
-			s_playerInfo.newWeapon = WPN_FIST;
+			s_playerInfo.newWeapon = s_playerInfo.itemPistol ? WPN_PISTOL : WPN_FIST;
 		}
 		s_playerInfo.itemRifle = JFALSE;
 	}
@@ -281,7 +281,7 @@ namespace TFE_DarkForces
 	{
 		if (s_playerInfo.curWeapon == WPN_REPEATER)
 		{
-			s_playerInfo.newWeapon = WPN_FIST;
+			s_playerInfo.newWeapon = s_playerInfo.itemPistol ? WPN_PISTOL : WPN_FIST;
 		}
 		s_playerInfo.itemAutogun = JFALSE;
 	}
@@ -290,7 +290,7 @@ namespace TFE_DarkForces
 	{
 		if (s_playerInfo.curWeapon == WPN_FUSION)
 		{
-			s_playerInfo.newWeapon = WPN_FIST;
+			s_playerInfo.newWeapon = s_playerInfo.itemPistol ? WPN_PISTOL : WPN_FIST;
 		}
 		s_playerInfo.itemFusion = JFALSE;
 	}
@@ -299,7 +299,7 @@ namespace TFE_DarkForces
 	{
 		if (s_playerInfo.curWeapon == WPN_MORTAR)
 		{
-			s_playerInfo.newWeapon = WPN_FIST;
+			s_playerInfo.newWeapon = s_playerInfo.itemPistol ? WPN_PISTOL : WPN_FIST;
 		}
 		s_playerInfo.itemMortar = JFALSE;
 	}
@@ -308,7 +308,7 @@ namespace TFE_DarkForces
 	{
 		if (s_playerInfo.curWeapon == WPN_CONCUSSION)
 		{
-			s_playerInfo.newWeapon = WPN_FIST;
+			s_playerInfo.newWeapon = s_playerInfo.itemPistol ? WPN_PISTOL : WPN_FIST;
 		}
 		s_playerInfo.itemConcussion = JFALSE;
 	}
@@ -317,7 +317,7 @@ namespace TFE_DarkForces
 	{
 		if (s_playerInfo.curWeapon == WPN_CANNON)
 		{
-			s_playerInfo.newWeapon = WPN_FIST;
+			s_playerInfo.newWeapon = s_playerInfo.itemPistol ? WPN_PISTOL : WPN_FIST;
 		}
 		s_playerInfo.itemCannon = JFALSE;
 	}
