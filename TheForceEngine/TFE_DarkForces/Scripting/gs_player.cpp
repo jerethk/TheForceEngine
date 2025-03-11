@@ -3,6 +3,7 @@
 #include <TFE_DarkForces/player.h>
 #include <TFE_DarkForces/mission.h>
 #include <TFE_DarkForces/pickup.h>
+#include <TFE_DarkForces/weapon.h>
 #include <TFE_System/system.h>
 #include <angelscript.h>
 
@@ -260,8 +261,65 @@ namespace TFE_DarkForces
 
 	void GS_Player::removePistol()
 	{
+		if (s_playerInfo.curWeapon == WPN_PISTOL)
+		{
+			s_playerInfo.newWeapon = WPN_FIST;
+		}
 		s_playerInfo.itemPistol = JFALSE;
-		// TODO - to implement this (and other weapons) properly, we have to make the weapon disappear from the screen if the player is currently holding it
+	}
+
+	void GS_Player::removeRifle()
+	{
+		if (s_playerInfo.curWeapon == WPN_RIFLE)
+		{
+			s_playerInfo.newWeapon = WPN_FIST;
+		}
+		s_playerInfo.itemRifle = JFALSE;
+	}
+
+	void GS_Player::removeAutogun()
+	{
+		if (s_playerInfo.curWeapon == WPN_REPEATER)
+		{
+			s_playerInfo.newWeapon = WPN_FIST;
+		}
+		s_playerInfo.itemAutogun = JFALSE;
+	}
+
+	void GS_Player::removeFusion()
+	{
+		if (s_playerInfo.curWeapon == WPN_FUSION)
+		{
+			s_playerInfo.newWeapon = WPN_FIST;
+		}
+		s_playerInfo.itemFusion = JFALSE;
+	}
+
+	void GS_Player::removeMortar()
+	{
+		if (s_playerInfo.curWeapon == WPN_MORTAR)
+		{
+			s_playerInfo.newWeapon = WPN_FIST;
+		}
+		s_playerInfo.itemMortar = JFALSE;
+	}
+
+	void GS_Player::removeConcussion()
+	{
+		if (s_playerInfo.curWeapon == WPN_CONCUSSION)
+		{
+			s_playerInfo.newWeapon = WPN_FIST;
+		}
+		s_playerInfo.itemConcussion = JFALSE;
+	}
+
+	void GS_Player::removeCannon()
+	{
+		if (s_playerInfo.curWeapon == WPN_CANNON)
+		{
+			s_playerInfo.newWeapon = WPN_FIST;
+		}
+		s_playerInfo.itemCannon = JFALSE;
 	}
 
 	void GS_Player::killPlayer()
@@ -293,7 +351,7 @@ namespace TFE_DarkForces
 			ScriptLambdaPropertyGet("int get_ammoMine()", s32, { return s_playerInfo.ammoMine; });
 			ScriptLambdaPropertyGet("int get_ammoPlasma()", s32, { return s_playerInfo.ammoPlasma; });
 			ScriptLambdaPropertyGet("int get_ammoMissile()", s32, { return s_playerInfo.ammoMissile; });
-			ScriptObjMethod("int get_battery()", getBatteryPercent);	// Get battery as a percentage
+			ScriptPropertyGet("int get_battery()", getBatteryPercent);
 
 			// Health / ammo setters
 			ScriptPropertySet("void set_health(int)", setHealth);
@@ -334,21 +392,28 @@ namespace TFE_DarkForces
 
 			// Weapons
 			ScriptObjMethod("bool hasPistol()", hasPistol);
-			ScriptObjMethod("void givePistol()", givePistol);
 			ScriptObjMethod("bool hasRifle()", hasRifle);
-			ScriptObjMethod("void giveRifle()", giveRifle);
 			ScriptObjMethod("bool hasAutogun()", hasAutogun);
-			ScriptObjMethod("void giveAutogun()", giveAutogun);
 			ScriptObjMethod("bool hasFusion()", hasFusion);
-			ScriptObjMethod("void giveFusion()", giveFusion);
 			ScriptObjMethod("bool hasMortar()", hasMortar);
-			ScriptObjMethod("void giveMortar()", giveMortar);
 			ScriptObjMethod("bool hasConcussion()", hasConcussion);
-			ScriptObjMethod("void giveConcussion()", giveConcussion);
 			ScriptObjMethod("bool hasCannon()", hasCannon);
+
+			ScriptObjMethod("void givePistol()", givePistol);
+			ScriptObjMethod("void giveRifle()", giveRifle);
+			ScriptObjMethod("void giveAutogun()", giveAutogun);
+			ScriptObjMethod("void giveFusion()", giveFusion);
+			ScriptObjMethod("void giveMortar()", giveMortar);
+			ScriptObjMethod("void giveConcussion()", giveConcussion);
 			ScriptObjMethod("void giveCannon()", giveCannon);
 
-			//ScriptObjMethod("void removePistol()", removePistol);
+			ScriptObjMethod("void removePistol()", removePistol);
+			ScriptObjMethod("void removeRifle()", removeRifle);
+			ScriptObjMethod("void removeAutogun()", removeAutogun);
+			ScriptObjMethod("void removeFusion()", removeFusion);
+			ScriptObjMethod("void removeMortar()", removeMortar);
+			ScriptObjMethod("void removeConcussion()", removeConcussion);
+			ScriptObjMethod("void removeCannon()", removeCannon);
 		}
 		ScriptClassEnd();
 	}

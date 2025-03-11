@@ -63,6 +63,12 @@ namespace TFE_DarkForces
 		void giveCannon();
 
 		void removePistol();
+		void removeRifle();
+		void removeAutogun();
+		void removeFusion();
+		void removeMortar();
+		void removeConcussion();
+		void removeCannon();
 
 		void killPlayer();
 	};
