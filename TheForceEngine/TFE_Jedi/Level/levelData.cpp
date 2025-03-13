@@ -54,6 +54,7 @@ namespace TFE_Jedi
 		sector_clear(s_levelState.controlSector);
 
 		objData_clear();
+		obj_refListClear();
 	}
 
 	void level_serializeFixupMirrors()

@@ -67,6 +67,19 @@ enum ObjStateVersion : u32
 	ObjState_CurVersion = ObjState_ConstOverrides,
 };
 
+// TFE Scripting
+enum ObjectRefType
+{
+	ObjRefType_Startup           = 0,		// Present at level load
+	ObjRefType_Projectile        = 1,
+	ObjRefType_Effect            = 2,
+	ObjRefType_SpawnItem         = 3,		// Item spawned at runtime
+	ObjRefType_Corpse            = 4,
+	ObjRefType_GeneratorSpawn    = 5,
+	ObjRefType_ConsoleSpawn      = 6,
+	ObjRefType_Removed           = 7,		// Object no longer exists
+};
+
 #define SPRITE_SCALE_FIXED FIXED(10)
 
 struct SecObject
@@ -116,6 +129,15 @@ struct SecObject
 
 namespace TFE_Jedi
 {
+	// TFE - immutable reference list of objects for scripting
+	struct ObjectRef
+	{
+		SecObject* object;
+		ObjectRefType type;
+		char name[32];
+	};
+	extern std::vector<ObjectRef> s_objectRefList;		// THIS NEEDS TO BE SERIALISED
+	
 	void objData_clear();
 	SecObject* objData_allocFromArray();
 	void objData_freeToArray(SecObject* obj);
@@ -125,4 +147,10 @@ namespace TFE_Jedi
 	// Used for downstream serialization, to get the object from the serialized object ID.
 	SecObject* objData_getObjectBySerializationId(u32 id);
 	SecObject* objData_getObjectBySerializationId_NoValidation(u32 id);
+
+	// TFE - scripting
+	void obj_refListClear();
+	void obj_addToRefList(SecObject* obj, ObjectRefType refType);
+	void obj_removeFromRefList(SecObject* obj);
+	void obj_addName(const char* name, SecObject* obj);
 }
