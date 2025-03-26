@@ -2,7 +2,7 @@
 #include "scriptObject.h"
 #include "scriptSector.h"
 #include <angelscript.h>
-#include <TFE_FrontEndUI/console.h>
+#include <TFE_FrontEndUI/frontEndUi.h>
 #include <TFE_Asset/dfKeywords.h>
 #include <TFE_DarkForces/logic.h>
 #include <TFE_DarkForces/animLogic.h>
@@ -43,7 +43,7 @@ namespace TFE_DarkForces
 		{
 			if (obj->entityFlags & ETFLAG_PLAYER || obj->flags & OBJ_FLAG_EYE)
 			{
-				TFE_Console::addToHistory("Deleting the player or eye object is not allowed.");
+				TFE_FrontEndUI::logToConsole("Deleting the player or eye object is not allowed.");
 				return;
 			}
 			

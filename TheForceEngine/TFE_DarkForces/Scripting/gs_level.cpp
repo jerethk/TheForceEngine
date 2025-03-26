@@ -17,8 +17,6 @@
 #include <TFE_Jedi/Level/rsector.h>
 #include <TFE_Jedi/Level/rtexture.h>
 
-#include <TFE_DarkForces/logic.h>
-
 #include <angelscript.h>
 
 using namespace TFE_Jedi;
