@@ -546,6 +546,51 @@ namespace TFE_DarkForces
 		}
 	}
 
+	void disableMovement()
+	{
+		s_disablePlayerMovement = JTRUE;
+	}
+
+	void enableMovement()
+	{
+		s_disablePlayerMovement = JFALSE;
+	}
+
+	bool movementDisabled()
+	{
+		return s_disablePlayerMovement == JTRUE;
+	}
+
+	void disableRotation()
+	{
+		s_disablePlayerRotation = JTRUE;
+	}
+
+	void enableRotation()
+	{
+		s_disablePlayerRotation = JFALSE;
+	}
+
+	bool rotationDisabled()
+	{
+		return s_disablePlayerRotation == JTRUE;
+	}
+
+	void disableFire()
+	{
+		s_disablePlayerFire = JTRUE;
+	}
+
+	void enableFire()
+	{
+		s_disablePlayerFire = JFALSE;
+	}
+
+	bool fireDisabled()
+	{
+		return s_disablePlayerFire == JTRUE;
+	}
+
 	bool GS_Player::scriptRegister(ScriptAPI api)
 	{
 		ScriptClassBegin("Player", "player", api);
@@ -578,7 +623,16 @@ namespace TFE_DarkForces
 			ScriptEnumStr(AMMO_MISSILE);
 
 			ScriptObjFunc("void kill()", killPlayer);
-			
+			ScriptObjFunc("void disableMovement()", disableMovement);
+			ScriptObjFunc("void enableMovement()", enableMovement);
+			ScriptObjFunc("bool movementDisabled()", movementDisabled);
+			ScriptObjFunc("void disableRotation()", disableRotation);
+			ScriptObjFunc("void enableRotation()", enableRotation);
+			ScriptObjFunc("bool rotationDisabled()", rotationDisabled);
+			ScriptObjFunc("void disableFire()", disableFire);
+			ScriptObjFunc("void enableFire()", enableFire);
+			ScriptObjFunc("bool fireDisabled()", fireDisabled);
+
 			// Position and velocity
 			ScriptPropertyGetFunc("float3 get_position()", getPlayerPosition);
 			ScriptPropertySetFunc("void set_position(float3)", setPlayerPosition);
