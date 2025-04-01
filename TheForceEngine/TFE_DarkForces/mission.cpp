@@ -970,7 +970,7 @@ namespace TFE_DarkForces
 
 	void enableNightVision()
 	{
-		if (!s_playerInfo.itemGoggles) { return; }
+		if (!s_playerInfo.itemGoggles || s_externalCameraMode) { return; }
 
 		if (!s_batteryPower)
 		{

@@ -222,6 +222,7 @@ namespace TFE_DarkForces
 	SecObject* s_playerEye = nullptr;
 	vec3_fixed s_eyePos = { 0 };	// s_camX, s_camY, s_camZ in the DOS code.
 	angle14_32 s_eyePitch = 0, s_eyeYaw = 0, s_eyeRoll = 0;
+	JBool s_externalCameraMode = JFALSE;
 	u32 s_playerEyeFlags = OBJ_FLAG_NEEDS_TRANSFORM;
 	Tick s_playerTick;
 	Tick s_prevPlayerTick;
@@ -890,6 +891,7 @@ namespace TFE_DarkForces
 		s_playerPrimaryFire = JFALSE;
 		s_playerSecFire     = JFALSE;
 		s_playerJumping     = JFALSE;
+		s_externalCameraMode = JFALSE;
 
 		s_crushSoundId = 0;
 		s_kyleScreamSoundId = 0;
@@ -1534,6 +1536,8 @@ namespace TFE_DarkForces
 		s_playerCrouchSpd = 0;
 		s_prevDistFromFloor = 0;
 		s_playerObject->worldHeight = 0x5cccc;	// 5.8
+		s_externalCameraMode = JFALSE;
+		player_setupEyeObject(s_playerObject);
 	}
 
 	void player_changeSector(RSector* newSector)
