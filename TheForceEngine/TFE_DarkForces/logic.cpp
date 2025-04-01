@@ -101,6 +101,11 @@ namespace TFE_DarkForces
 		{
 			obj->worldWidth = floatToFixed16(strtof(s_objSeqArg1, &endPtr));
 		}
+		// New in TFE
+		else if (key == KW_CAMERA)
+		{
+			obj->flags |= OBJ_FLAG_CAMERA;
+		}
 		else  // Invalid key.
 		{
 			retValue = JFALSE;
