@@ -26,7 +26,7 @@ namespace TFE_Jedi
 	static SectorObjectData s_objData = {};
 
 	// TFE - immutable reference list of objects for scripting
-	// Objects are never deleted from this list so they will keep a unique ID based on their position in the list
+	// Entries are never deleted from this list so objects will keep a unique ID based on their position in the list
 	std::vector<ObjectRef> s_objectRefList;
 	
 	// Forward declarations
@@ -332,7 +332,8 @@ namespace TFE_Jedi
 
 	void obj_removeFromRefList(SecObject* obj)
 	{
-		// Remove the object reference but keep an "empty" space in the list so the Ids don't change
+		// Remove the object pointer, and mark the object as removed.
+		// This creates an "empty space" in the list so the Ids of other objects don't change
 		ObjectRef* objRef = obj_getRef(obj);
 		if (!objRef) { return; }
 

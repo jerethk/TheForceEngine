@@ -130,7 +130,7 @@ struct SecObject
 
 namespace TFE_Jedi
 {
-	// TFE - immutable reference list of objects for scripting
+	// TFE - reference list of objects for scripting
 	struct ObjectRef
 	{
 		SecObject* object;
