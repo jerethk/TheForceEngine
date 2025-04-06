@@ -11,6 +11,7 @@
 #include <TFE_Jedi/Task/task.h>
 #include <TFE_System/parser.h>
 #include <TFE_ExternalData/dfLogics.h>
+#include <TFE_ForceScript/forceScript.h>
 
 struct Logic;
 typedef void(*LogicCleanupFunc)(Logic*);
@@ -48,6 +49,13 @@ struct Logic
 	Logic** parent = nullptr;
 	Task* task = nullptr;
 	LogicCleanupFunc cleanupFunc = nullptr;
+};
+
+// TFE: ScriptCall from a logic.
+struct LogicScriptCall
+{
+	void* funcPtr;
+	s32 objectId;	// the ScriptObject's id, which can be passed as an arg
 };
 
 namespace TFE_DarkForces
