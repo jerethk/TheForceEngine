@@ -82,6 +82,47 @@ namespace TFE_DarkForces
 		}
 	}
 
+	void logic_addScriptCall(SecObject* obj, ActorScriptCallType type)
+	{
+		Logic** logicPtr = (Logic**)allocator_getHead((Allocator*)obj->logic);
+		while (logicPtr)
+		{
+			Logic* logic = *logicPtr;
+			if (logic->type == LOGIC_DISPATCH)
+			{
+				ActorDispatch* actor = (ActorDispatch*)logic;
+				LogicScriptCall* scriptCall = nullptr;
+				
+				switch (type)
+				{
+					case SCRIPTCALL_DEATH:
+						scriptCall = &actor->deathScriptCall;
+						break;
+					case SCRIPTCALL_ALERT:
+						scriptCall = &actor->alertScriptCall;
+						break;
+					case SCRIPTCALL_PAIN:
+						// not yet implemented
+						break;
+					default:
+						return;
+				}
+
+				if (scriptCall)
+				{
+					TFE_ForceScript::FunctionHandle func = getLevelScriptFunc(s_objSeqArg1);
+					if (func)
+					{
+						scriptCall->funcPtr = func;
+						scriptCall->objectId = obj_getRefIndex(obj);
+					}
+				}
+			}
+
+			logicPtr = (Logic**)allocator_getNext((Allocator*)obj->logic);
+		};
+	}
+
 	JBool logic_defaultSetupFunc(SecObject* obj, KEYWORD key)
 	{
 		char* endPtr;
@@ -106,6 +147,14 @@ namespace TFE_DarkForces
 		{
 			// TFE - scripting
 			TFE_Jedi::obj_addName(s_objSeqArg1, obj);
+		}
+		else if (key == KW_DEATHSCRIPTCALL)
+		{
+			logic_addScriptCall(obj, SCRIPTCALL_DEATH);
+		}
+		else if (key == KW_ALERTSCRIPTCALL)
+		{
+			logic_addScriptCall(obj, SCRIPTCALL_ALERT);
 		}
 		else  // Invalid key.
 		{
