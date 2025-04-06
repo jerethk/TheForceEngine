@@ -29,6 +29,7 @@
 #include <TFE_Jedi/Memory/list.h>
 #include <TFE_Jedi/Memory/allocator.h>
 #include <TFE_Jedi/Serialization/serialization.h>
+#include <TFE_ForceScript/forceScript.h>
 
 using namespace TFE_Jedi;
 
@@ -662,6 +663,14 @@ namespace TFE_DarkForces
 					obj_addToRefList(corpse, ObjRefType_Corpse);	// scripting
 				}
 			}
+
+			// TFE - call deathscript
+			ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
+			if (logic->deathScriptCall.funcPtr)
+			{
+				TFE_ForceScript::execFunc(logic->deathScriptCall.funcPtr, 0);
+			}
+
 			actor_kill();
 			return 0;
 		}
@@ -1978,6 +1987,15 @@ namespace TFE_DarkForces
 					s_actorState.nextAlertTick = s_curTick + 291;	// ~2 seconds between alerts
 				}
 				dispatch->flags &= ~ACTOR_IDLE;		// remove flag bit 0 (ACTOR_IDLE)
+
+				// TFE - call alertscript, pass the objectId as argument
+				if (dispatch->alertScriptCall.funcPtr)
+				{
+					TFE_ForceScript::ScriptArg arg;
+					arg.type = TFE_ForceScript::ARG_S32;
+					arg.iValue = dispatch->alertScriptCall.objectId;
+					TFE_ForceScript::execFunc(dispatch->alertScriptCall.funcPtr, 1, &arg);
+				}
 			}
 		}
 		else if (msg == MSG_DAMAGE || msg == MSG_EXPLOSION)
@@ -1988,6 +2006,15 @@ namespace TFE_DarkForces
 			}
 			dispatch->flags &= ~ACTOR_IDLE;
 			s_actorState.curAnimation = nullptr;
+
+			// TFE - call alertscript, pass the objectId as argument
+			if (dispatch->alertScriptCall.funcPtr)
+			{
+				TFE_ForceScript::ScriptArg arg;
+				arg.type = TFE_ForceScript::ARG_S32;
+				arg.iValue = dispatch->alertScriptCall.objectId;
+				TFE_ForceScript::execFunc(dispatch->alertScriptCall.funcPtr, 1, &arg);
+			}
 		}
 	}
 

@@ -94,6 +94,15 @@ enum ActorDispatchFlags
 	ACTOR_TROOP_ALERT		= FLAG_BIT(5),	// use stormtrooper alert sounds
 };
 
+// TFE Scripting
+enum ActorScriptCallType
+{
+	SCRIPTCALL_NONE = 0,
+	SCRIPTCALL_DEATH,
+	SCRIPTCALL_ALERT,
+	SCRIPTCALL_PAIN,
+};
+
 // Forward Declarations.
 struct ActorModule;
 struct MovementModule;
@@ -129,6 +138,10 @@ struct ActorDispatch
 
 	Task* freeTask;
 	u32 flags;
+
+	// TFE scripting - TODO: will need to serialise these
+	LogicScriptCall deathScriptCall;
+	LogicScriptCall alertScriptCall;
 };
 
 struct ActorState
