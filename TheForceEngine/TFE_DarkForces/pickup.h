@@ -26,6 +26,9 @@ namespace TFE_DarkForces
 		s32 amount;
 		s32 msgId[2];
 		s32 maxAmount;
+
+		// TFE scripting - TODO: will need to serialise these
+		LogicScriptCall pickupScriptCall;
 	};
 
 	ItemId getPickupItemId(const char* keyword);

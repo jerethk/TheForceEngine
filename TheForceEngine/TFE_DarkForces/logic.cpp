@@ -82,7 +82,7 @@ namespace TFE_DarkForces
 		}
 	}
 
-	void logic_addScriptCall(SecObject* obj, ActorScriptCallType type)
+	void logic_addScriptCall(SecObject* obj, LogicScriptCallType callType)
 	{
 		Logic** logicPtr = (Logic**)allocator_getHead((Allocator*)obj->logic);
 		while (logicPtr)
@@ -93,7 +93,7 @@ namespace TFE_DarkForces
 				ActorDispatch* actor = (ActorDispatch*)logic;
 				LogicScriptCall* scriptCall = nullptr;
 				
-				switch (type)
+				switch (callType)
 				{
 					case SCRIPTCALL_DEATH:
 						scriptCall = &actor->deathScriptCall;
@@ -116,6 +116,17 @@ namespace TFE_DarkForces
 						scriptCall->funcPtr = func;
 						scriptCall->objectId = obj_getRefIndex(obj);
 					}
+				}
+			}
+
+			if (logic->type == LOGIC_PICKUP && callType == SCRIPTCALL_PICKUP)
+			{
+				Pickup* pickup = (Pickup*)logic;
+				TFE_ForceScript::FunctionHandle func = getLevelScriptFunc(s_objSeqArg1);
+				if (func)
+				{
+					pickup->pickupScriptCall.funcPtr = func;
+					pickup->pickupScriptCall.objectId = obj_getRefIndex(obj);
 				}
 			}
 
@@ -155,6 +166,10 @@ namespace TFE_DarkForces
 		else if (key == KW_ALERTSCRIPTCALL)
 		{
 			logic_addScriptCall(obj, SCRIPTCALL_ALERT);
+		}
+		else if (key == KW_PICKUPSCRIPTCALL)
+		{
+			logic_addScriptCall(obj, SCRIPTCALL_PICKUP);
 		}
 		else  // Invalid key.
 		{

@@ -54,8 +54,17 @@ struct Logic
 // TFE: ScriptCall from a logic.
 struct LogicScriptCall
 {
-	void* funcPtr;
+	void* funcPtr = nullptr;
 	s32 objectId;	// the ScriptObject's id, which can be passed as an arg
+};
+
+enum LogicScriptCallType
+{
+	SCRIPTCALL_NONE = 0,
+	SCRIPTCALL_DEATH,
+	SCRIPTCALL_ALERT,
+	SCRIPTCALL_PAIN,
+	SCRIPTCALL_PICKUP,
 };
 
 namespace TFE_DarkForces
