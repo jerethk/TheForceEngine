@@ -66,7 +66,8 @@ enum ObjStateVersion : u32
 	ObjState_CustomLogics = 6,
 	ObjState_ConstOverrides = 7,
 	ObjState_DisablePlayerMovement = 8,
-	ObjState_CurVersion = ObjState_DisablePlayerMovement,
+	ObjState_ExternalCamera = 9,
+	ObjState_CurVersion = ObjState_ExternalCamera,
 };
 
 #define SPRITE_SCALE_FIXED FIXED(10)
