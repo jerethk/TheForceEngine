@@ -227,7 +227,7 @@ static const char* c_keywords[] =
 	"M_TRIGGER",
 	// TFE
 	"SCRIPTCALL:",
-	"NAME:"
+	"NAME:",
 	"CAMERA",
 };
 
