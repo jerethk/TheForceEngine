@@ -6,6 +6,7 @@
 #include <TFE_Asset/dfKeywords.h>
 #include <TFE_DarkForces/logic.h>
 #include <TFE_DarkForces/animLogic.h>
+#include <TFE_DarkForces/player.h>
 #include <TFE_ForceScript/forceScript.h>
 #include <TFE_ForceScript/scriptAPI.h>
 #include <TFE_Jedi/Level/levelData.h>
@@ -264,6 +265,15 @@ namespace TFE_DarkForces
 		// TODO enable adding custom logic
 	}
 
+	void setCamera(ScriptObject* sObject)
+	{
+		if (!doesObjectExist(sObject)) { return; }
+
+		SecObject* obj = TFE_Jedi::s_objectRefList[sObject->m_id].object;
+		player_setupEyeObject(obj);
+		s_externalCameraMode = obj == s_playerObject ? JFALSE : JTRUE;
+	}
+
 	void ScriptObject::registerType()
 	{
 		s32 res = 0;
@@ -300,5 +310,6 @@ namespace TFE_DarkForces
 		// Other functions
 		ScriptObjFunc("void delete()", deleteObject);
 		ScriptObjFunc("void addLogic(string)", addLogicToObject);
+		ScriptObjFunc("void setCamera()", setCamera);
 	}
 }
