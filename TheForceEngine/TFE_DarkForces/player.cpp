@@ -309,7 +309,8 @@ namespace TFE_DarkForces
 	// TFE
 	void player_warp(const ConsoleArgList& args);
 	void player_sector(const ConsoleArgList& args);
-		
+	void handlePlayerAnimation();
+
 	///////////////////////////////////////////
 	// API Implentation
 	///////////////////////////////////////////
@@ -937,6 +938,8 @@ namespace TFE_DarkForces
 
 		s_playerSecMoved = JFALSE;
 		s_playerSector = obj->sector;
+
+		setupPlayerAnim(5, JTRUE);
 	}
 
 	void player_setupEyeObject(SecObject* obj)
@@ -1500,6 +1503,7 @@ namespace TFE_DarkForces
 
 			if (s_lifeCount != 0 && s_curSafe)
 			{
+				setupPlayerAnim(5, JTRUE);
 				s_lifeCount -= 1;
 				player_revive();
 				player_reset();
@@ -1579,9 +1583,18 @@ namespace TFE_DarkForces
 					handlePlayerPhysics();
 					handlePlayerActions();
 					handlePlayerScreenFx();
+					handlePlayerAnimation();
 					if (s_playerDying)
 					{
 						handlePlayerDying();
+					}
+					
+					if (s_playerObject->wax)
+					{
+						if (actor_advanceAnimation(&s_playerLogic.anim, s_playerObject))
+						{
+							s_playerLogic.anim.flags |= AFLAG_READY;
+						}
 					}
 				}
 			}
@@ -1591,7 +1604,43 @@ namespace TFE_DarkForces
 		}
 		task_end;
 	}
-	
+
+	void setupPlayerAnim(s32 animId, JBool looping)
+	{
+		if (s_playerObject->wax)
+		{
+			LogicAnimation* logicAnim = &s_playerLogic.anim;
+
+			if (looping == JTRUE)
+			{
+				// If this is a looping animation that is already playing, don't reset it
+				if (logicAnim->animId == animId) { return; }
+
+				logicAnim->flags &= ~AFLAG_PLAYONCE;
+			}
+			else
+			{
+				logicAnim->flags |= AFLAG_PLAYONCE;
+			}
+
+			logicAnim->animId = animId;
+			logicAnim->prevTick = 0;
+			logicAnim->startFrame = 0;
+			logicAnim->frame = 0;
+
+			WaxAnim* waxAnim = WAX_AnimPtr(s_playerObject->wax, logicAnim->animId);
+			assert(waxAnim);
+			if (waxAnim)
+			{
+				logicAnim->frameCount = intToFixed16(waxAnim->frameCount);
+				logicAnim->frameRate = min(waxAnim->frameRate, 30);
+				logicAnim->flags &= ~AFLAG_READY;
+			}
+
+			s_playerObject->anim = logicAnim->animId;
+		}
+	}
+
 	///////////////////////////////////////////
 	// Internal Implentation
 	///////////////////////////////////////////
@@ -1746,6 +1795,8 @@ namespace TFE_DarkForces
 				s_playerJumping = JTRUE;
 				s_playerUpVel  = speed;
 				s_playerUpVel2 = speed;
+
+				setupPlayerAnim(6, JFALSE);
 			}
 		}
 		else if (s_flyMode && s_playerUpVel < 0)
@@ -1863,6 +1914,63 @@ namespace TFE_DarkForces
 			// In the original DOS code, airControl = 8.
 			s_forwardSpd >>= airControl;
 			s_strafeSpd  >>= airControl;
+		}
+	}
+
+	void handlePlayerAnimation()
+	{
+		if (s_playerDying)
+		{ 
+			return;
+		}
+
+		// Only change animation if we are on a looping animation, or if a non-looping animation has finished playing
+		if (!(s_playerLogic.anim.flags & AFLAG_PLAYONCE) || s_playerLogic.anim.flags & AFLAG_READY)
+		{
+			// In the air
+			if (!s_onFloor)
+			{
+				setupPlayerAnim(11, JTRUE);
+				return;
+			}
+
+			// Standing
+			if (s_playerObject->worldHeight > FIXED(4))
+			{
+				// Moving forward or strafing
+				if (s_forwardSpd > HALF_16 || s_strafeSpd < -HALF_16 || s_strafeSpd > HALF_16)
+				{
+					setupPlayerAnim(0, JTRUE);
+				}
+				// Moving backwards
+				else if (s_forwardSpd < -HALF_16)
+				{
+					setupPlayerAnim(0, JTRUE);
+				}
+				// Stationary
+				else
+				{
+					setupPlayerAnim(5, JTRUE);
+				}
+			}
+			// Crouching
+			else 
+			{
+				if (s_forwardSpd > HALF_16 || s_strafeSpd < -HALF_16 || s_strafeSpd > HALF_16)
+				{
+					setupPlayerAnim(8, JTRUE);
+				}
+				// Moving backwards
+				else if (s_forwardSpd < -HALF_16)
+				{
+					setupPlayerAnim(8, JTRUE);
+				}
+				// Stationary
+				else
+				{
+					setupPlayerAnim(8, JTRUE);
+				}
+			}
 		}
 	}
 
@@ -2575,6 +2683,8 @@ namespace TFE_DarkForces
 		fixed16_16 health  = intToFixed16(s_playerInfo.health);
 		health += s_playerInfo.healthFract;
 
+		setupPlayerAnim(12, JFALSE);
+
 		s32 applyDmg = s_invincibility ? 0 : 1;
 		if (applyDmg && health && shieldDmg >= 0)
 		{
@@ -2622,6 +2732,8 @@ namespace TFE_DarkForces
 				s_gasSectorTask = nullptr;
 				s_playerDying = JTRUE;
 				s_reviveTick = s_curTick + 436;
+
+				setupPlayerAnim(2, JFALSE);
 			}
 			else
 			{
@@ -2768,6 +2880,7 @@ namespace TFE_DarkForces
 		}
 		if (s_playerUse)
 		{
+			setupPlayerAnim(7, JFALSE);
 			s_playerUse = JFALSE;
 			if (!s_playerActionUse)
 			{

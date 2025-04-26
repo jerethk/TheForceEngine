@@ -5,6 +5,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include <TFE_System/types.h>
+#include <TFE_DarkForces/Actor/actorModule.h>
 #include "logic.h"
 
 namespace TFE_DarkForces
@@ -16,5 +17,7 @@ namespace TFE_DarkForces
 		vec2_fixed dir;
 		vec3_fixed move;
 		fixed16_16 stepHeight;
+
+		LogicAnimation anim;
 	};
 }  // namespace TFE_DarkForces

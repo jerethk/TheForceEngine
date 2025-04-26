@@ -201,6 +201,8 @@ namespace TFE_DarkForces
 	// Conversely the headlamp will make 'obj' visible from further away.
 	JBool actor_isObjectVisible(SecObject* actorObj, SecObject* obj, angle14_32 fov, fixed16_16 closeDist);
 
+	JBool actor_advanceAnimation(LogicAnimation* anim, SecObject* obj);
+
 	extern ActorState s_actorState;
 	extern SoundSourceId s_alertSndSrc[ALERT_COUNT];
 	extern SoundSourceId s_officerAlertSndSrc[OFFICER_ALERT_COUNT];
