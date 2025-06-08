@@ -4,6 +4,7 @@
 #include "player.h"
 #include "sound.h"
 #include <cstring>
+#include <TFE_Asset/modelAsset_jedi.h>
 #include <TFE_Asset/spriteAsset_Jedi.h>
 #include <TFE_Jedi/Collision/collision.h>
 #include <TFE_Jedi/InfSystem/infSystem.h>
@@ -1534,7 +1535,7 @@ namespace TFE_DarkForces
 	}
 
 	// Update the spawn offset of a projectile based on the player's position and projec
-	void transformFireOffsets(SecObject* obj, vec3_fixed * sourceOffset, vec3 * offset)
+	void transformFireOffsets(SecObject* obj, vec3_fixed * sourceOffset, vec3_fixed * offset)
 	{
 		float dx = s_playerObject->posWS.x - obj->posWS.x;
 		float dz = s_playerObject->posWS.z - obj->posWS.z;

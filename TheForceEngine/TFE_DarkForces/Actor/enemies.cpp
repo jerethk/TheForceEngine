@@ -221,14 +221,9 @@ namespace TFE_DarkForces
 		attackMod->meleeRate = FIXED(cust->meleeRate);
 		attackMod->minDist = FIXED(cust->minAttackDist);
 		attackMod->fireSpread = FIXED(cust->fireSpread);
-		attackMod->fireOffset.x = cust->fireOffset.x;
-		attackMod->fireOffset.y = cust->fireOffset.y;
-		attackMod->fireOffset.z = cust->fireOffset.z;
-		attackMod->altFireOffset.x = cust->altFireOffset.x;
-		attackMod->altFireOffset.y = cust->altFireOffset.y;
-		attackMod->altFireOffset.z = cust->altFireOffset.z;
-
-
+		attackMod->fireOffset.x = floatToFixed16(cust->fireOffset.x);
+		attackMod->fireOffset.y = cust->fireOffset.y < -999 ? attackMod->fireOffset.y : floatToFixed16(cust->fireOffset.y);		// if -1000 use the default value 
+		attackMod->fireOffset.z = floatToFixed16(cust->fireOffset.z);
 		s_actorState.attackMod = attackMod;
 		actor_addModule(dispatch, (ActorModule*)attackMod);
 

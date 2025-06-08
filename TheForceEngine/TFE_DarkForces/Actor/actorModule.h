@@ -152,7 +152,6 @@ struct AttackModule
 	fixed16_16 fireSpread;
 	Tick accuracyNextTick;
 	vec3_fixed fireOffset;
-	vec3_fixed altFireOffset;
 
 	ProjectileType projType;
 	SoundSourceId attackSecSndSrc;
