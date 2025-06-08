@@ -1030,7 +1030,7 @@ namespace TFE_DarkForces
 				vec3_fixed fireOffset = {};
 
 				// Calculate the X,Z fire offsets based on where the enemy is facing. It doesn't matter for Y. 
-				transformFireOffsets(obj, &attackMod->fireOffset, &fireOffset);
+				transformFireOffsets(obj->yaw, &attackMod->fireOffset, &fireOffset);
 
 				ProjectileLogic* proj = (ProjectileLogic*)createProjectile(attackMod->projType, obj->sector, fireOffset.x + obj->posWS.x, fireOffset.y + obj->posWS.y, fireOffset.z + obj->posWS.z, obj);
 				sound_playCued(attackMod->attackPrimSndSrc, obj->posWS);
@@ -1103,7 +1103,7 @@ namespace TFE_DarkForces
 				vec3_fixed fireOffset = {};
 				
 				// Calculate the fire offsets based on where the enemy is facing. It doesn't matter for Y. 
-				transformFireOffsets(obj, &attackMod->fireOffset, &fireOffset);
+				transformFireOffsets(obj->yaw, &attackMod->fireOffset, &fireOffset);
 
 				ProjectileLogic* proj = (ProjectileLogic*)createProjectile(attackMod->projType, obj->sector, fireOffset.x + obj->posWS.x, fireOffset.y + obj->posWS.y, fireOffset.z + obj->posWS.z, obj);
 				sound_playCued(attackMod->attackPrimSndSrc, obj->posWS);

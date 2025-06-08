@@ -1534,21 +1534,15 @@ namespace TFE_DarkForces
 		return JFALSE;
 	}
 
-	// Update the spawn offset of a projectile based on the player's position and projec
-	void transformFireOffsets(SecObject* obj, vec3_fixed * sourceOffset, vec3_fixed * offset)
+	// Transform the spawn offset of a projectile based on orientation (yaw)
+	void transformFireOffsets(angle14_16 yaw, vec3_fixed* sourceOffset, vec3_fixed* offset)
 	{
-		float dx = s_playerObject->posWS.x - obj->posWS.x;
-		float dz = s_playerObject->posWS.z - obj->posWS.z;
+		fixed16_16 sinYaw;
+		fixed16_16 cosYaw;
 
-		// Distance - thank you Pythagoras 
-		float length = sqrtf(dx * dx + dz * dz);
-		if (length == 0) return;
-
-		dx /= length;
-		dz /= length;
-
-		offset->x = sourceOffset->x * dx + sourceOffset->z * -dz;
-		offset->z = sourceOffset->x * dz + sourceOffset->z * dx;
+		sinCosFixed(yaw, &sinYaw, &cosYaw);
+		offset->x = mul16(sourceOffset->x,cosYaw) + mul16(sourceOffset->z, sinYaw);
+		offset->z = -mul16(sourceOffset->x,sinYaw) + mul16(sourceOffset->z, cosYaw);
 		offset->y = sourceOffset->y;
 	}
 

@@ -342,16 +342,16 @@ namespace TFE_ExternalData
 		// X value negative =  projectile spawns to the RIGHT of actor 
 		// Z value postivie =  projectile spawns in FRONT of actor
 		// Z value negative =  projectile spawns BEHIND the actor
-		// Y value positive =  projectile spawns BELOW the actor
-		// Y value negative =  projectile spawns ABOVE the actor
+		// Y value positive =  projectile spawns ABOVE the actor
+		// Y value negative =  projectile spawns BELOW the actor
 		//
 		if (cJSON_IsArray(data) && strcasecmp(data->string, "fireOffset") == 0)
 		{
 
 			if (cJSON_GetArraySize(data) == 3)
 			{
-				customLogic.fireOffset.x = cJSON_GetArrayItem(data, 0)->valuedouble;
-				customLogic.fireOffset.y = cJSON_GetArrayItem(data, 1)->valuedouble;
+				customLogic.fireOffset.x = -cJSON_GetArrayItem(data, 0)->valuedouble;
+				customLogic.fireOffset.y = -cJSON_GetArrayItem(data, 1)->valuedouble;
 				customLogic.fireOffset.z = cJSON_GetArrayItem(data, 2)->valuedouble;
 				return true;
 			}

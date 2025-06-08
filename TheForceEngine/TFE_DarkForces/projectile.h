@@ -137,5 +137,5 @@ namespace TFE_DarkForces
 
 	extern WallHitFlag s_hitWallFlag;
 	extern angle14_32 s_projReflectOverrideYaw;
-	void transformFireOffsets(SecObject* obj, vec3_fixed * sourceOffset, vec3_fixed* offset);
+	void transformFireOffsets(angle14_16 yaw, vec3_fixed* sourceOffset, vec3_fixed* offset);
 }  // namespace TFE_DarkForces
