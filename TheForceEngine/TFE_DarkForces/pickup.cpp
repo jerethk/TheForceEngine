@@ -331,6 +331,12 @@ namespace TFE_DarkForces
 			sound_play(s_itemPickupSnd);
 		}
 
+		// TFE - Call Pickup script
+		if (pickup->pickupScriptCall.funcPtr)
+		{
+			TFE_ForceScript::execFunc(pickup->pickupScriptCall.funcPtr, pickup->pickupScriptCall.argCount, pickup->pickupScriptCall.args);
+		}
+
 		// Initialize effect
 		s_flashEffect = FIXED(15);
 		task_makeActive(s_pickupTask);

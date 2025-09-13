@@ -614,6 +614,8 @@ namespace TFE_DarkForces
 			}
 			spawnHitEffect(damageMod->dieEffect, sector, obj->posWS, obj);
 
+			s32 corpseId = -1;	// corpseId to be passed to a deathscriptcall
+
 			// If the secHeight is <= 0, then it is not a water sector.
 			if (sector->secHeight - 1 < 0)
 			{
@@ -665,8 +667,20 @@ namespace TFE_DarkForces
 					sector_addObject(obj->sector, corpse);
 
 					obj_addToRefList(corpse, ObjRefType_Corpse);	// scripting
+					corpseId = obj_getRefIndex(corpse);
 				}
 			}
+
+			// TFE - call deathscript, add corpse's ObjectId as the final arg
+			LogicScriptCall* scriptCall = &((ActorDispatch*)s_actorState.curLogic)->deathScriptCall;
+			if (scriptCall && scriptCall->funcPtr)
+			{
+				scriptCall->argCount++;
+				scriptCall->args[scriptCall->argCount - 1].type = TFE_ForceScript::ARG_S32;
+				scriptCall->args[scriptCall->argCount - 1].iValue = corpseId;
+				TFE_ForceScript::execFunc(scriptCall->funcPtr, scriptCall->argCount, scriptCall->args);
+			}
+
 			actor_kill();
 			return 0;
 		}
@@ -2014,6 +2028,16 @@ namespace TFE_DarkForces
 					s_actorState.nextAlertTick = s_curTick + 291;	// ~2 seconds between alerts
 				}
 				dispatch->flags &= ~ACTOR_IDLE;		// remove flag bit 0 (ACTOR_IDLE)
+
+				// TFE - call alertscript, add the ObjectId as the final arg
+				LogicScriptCall* scriptCall = &dispatch->alertScriptCall;
+				if (scriptCall && scriptCall->funcPtr)
+				{
+					scriptCall->argCount++;
+					scriptCall->args[scriptCall->argCount - 1].type = TFE_ForceScript::ARG_S32;
+					scriptCall->args[scriptCall->argCount - 1].iValue = obj_getRefIndex(obj);
+					TFE_ForceScript::execFunc(scriptCall->funcPtr, scriptCall->argCount, scriptCall->args);
+				}
 			}
 		}
 		else if (msg == MSG_DAMAGE || msg == MSG_EXPLOSION)
@@ -2021,6 +2045,16 @@ namespace TFE_DarkForces
 			if (dispatch->flags & ACTOR_IDLE)
 			{
 				gameMusic_startFight();
+
+				// TFE - call alertscript, add the ObjectId as the final arg
+				LogicScriptCall* scriptCall = &dispatch->alertScriptCall;
+				if (scriptCall && scriptCall->funcPtr)
+				{
+					scriptCall->argCount++;
+					scriptCall->args[scriptCall->argCount - 1].type = TFE_ForceScript::ARG_S32;
+					scriptCall->args[scriptCall->argCount - 1].iValue = obj_getRefIndex(obj);
+					TFE_ForceScript::execFunc(scriptCall->funcPtr, scriptCall->argCount, scriptCall->args);
+				}
 			}
 			dispatch->flags &= ~ACTOR_IDLE;
 			s_actorState.curAnimation = nullptr;
