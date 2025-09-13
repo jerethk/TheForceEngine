@@ -82,6 +82,119 @@ namespace TFE_DarkForces
 		}
 	}
 
+	s32 logic_parseScriptCallArg(SecObject* obj, TFE_ForceScript::ScriptArg* arg, s32 maxArgCount, const char* arg0, const char* arg1, const char* arg2, const char* arg3)
+	{
+		const char* argList[] = { arg0, arg1, arg2, arg3 };
+		s32 argCount = 0;
+		for (s32 i = 0; i < maxArgCount; i++)
+		{
+			const char* value = argList[i];
+			if (!value || value[0] == 0) { continue; }
+
+			if (strcasecmp(value, "true") == 0)
+			{
+				arg[argCount].bValue = true;
+				arg[argCount].type = TFE_ForceScript::ARG_BOOL;
+				argCount++;
+			}
+			else if (strcasecmp(value, "false") == 0)
+			{
+				arg[argCount].bValue = false;
+				arg[argCount].type = TFE_ForceScript::ARG_BOOL;
+				argCount++;
+			}
+			else if (value[0] == '\"')
+			{
+				// Remove the quotes.
+				char unquotedStr[256];
+				const s32 len = (s32)strlen(value);
+				s32 lastQuote = 0;
+				for (s32 c = 1; c < len; c++)
+				{
+					if (value[c] == '\"')
+					{
+						lastQuote = c;
+					}
+				}
+				const s32 newLen = min(255, lastQuote - 1);
+				if (newLen >= 1)
+				{
+					memcpy(unquotedStr, &value[1], newLen);
+					unquotedStr[newLen] = 0;
+
+					arg[argCount].stdStr = std::string(unquotedStr);
+					arg[argCount].type = TFE_ForceScript::ARG_STRING;
+					argCount++;
+				}
+			}
+			// If it is a numerical value, assume float.
+			else
+			{
+				char* endPtr = nullptr;
+				arg[argCount].fValue = strtof(value, &endPtr);
+				arg[argCount].type = TFE_ForceScript::ARG_F32;
+				argCount++;
+			}
+		}
+
+		return argCount;
+	}
+	
+	void logic_addScriptCall(SecObject* obj, LogicScriptCallType callType)
+	{
+		Logic** logicPtr = (Logic**)allocator_getHead((Allocator*)obj->logic);
+		while (logicPtr)
+		{
+			Logic* logic = *logicPtr;
+			
+			// DISPATCH logic can have a deathScriptCall and alertScriptCall
+			if (logic->type == LOGIC_DISPATCH)
+			{
+				ActorDispatch* actor = (ActorDispatch*)logic;
+				LogicScriptCall* scriptCall = nullptr;
+				
+				switch (callType)
+				{
+					case SCRIPTCALL_DEATH:
+						scriptCall = &actor->deathScriptCall;
+						break;
+					case SCRIPTCALL_ALERT:
+						scriptCall = &actor->alertScriptCall;
+						break;
+					case SCRIPTCALL_PAIN:
+						// not yet implemented
+						break;
+					default:
+						return;
+				}
+
+				if (scriptCall)
+				{
+					TFE_ForceScript::FunctionHandle func = getLevelScriptFunc(s_objSeqArg1);
+					if (func)
+					{
+						scriptCall->funcPtr = func;
+						scriptCall->argCount = logic_parseScriptCallArg(obj, scriptCall->args, s_objSeqArgCount - 2, s_objSeqArg2, s_objSeqArg3, s_objSeqArg4, s_objSeqArg5);
+					}
+				}
+			}
+
+			// PICKUP logic can have pickupScriptCall
+			if (logic->type == LOGIC_PICKUP && callType == SCRIPTCALL_PICKUP)
+			{
+				Pickup* pickup = (Pickup*)logic;
+				TFE_ForceScript::FunctionHandle func = getLevelScriptFunc(s_objSeqArg1);
+				if (func)
+				{
+					pickup->pickupScriptCall.funcPtr = func;
+					pickup->pickupScriptCall.argCount = logic_parseScriptCallArg(obj, pickup->pickupScriptCall.args, s_objSeqArgCount - 2, s_objSeqArg2, s_objSeqArg3, s_objSeqArg4, s_objSeqArg5);
+				}
+			}
+
+			logicPtr = (Logic**)allocator_getNext((Allocator*)obj->logic);
+		};
+	}
+
 	JBool logic_defaultSetupFunc(SecObject* obj, KEYWORD key)
 	{
 		char* endPtr;
@@ -111,6 +224,18 @@ namespace TFE_DarkForces
 		else if (key == KW_CAMERA)
 		{
 			obj->flags |= OBJ_FLAG_CAMERA;
+		}
+		else if (key == KW_DEATHSCRIPTCALL)
+		{
+			logic_addScriptCall(obj, SCRIPTCALL_DEATH);
+		}
+		else if (key == KW_ALERTSCRIPTCALL)
+		{
+			logic_addScriptCall(obj, SCRIPTCALL_ALERT);
+		}
+		else if (key == KW_PICKUPSCRIPTCALL)
+		{
+			logic_addScriptCall(obj, SCRIPTCALL_PICKUP);
 		}
 		else  // Invalid key.
 		{

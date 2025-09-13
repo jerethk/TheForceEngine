@@ -129,6 +129,10 @@ struct ActorDispatch
 
 	Task* freeTask;
 	u32 flags;
+
+	// TFE scripting - TODO: will need to serialise these
+	LogicScriptCall deathScriptCall;
+	LogicScriptCall alertScriptCall;
 };
 
 struct ActorState

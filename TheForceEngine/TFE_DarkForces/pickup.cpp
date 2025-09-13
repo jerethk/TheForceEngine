@@ -469,6 +469,10 @@ namespace TFE_DarkForces
 		pickup->msgId[0] = -1;
 		pickup->msgId[1] = -1;
 		pickup->maxAmount = 999;
+		
+		pickup->pickupScriptCall.funcPtr = nullptr;
+		pickup->pickupScriptCall.argCount = 0;
+		memset(pickup->pickupScriptCall.args, 0, sizeof(TFE_ForceScript::ScriptArg) * 5);
 
 		setPickup(pickup, obj, id, TFE_ExternalData::getExternalPickups());
 		return (Logic*)pickup;
