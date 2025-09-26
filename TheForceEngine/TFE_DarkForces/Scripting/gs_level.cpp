@@ -5,6 +5,7 @@
 #include "scriptWall.h"
 #include "scriptSector.h"
 #include "scriptObject.h"
+#include "scriptSound.h"
 #include <TFE_DarkForces/agent.h>
 #include <TFE_DarkForces/player.h>
 #include <TFE_DarkForces/projectile.h>
@@ -247,12 +248,14 @@ namespace TFE_DarkForces
 		ScriptTexture scriptTex;
 		ScriptSector scriptSector;
 		ScriptWall scriptWall;
+		ScriptSound scriptSound;
 		ScriptObject scriptObject;
 		scriptElev.registerType();
 		scriptTex.registerType();
 		scriptWall.registerType();
 		scriptObject.registerType();
 		scriptSector.registerType();
+		scriptSound.registerType();
 		scriptObject.registerFunctions();
 		
 		ScriptClassBegin("Level", "level", api);
