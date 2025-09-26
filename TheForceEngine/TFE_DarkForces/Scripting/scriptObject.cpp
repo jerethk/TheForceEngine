@@ -651,8 +651,8 @@ namespace TFE_DarkForces
 
 	void setSound(LogicSound type, ScriptSound sound, ScriptObject* sObject)
 	{
-		if (!isSoundValid(&sound)) { return; }
 		if (!doesObjectExist(sObject)) { return; }
+		if (!isSoundValid(&sound)) { return; }
 
 		SecObject* obj = TFE_Jedi::s_objectRefList[sObject->m_id].object;
 		ActorDispatch* dispatch = getDispatch(obj);
@@ -693,6 +693,56 @@ namespace TFE_DarkForces
 						return;
 					case SND_ATTACK2:
 						attackMod->attackSecSndSrc = sound_getSoundFromIndex(sound.m_id);
+					}
+				}
+				return;
+			}
+		}
+	}
+
+	void setNullSound(LogicSound type, ScriptObject* sObject)
+	{
+		if (!doesObjectExist(sObject)) { return; }
+
+		SecObject* obj = TFE_Jedi::s_objectRefList[sObject->m_id].object;
+		ActorDispatch* dispatch = getDispatch(obj);
+		if (dispatch)
+		{
+			if (type == SND_ALERT)
+			{
+				dispatch->alertSndSrc = NULL_SOUND;
+			}
+
+			if (type == SND_PAIN || type == SND_DIE)
+			{
+				DamageModule* damageMod = getDamageModule(dispatch);
+				if (damageMod)
+				{
+					switch (type)
+					{
+					case SND_PAIN:
+						damageMod->hurtSndSrc = NULL_SOUND;
+						return;
+					case SND_DIE:
+						damageMod->dieSndSrc = NULL_SOUND;
+						return;
+					}
+				}
+				return;
+			}
+
+			if (type == SND_ATTACK1 || type == SND_ATTACK2)
+			{
+				AttackModule* attackMod = getAttackModule(dispatch);
+				if (attackMod)
+				{
+					switch (type)
+					{
+					case SND_ATTACK1:
+						attackMod->attackPrimSndSrc = NULL_SOUND;
+						return;
+					case SND_ATTACK2:
+						attackMod->attackSecSndSrc = NULL_SOUND;
 					}
 				}
 				return;
@@ -814,6 +864,7 @@ namespace TFE_DarkForces
 		ScriptPropertySetFunc("void set_velocity(float3)", setVelocity);
 		ScriptObjFunc("Sound getSound(int)", getSound);
 		ScriptObjFunc("void setSound(int, Sound)", setSound);
+		ScriptObjFunc("void setNullSound(int)", setNullSound);
 		ScriptObjFunc("Sprite getWax()", getSprite);
 		ScriptObjFunc("void setWax(Sprite)", setSprite);
 	}
