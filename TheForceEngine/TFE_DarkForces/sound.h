@@ -78,4 +78,6 @@ namespace TFE_DarkForces
 	// Get the sound data index from the id.
 	s32 sound_getIndexFromId(SoundSourceId id);
 	SoundSourceId sound_getSoundFromIndex(s32 index, bool refCount = true);
+	
+	s32 sound_getCount();
 }  // namespace TFE_Jedi

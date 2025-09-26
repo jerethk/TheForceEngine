@@ -2,6 +2,7 @@
 #include "gs_player.h"
 #include "scriptObject.h"
 #include "scriptSector.h"
+#include "scriptSound.h"
 #include <angelscript.h>
 #include <TFE_FrontEndUI/frontEndUi.h>
 #include <TFE_Asset/dfKeywords.h>
@@ -19,6 +20,15 @@
 
 namespace TFE_DarkForces
 {
+	enum LogicSound
+	{
+		SND_ALERT,
+		SND_PAIN,
+		SND_DIE,
+		SND_ATTACK1,
+		SND_ATTACK2,
+	};
+	
 	// The "special" actors can all be cast to this struct (eg. bosses, dark troopers, mousebot, turret)
 	struct SpecialActor	
 	{
@@ -578,6 +588,116 @@ namespace TFE_DarkForces
 		}
 	}
 
+	ScriptSound getSound(LogicSound type, ScriptObject* sObject)
+	{
+		if (!doesObjectExist(sObject))
+		{ 
+			ScriptSound sound(-1);
+			return sound; 
+		}
+		
+		SecObject* obj = TFE_Jedi::s_objectRefList[sObject->m_id].object;
+		ActorDispatch* dispatch = getDispatch(obj);
+		if (dispatch)
+		{
+			if (type == SND_ALERT)
+			{
+				s32 index = sound_getIndexFromId(dispatch->alertSndSrc);
+				ScriptSound sound(index);
+				return sound;
+			}
+
+			if (type == SND_PAIN || type == SND_DIE)
+			{
+				s32 index = -1;
+				DamageModule* damageMod = getDamageModule(dispatch);
+				if (damageMod)
+				{
+					switch (type)
+					{
+					case SND_PAIN:
+						index = sound_getIndexFromId(damageMod->hurtSndSrc);
+						break;
+					case SND_DIE:
+						index = sound_getIndexFromId(damageMod->dieSndSrc);
+						break;
+					}
+				}
+				
+				ScriptSound sound(index);
+				return sound;
+			}
+
+			if (type == SND_ATTACK1 || type == SND_ATTACK2)
+			{
+				s32 index = -1;
+				AttackModule* attackMod = getAttackModule(dispatch);
+				if (attackMod)
+				{
+					index = type == SND_ATTACK2
+						? sound_getIndexFromId(attackMod->attackSecSndSrc)
+						: sound_getIndexFromId(attackMod->attackPrimSndSrc);
+				}
+				ScriptSound sound(index);
+				return sound;
+			}
+		}
+
+		ScriptSound sound(-1);
+		return sound;
+	}
+
+	void setSound(LogicSound type, ScriptSound sound, ScriptObject* sObject)
+	{
+		if (!isSoundValid(&sound)) { return; }
+		if (!doesObjectExist(sObject)) { return; }
+
+		SecObject* obj = TFE_Jedi::s_objectRefList[sObject->m_id].object;
+		ActorDispatch* dispatch = getDispatch(obj);
+		if (dispatch)
+		{
+			if (type == SND_ALERT)
+			{
+				dispatch->alertSndSrc = sound_getSoundFromIndex(sound.m_id);
+			}
+
+			if (type == SND_PAIN || type == SND_DIE)
+			{
+				DamageModule* damageMod = getDamageModule(dispatch);
+				if (damageMod)
+				{
+					switch (type)
+					{
+					case SND_PAIN:
+						damageMod->hurtSndSrc = sound_getSoundFromIndex(sound.m_id);
+						return;
+					case SND_DIE:
+						damageMod->dieSndSrc = sound_getSoundFromIndex(sound.m_id);
+						return;
+					}
+				}
+				return;
+			}
+
+			if (type == SND_ATTACK1 || type == SND_ATTACK2)
+			{
+				AttackModule* attackMod = getAttackModule(dispatch);
+				if (attackMod)
+				{
+					switch (type)
+					{
+					case SND_ATTACK1:
+						attackMod->attackPrimSndSrc = sound_getSoundFromIndex(sound.m_id);
+						return;
+					case SND_ATTACK2:
+						attackMod->attackSecSndSrc = sound_getSoundFromIndex(sound.m_id);
+					}
+				}
+				return;
+			}
+		}
+	}
+
 	void ScriptObject::registerType()
 	{
 		s32 res = 0;
@@ -608,6 +728,13 @@ namespace TFE_DarkForces
 		ScriptEnumStr(PROJ_HOMING_MISSILE);
 		ScriptEnumStr(PROJ_PROBE_PROJ);
 		ScriptEnum("PROJ_BOBAFETT_BALL", PROJ_BOBAFET_BALL);
+
+		ScriptEnumRegister("LogicSound");
+		ScriptEnumStr(SND_ALERT);
+		ScriptEnumStr(SND_PAIN);
+		ScriptEnumStr(SND_DIE);
+		ScriptEnumStr(SND_ATTACK1);
+		ScriptEnumStr(SND_ATTACK2);
 
 		// Checks
 		ScriptObjFunc("bool isValid()", isScriptObjectValid);
@@ -645,5 +772,7 @@ namespace TFE_DarkForces
 		ScriptPropertySetFunc("void set_projectile(int)", setProjectile);
 		ScriptPropertyGetFunc("float3 get_velocity()", getVelocity);
 		ScriptPropertySetFunc("void set_velocity(float3)", setVelocity);
+		ScriptObjFunc("Sound getSound(int)", getSound);
+		ScriptObjFunc("void setSound(int, Sound)", setSound)
 	}
 }

@@ -450,4 +450,9 @@ namespace TFE_DarkForces
 		GameSound* sound = getSoundPtr(id);
 		return sound ? sound->data : nullptr;
 	}
+
+	s32 sound_getCount()
+	{
+		return allocator_getCount(sound_state.gameSoundList);
+	}
 }  // TFE_DarkForces
