@@ -448,6 +448,7 @@ echo ^)";
     <ClInclude Include="TFE_DarkForces\Scripting\scriptObject.h" />
     <ClInclude Include="TFE_DarkForces\Scripting\scriptSector.h" />
     <ClInclude Include="TFE_DarkForces\Scripting\scriptSound.h" />
+    <ClInclude Include="TFE_DarkForces\Scripting\scriptSprite.h" />
     <ClInclude Include="TFE_DarkForces\Scripting\scriptTexture.h" />
     <ClInclude Include="TFE_DarkForces\Scripting\scriptWall.h" />
     <ClInclude Include="TFE_DarkForces\sound.h" />
@@ -866,6 +867,7 @@ echo ^)";
     <ClCompile Include="TFE_DarkForces\Scripting\scriptObject.cpp" />
     <ClCompile Include="TFE_DarkForces\Scripting\scriptSector.cpp" />
     <ClCompile Include="TFE_DarkForces\Scripting\scriptSound.cpp" />
+    <ClCompile Include="TFE_DarkForces\Scripting\scriptSprite.cpp" />
     <ClCompile Include="TFE_DarkForces\Scripting\scriptTexture.cpp" />
     <ClCompile Include="TFE_DarkForces\Scripting\scriptWall.cpp" />
     <ClCompile Include="TFE_DarkForces\sound.cpp" />

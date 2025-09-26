@@ -803,6 +803,21 @@ namespace TFE_Sprite_Jedi
 		return false;
 	}
 
+	bool getWaxIndexFromLevelPool(JediWax* wax, s32* index)
+	{
+		const size_t waxCount = s_spriteList[POOL_LEVEL].size();
+		JediWax** waxList = s_spriteList[POOL_LEVEL].data();
+		for (size_t i = 0; i < waxCount; i++)
+		{
+			if (waxList[i] == wax)
+			{
+				*index = s32(i);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	JediWax* getWaxByIndex(s32 index, AssetPool pool)
 	{
 		if (pool >= POOL_COUNT || index >= (s32)s_spriteList[pool].size())
@@ -838,5 +853,10 @@ namespace TFE_Sprite_Jedi
 			return nullptr;
 		}
 		return s_frameList[pool][index];
+	}
+
+	s32 getWaxCount(AssetPool pool)
+	{
+		return s_spriteList[pool].size();
 	}
 }
