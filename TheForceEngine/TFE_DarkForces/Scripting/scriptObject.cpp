@@ -3,9 +3,11 @@
 #include "scriptObject.h"
 #include "scriptSector.h"
 #include "scriptSound.h"
+#include "scriptSprite.h"
 #include <angelscript.h>
 #include <TFE_FrontEndUI/frontEndUi.h>
 #include <TFE_Asset/dfKeywords.h>
+#include <TFE_Asset/spriteAsset_Jedi.h>
 #include <TFE_DarkForces/logic.h>
 #include <TFE_DarkForces/animLogic.h>
 #include <TFE_DarkForces/pickup.h>
@@ -698,6 +700,44 @@ namespace TFE_DarkForces
 		}
 	}
 
+	ScriptSprite getSprite(ScriptObject* sObject)
+	{
+		if (!doesObjectExist(sObject))
+		{
+			ScriptSprite sprite(-1);
+			return sprite;
+		}
+
+		SecObject* obj = TFE_Jedi::s_objectRefList[sObject->m_id].object;
+		if (obj->type != OBJ_TYPE_SPRITE)
+		{
+			ScriptSprite sprite(-1);
+			return sprite;
+		}
+		
+		JediWax* wax = obj->wax;
+		s32 index = -1;
+		TFE_Sprite_Jedi::getWaxIndexFromLevelPool(wax, &index);
+
+		ScriptSprite sprite(index);
+		return sprite;
+	}
+
+	void setSprite(ScriptSprite sprite, ScriptObject* sObject)
+	{
+		if (!doesObjectExist(sObject)) { return; }
+		if (!isSpriteValid(&sprite)) { return; }
+
+		SecObject* obj = TFE_Jedi::s_objectRefList[sObject->m_id].object;
+		if (obj->type != OBJ_TYPE_SPRITE) {	return;	}
+
+		JediWax* wax = TFE_Sprite_Jedi::getWaxByIndex(sprite.m_id, POOL_LEVEL);
+		if (wax)
+		{
+			obj->wax = wax;
+		}
+	}
+
 	void ScriptObject::registerType()
 	{
 		s32 res = 0;
@@ -773,6 +813,8 @@ namespace TFE_DarkForces
 		ScriptPropertyGetFunc("float3 get_velocity()", getVelocity);
 		ScriptPropertySetFunc("void set_velocity(float3)", setVelocity);
 		ScriptObjFunc("Sound getSound(int)", getSound);
-		ScriptObjFunc("void setSound(int, Sound)", setSound)
+		ScriptObjFunc("void setSound(int, Sound)", setSound);
+		ScriptObjFunc("Sprite getWax()", getSprite);
+		ScriptObjFunc("void setWax(Sprite)", setSprite);
 	}
 }

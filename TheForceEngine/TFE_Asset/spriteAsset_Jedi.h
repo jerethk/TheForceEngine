@@ -116,10 +116,13 @@ namespace TFE_Sprite_Jedi
 	const std::vector<JediFrame*>& getFrameList(AssetPool pool = POOL_LEVEL);
 
 	bool getWaxIndex(JediWax* wax, s32* index, AssetPool* pool);
+	bool getWaxIndexFromLevelPool(JediWax* wax, s32* index);	// Search only in the level pool
 	JediWax* getWaxByIndex(s32 index, AssetPool pool);
 
 	bool getFrameIndex(JediFrame* frame, s32* index, AssetPool* pool);
 	JediFrame* getFrameByIndex(s32 index, AssetPool pool);
+
+	s32 getWaxCount(AssetPool pool);
 
 	void sprite_serializeSpritesAndFrames(Stream* stream);
 }
