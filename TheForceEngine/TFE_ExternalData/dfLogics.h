@@ -43,6 +43,12 @@ namespace TFE_ExternalData
 		u32 fireSpread = 30;
 		vec3_float fireOffset = { 0, -1000, 0 };	// (y = -1000) will be treated as default
 
+		// burst fire
+		bool hasBurstFire = false;
+		u32 burstNumber = 5;
+		u32 burstVariation = 2;
+		u32 burstInterval = 29;
+
 		u32 speed = 4;
 		u32 verticalSpeed = 10;
 		u32 rotationSpeed = 720;	// 0x7fff in DF angle
