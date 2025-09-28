@@ -68,7 +68,10 @@ enum ObjStateVersion : u32
 	ObjState_DisablePlayerMovement = 8,
 	ObjState_RefList = 9,
 	ObjState_ExternalCamera = 10,
-	ObjState_CurVersion = ObjState_ExternalCamera,
+	ObjState__scriptcalls = 11,
+	ObjState__burstfire = 12,
+	ObjState_ActorTeams = 13,
+	ObjState_CurVersion = ObjState_ActorTeams,
 };
 
 // TFE Scripting
