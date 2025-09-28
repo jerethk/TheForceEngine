@@ -192,7 +192,7 @@ namespace TFE_DarkForces
 		dispatch->alertSndSrc = sound_load(cust->alertSound, SOUND_PRIORITY_MED5);
 		dispatch->fov = floatToAngle((f32)cust->fov);
 		dispatch->awareRange = FIXED(cust->awareRange);
-		//dispatch->team = cust->team;
+		dispatch->team = (ActorTeam)cust->team;
 
 		// Damage Module
 		DamageModule* damageMod = actor_createDamageModule(dispatch);

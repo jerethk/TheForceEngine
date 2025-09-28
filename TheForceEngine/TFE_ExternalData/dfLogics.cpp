@@ -370,6 +370,12 @@ namespace TFE_ExternalData
 			return true;
 		}
 
+		if (cJSON_IsNumber(data) && strcasecmp(data->string, "team") == 0)
+		{
+			customLogic.team = data->valueint;
+			return true;
+		}
+
 		// When it comes to offsets these are considered from the perspective of the actor.
 		//
 		// Projectile spawn details guide.
