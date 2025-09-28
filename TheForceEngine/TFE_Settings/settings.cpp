@@ -1432,7 +1432,7 @@ namespace TFE_Settings
 		return s_graphicsSettings.fix3doNormalOverflow;
 	}
 
-	bool jsonAiLogics()
+	bool enhancedAiLogics()
 	{
 		if (s_modSettings.jsonAiLogics != MSO_NOT_SET)
 		{

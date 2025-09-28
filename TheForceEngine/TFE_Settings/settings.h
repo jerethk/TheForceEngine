@@ -221,7 +221,7 @@ struct TFE_Settings_Game
 	bool df_stepSecondAlt = false;		// Allow the player to step up onto second heights, similar to the way normal stairs work.
 	bool df_solidWallFlagFix = true;	// Solid wall flag is enforced for collision with moving walls.
 	bool df_enableUnusedItem = true;	// Enables the unused item in the inventory (delt 10).
-	bool df_jsonAiLogics = true;		// AI logics can be loaded from external JSON files
+	bool df_jsonAiLogics = true;		// Custom logics, AI teams, and other logic enhancements
 	bool df_enableRecording = false;    // Enable recording of gameplay
 	bool df_enableRecordingAll = false; // Always record gameplay. 
 	bool df_enableReplay = false;       // Enable replay of gameplay.
@@ -438,7 +438,7 @@ namespace TFE_Settings
 	bool ignore3doLimits();
 	bool normalFix3do();
 	bool enableUnusedItem();
-	bool jsonAiLogics();
+	bool enhancedAiLogics();
 
 	// Settings for level mod overrides.
 	ModSettingLevelOverride getLevelOverrides(string levelName);

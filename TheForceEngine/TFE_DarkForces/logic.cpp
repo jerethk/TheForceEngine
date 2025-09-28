@@ -146,7 +146,7 @@ namespace TFE_DarkForces
 					? tryFindCustomActorLogic(s_objSeqArg1)
 					: nullptr;		// do not allow "LOGIC: PLAYER" to be overridden !!
 
-				if (TFE_Settings::jsonAiLogics() && customLogic)
+				if (TFE_Settings::enhancedAiLogics() && customLogic)
 				{
 					newLogic = obj_setCustomActorLogic(obj, customLogic);
 					setupFunc = nullptr;
