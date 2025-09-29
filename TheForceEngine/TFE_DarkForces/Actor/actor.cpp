@@ -865,6 +865,11 @@ namespace TFE_DarkForces
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
 
+		if (logic->team == TEAM_NEUTRAL)
+		{
+			return attackMod->timing.delay;	// neutrals don't attack
+		}
+		
 		// Killed AIs have sector = nullptr, so need to be reassigned
 		if (!logic->targetObject || !logic->targetObject->sector)
 		{
@@ -1054,7 +1059,7 @@ namespace TFE_DarkForces
 							// reduce by half, same as with projectiles
 							// use MSG_EXPLOSION (a hack, but it works)
 							s_msgArg1 = attackMod->meleeDmg >> 1;
-							s_msgArg2 = FIXED(5);	// force
+							s_msgArg2 = FIXED(10);	// force
 							message_sendToObj(logic->targetObject, MSG_EXPLOSION, nullptr);
 						}
 						
@@ -1332,9 +1337,14 @@ namespace TFE_DarkForces
 		else if (thinkerMod->anim.state == STATE_TURN)
 		{
 			ActorDispatch* logic = actor_getCurrentLogic();
-			if (!logic->targetObject || !logic->targetObject->sector || !actor_canSeeObject(obj, logic->targetObject))
+			if (logic->team != TEAM_NEUTRAL)
 			{
-				logic->targetObject = findNewTargetObject(obj, logic->team);
+				if (!logic->targetObject || 
+					!logic->targetObject->sector || 
+					(logic->team != TEAM_DEFAULT && !actor_canSeeObject(obj, logic->targetObject)))	// TEAM_DEFAULT stays targeted on the player even if they lose sight
+				{
+					logic->targetObject = findNewTargetObject(obj, logic->team);
+				}
 			}
 
 			fixed16_16 targetX, targetZ;
@@ -2388,10 +2398,13 @@ namespace TFE_DarkForces
 			return nullptr;	// team neutral does not target anybody
 		}
 
-		// preferentially target the player if it can be seen
-		if (sourceTeam != TEAM_PLAYER && actor_canSeeObject(sourceObj, s_playerObject))
+		if (sourceTeam != TEAM_PLAYER)
 		{
-			return s_playerObject;
+			// target the player if it can be seen (50% probability)
+			if (random(10) < 5 && actor_canSeeObject(sourceObj, s_playerObject))
+			{
+				return s_playerObject;
+			}
 		}
 
 		RSector* sector = s_levelState.sectors;
@@ -2410,10 +2423,9 @@ namespace TFE_DarkForces
 					continue;	// only target AI actors
 				}
 
-				// don't target actors > 200 DFU distant
-				fixed16_16 dx = TFE_Jedi::abs(sourceObj->posWS.x - obj->posWS.x);
-				fixed16_16 dz = TFE_Jedi::abs(sourceObj->posWS.z - obj->posWS.z);
-				if (dx > FIXED(200) || dz > FIXED(200))
+				// don't target actors > 250 DFU distant
+				fixed16_16 dist = distApprox(sourceObj->posWS.x, sourceObj->posWS.z, obj->posWS.x, obj->posWS.z);
+				if (dist > FIXED(250))
 				{
 					continue;
 				}
@@ -2434,6 +2446,8 @@ namespace TFE_DarkForces
 				}
 				if (!dispatch) { continue; }
 
+				if (!(dispatch->flags & ACTOR_NPC)) { continue; }	// only target NPCs (exclude barrels and scenery)
+				
 				if (dispatch->team == TEAM_NEUTRAL) { continue; }	// don't target objects on "team neutral"
 
 				if (sourceTeam != TEAM_NONE && sourceTeam == dispatch->team)
