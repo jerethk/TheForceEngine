@@ -12,6 +12,7 @@
 #include <TFE_DarkForces/pickup.h>
 #include <TFE_DarkForces/weapon.h>
 #include <TFE_DarkForces/sound.h>
+#include <TFE_DarkForces/hud.h>
 #include <TFE_Game/igame.h>
 #include <TFE_Asset/modelAsset_jedi.h>
 #include <TFE_FileSystem/paths.h>
@@ -460,6 +461,7 @@ namespace TFE_DarkForces
 
 					if (local(phase) == ATTACK_POINT)
 					{
+						TFE_DarkForces::hud_sendTextMessage("ATTACK_POINT", 0, false);
 						local(nextPhaseChangeTick)   = s_curTick + ATTACK_POINT_DURATION;
 						local(moveState)->thrustScale = ONE_16;
 						local(phase) = ATTACK_POINT1;
@@ -485,6 +487,7 @@ namespace TFE_DarkForces
 
 					if (local(phase) == ATTACK_CIRCLE)
 					{
+						TFE_DarkForces::hud_sendTextMessage("ATTACK_CIRCLE", 0, false);
 						local(nextPhaseChangeTick) = s_curTick + ATTACK_CIRCLE_DURATION;
 						local(lateralAccel) = (s_curTick & 1) ? -FIXED(15) : FIXED(15);
 						local(phase) = ATTACK_CIRCLE1;
@@ -507,6 +510,7 @@ namespace TFE_DarkForces
 
 					if (local(phase) == ATTACK_FIGURE8)
 					{
+						TFE_DarkForces::hud_sendTextMessage("ATTACK_FIGURE8", 0, false);
 						local(nextPhaseChangeTick) = s_curTick + ATTACK_FIGURE8_DURATION;
 						local(nextSwapAccelTick)   = s_curTick + FIGURE8_INTERVAL;
 						local(phase) = ATTACK_FIGURE8_1;
@@ -529,6 +533,30 @@ namespace TFE_DarkForces
 				{
 					local(phase) = (s_curTick & 1) ? ATTACK_POINT : (AttackPhase)floor16(random(FIXED(ATTACK_COUNT)));
 					local(nextPhaseChangeTick) = 0xffffffff;
+				}
+
+				const char* objName = "fetttarget";
+				SecObject* targetMarker = nullptr;
+				for (s32 i = 0; i < s_objectRefList.size(); i++)
+				{
+					if (strcasecmp(objName, s_objectRefList[i].name) == 0)
+					{
+						targetMarker = s_objectRefList[i].object;
+						break;
+					}
+				}
+
+				if (targetMarker)
+				{
+					targetMarker->posWS.x = local(moveState)->target.x;
+					targetMarker->posWS.y = local(moveState)->target.y;
+					targetMarker->posWS.z = local(moveState)->target.z;
+
+					RSector* sector = sector_which3D(targetMarker->posWS.x, targetMarker->posWS.y, targetMarker->posWS.z);
+					if (sector && (sector != targetMarker->sector))
+					{
+						sector_addObject(sector, targetMarker);
+					}
 				}
 
 				bobaFett_handleMovement(local(bobaFett));
@@ -685,15 +713,23 @@ namespace TFE_DarkForces
 
 			if (local(phase) == SEARCH_FIND)
 			{
+				TFE_DarkForces::hud_sendTextMessage("SEARCH_FIND", 0, false);
 				local(bobaFett)->moveState.target.x = s_playerObject->posWS.x;
 				local(bobaFett)->moveState.target.y = s_eyePos.y + FIXED(3);
 				local(bobaFett)->moveState.target.z = s_playerObject->posWS.z;
 			}
 			else if (local(phase) == SEARCH_RAND)
 			{
+				TFE_DarkForces::hud_sendTextMessage("SEARCH_RANDOM", 0, false);
 				local(bobaFett)->moveState.target.x = local(obj)->posWS.x;
 				local(bobaFett)->moveState.target.z = local(obj)->posWS.z;
-				actor_offsetTarget(&local(bobaFett)->moveState.target.x, &local(bobaFett)->moveState.target.z, FIXED(80), FIXED(40), random_next(), 0x1fff);
+				actor_offsetTarget(
+					&local(bobaFett)->moveState.target.x, // targetX
+					&local(bobaFett)->moveState.target.z, // targetZ
+					FIXED(80), // targetOffset
+					FIXED(40), // targetVariation
+					random_next(), // angle
+					0x1fff); // angleVariation
 				local(phase) = SEARCH_CONTINUE;
 			}
 			// else SEARCH_CONTINUE : Continue with current target.
