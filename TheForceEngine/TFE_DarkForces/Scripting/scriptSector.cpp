@@ -2,6 +2,7 @@
 #include "scriptWall.h"
 #include "scriptTexture.h"
 #include "scriptObject.h"
+#include "scriptElev.h"
 #include <TFE_ForceScript/ScriptAPI-Shared/scriptMath.h>
 #include <TFE_ForceScript/Angelscript/add_on/scriptarray/scriptarray.h>
 #include <TFE_Jedi/Level/levelData.h>
@@ -9,6 +10,8 @@
 #include <TFE_Jedi/Level/rsector.h>
 #include <TFE_Jedi/Level/robjData.h>
 #include <TFE_Jedi/InfSystem/message.h>
+#include <TFE_Jedi/InfSystem/infPublicTypes.h>
+#include <TFE_Jedi/InfSystem/infState.h>
 #include <angelscript.h>
 
 using namespace TFE_Jedi;
@@ -219,6 +222,37 @@ namespace TFE_DarkForces
 		}
 	}
 
+	ScriptElev getElevator(s32 number, ScriptSector* sSector)
+	{
+		if (isScriptSectorValid(sSector))
+		{
+			RSector* sector = &s_levelState.sectors[sSector->m_id];
+
+			s32 i = 0;
+			InfLink* link = (InfLink*)allocator_getHead(sector->infLink);
+			while (link)
+			{
+				if (link->type == LTYPE_SECTOR)
+				{
+					if (i == number) { break; }
+					i++;
+				}
+
+				link = (InfLink*)allocator_getNext(sector->infLink);
+			}
+
+			if (link && link->elev)
+			{
+				s32 elevIndex = allocator_getIndex(s_infSerState.infElevators, link->elev);
+				ScriptElev elev(elevIndex);
+				return elev;
+			}
+		}
+		
+		ScriptElev elev(-1);
+		return elev;
+	}
+
 	void ScriptSector::registerType()
 	{
 		s32 res = 0;
@@ -236,6 +270,7 @@ namespace TFE_DarkForces
 		ScriptObjFunc("float2 getCenterXZ()", getCenterXZ);
 		ScriptObjFunc("Wall getWall(int)", getWall);
 		ScriptObjFunc("void getObjects(array<Object>&)", getSectorObjects);
+		ScriptObjFunc("Elevator getElevator(int)", getElevator);
 
 		ScriptObjFunc("void sendMessage(int)", sendMessageToSector1);
 		ScriptObjFunc("void sendMessage(int, uint)", sendMessageToSector2);
