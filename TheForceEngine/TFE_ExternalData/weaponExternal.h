@@ -124,6 +124,7 @@ namespace TFE_ExternalData
 	ExternalEffect* getExternalEffects();
 	ExternalWeapon* getExternalWeapons();
 	ExternalGasmask* getExternalGasmask();
+	int getProjectileIndex(const char* type);
 	void clearExternalProjectiles();
 	void clearExternalEffects();
 	void clearExternalWeapons();

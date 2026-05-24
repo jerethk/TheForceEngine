@@ -34,5 +34,6 @@ namespace TFE_DarkForces
 		void findConnectedSectors(ScriptSector initSector, u32 matchProp, CScriptArray& results);
 		void setGravity(s32 grav);
 		void setProjectileGravity(s32 grav);
+		void spawnProjectile(std::string type, f32 x, f32 y, f32 z, f32 pitch, f32 yaw);
 	};
 }

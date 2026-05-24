@@ -21,7 +21,6 @@ namespace TFE_ExternalData
 	//////////////////////////////
 	// Forward Declarations
 	//////////////////////////////
-	int getProjectileIndex(char* type);
 	int getEffectIndex(char* type);
 	int getWeaponIndex(char* name);
 	bool tryAssignGasmaskProperty(cJSON* data);
@@ -421,7 +420,7 @@ namespace TFE_ExternalData
 		return true;
 	}
 
-	int getProjectileIndex(char* type)
+	int getProjectileIndex(const char* type)
 	{
 		for (int i = 0; i < TFE_DarkForces::PROJ_COUNT; i++)
 		{

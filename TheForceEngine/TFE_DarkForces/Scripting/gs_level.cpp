@@ -18,6 +18,8 @@
 #include <TFE_Jedi/Level/rwall.h>
 #include <TFE_Jedi/Level/rsector.h>
 #include <TFE_Jedi/Level/rtexture.h>
+#include <TFE_ExternalData/weaponExternal.h>
+#include <TFE_ExternalData/customProjectile.h>
 
 #include <angelscript.h>
 
@@ -241,6 +243,35 @@ namespace TFE_DarkForces
 		}
 	}
 
+	void GS_Level::spawnProjectile(std::string type, f32 x, f32 y, f32 z, f32 pitch, f32 yaw)
+	{
+		// Search standard projectiles
+		s32 projIndex = TFE_ExternalData::getProjectileIndex(type.c_str());
+
+		// Search custom projectiles
+		if (projIndex < 0)
+		{
+			projIndex = TFE_ExternalData::getCustomProjectileIndex(type.c_str());
+			projIndex += TFE_ExternalData::CUSTOM_PROJ_STARTNUM;
+		}
+
+		if (projIndex < 0) { return; }
+
+		fixed16_16 xFixed = floatToFixed16(x);
+		fixed16_16 yFixed = -floatToFixed16(y);
+		fixed16_16 zFixed = floatToFixed16(z);
+
+		RSector* sec = sector_which3D(xFixed, yFixed, zFixed);
+
+		// Can't create a projectile if there is no sector for it
+		if (!sec) { return; }
+
+		ProjectileLogic* proj = (ProjectileLogic*)createProjectile((ProjectileType)projIndex, sec, xFixed, yFixed, zFixed, nullptr);
+		angle14_32 pitchFixed = floatToAngle(pitch);
+		angle14_32 yawFixed = floatToAngle(yaw);
+		proj_setTransform(proj, pitchFixed, yawFixed);
+	}
+
 	bool GS_Level::scriptRegister(ScriptAPI api)
 	{
 		ScriptElev scriptElev;
@@ -324,6 +355,8 @@ namespace TFE_DarkForces
 
 			ScriptPropertySet("void set_gravity(int)", setGravity);
 			ScriptPropertySet("void set_projectileGravity(int)", setProjectileGravity);
+
+			ScriptObjMethod("void spawnProjectile(string, float, float, float, float, float)", spawnProjectile);
 
 			// -- Getters --
 			ScriptLambdaPropertyGet("int get_minLayer()", s32, { return s_levelState.minLayer; });
