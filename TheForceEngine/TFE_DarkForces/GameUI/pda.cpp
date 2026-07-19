@@ -1003,9 +1003,17 @@ namespace TFE_DarkForces
 	// This is specifically for ANIMpda_0.PNG
 	void pda_copyHighResBackgroundToBitmap()
 	{
-		u32 width = s_pdaArt->w * 2;
-		u32 height = s_pdaArt->h * 2;
-		s16* deltData = (s16*)s_pdaArt->array[s_pdaArt->state];
+		s16 index = s_pdaArt->state;
+
+		// This may happen if the PNG failed to load
+		if (!s_pdaArtHigh || s_pdaArtHigh->arraySize <= index)
+		{
+			return;
+		}
+
+		u32 width = min((u32)s_pdaArt->w * 2, s_pdaArtHigh->imageWidths[index]);
+		u32 height = min((u32)s_pdaArt->h * 2, s_pdaArtHigh->imageHeights[index]);
+		s16* deltData = (s16*)s_pdaArt->array[index];
 		s16 xOffset = deltData[0] * 2;
 		s16 yOffset = deltData[1] * 2;
 
@@ -1021,16 +1029,24 @@ namespace TFE_DarkForces
 			for (s32 x = 0; x < width; x++)
 			{
 				if ((x >= contentRect.left && x <= contentRect.right) && (y >= contentRect.top && y <= contentRect.bottom)) { continue; }	// skip pixels in the content rect
-				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = s_pdaArtHigh->array[s_pdaArt->state][y * width + x];
+				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = s_pdaArtHigh->array[index][y * s_pdaArtHigh->imageWidths[index] + x];
 			}
 		}
 	}
 
 	void pda_copyHighResImageToBitmap(LActor* lactor, HighResActor* hiResActor)
 	{
-		u32 width = lactor->w * 2;
-		u32 height = lactor->h * 2;
-		s16* deltData = (s16*)lactor->array[lactor->state];
+		s16 index = lactor->state;
+
+		// This may happen if any PNGs failed to load
+		if (!hiResActor || hiResActor->arraySize <= index)
+		{
+			return;
+		}
+
+		u32 width = min((u32)lactor->w * 2, hiResActor->imageWidths[index]);
+		u32 height = min((u32)lactor->h * 2, hiResActor->imageHeights[index]);
+		s16* deltData = (s16*)lactor->array[index];
 		s16 xOffset = deltData[0] * 2;
 		s16 yOffset = deltData[1] * 2;
 
@@ -1038,7 +1054,7 @@ namespace TFE_DarkForces
 		{
 			for (s32 x = 0; x < width; x++)
 			{
-				u32 pixel = hiResActor->array[lactor->state][y * width + x];
+				u32 pixel = hiResActor->array[index][y * hiResActor->imageWidths[index] + x];
 				if (pixel >> 24u == 0) { continue; }	// skip transparent pixels
 				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = pixel;
 			}
@@ -1055,19 +1071,28 @@ namespace TFE_DarkForces
 
 	void pda_copyHighResBriefingToBitmap()
 	{
-		s32 origWidth = s_briefing->w + 1;	// We have to add 1 here to get the correct width, because DELT format saves width as width - 1
+		if (!s_briefingHigh || s_briefingHigh->arraySize < 1)
+		{
+			return;
+		}
+
+		// We have to add 1 here to get the correct dimensions, see the DELT format
+		s32 origWidth = s_briefing->w + 1;
+		s32 origHeight = s_briefing->h + 1;
+
 		s32 margin = (s_overlayRect.right - s_overlayRect.left - origWidth) >> 1;
 		s32 xOffset = (margin + s_overlayRect.left) * 2;
 		s32 yOffset = s_overlayRect.top * 2;
-		s32 clipTop = s_briefY * 2;
-		s32 clipBot = min(s_overlayRect.bottom - s_overlayRect.top + s_briefY, s_briefing->h) * 2;
-		u32 width = origWidth * 2;
+		u32 width = min((u32)origWidth * 2, s_briefingHigh->imageWidths[0]);
+		u32 height = min((u32)origHeight * 2, s_briefingHigh->imageHeights[0]);
+		s32 clipTop = min((u32)s_briefY * 2, height);
+		s32 clipBot = min((u32)(s_overlayRect.bottom - s_overlayRect.top + s_briefY) * 2, height);
 
 		for (s32 y = clipTop; y < clipBot; y++)
 		{
 			for (s32 x = 0; x < width; x++)
 			{
-				u32 pixel = s_briefingHigh->array[0][y * width + x];
+				u32 pixel = s_briefingHigh->array[0][y * s_briefingHigh->imageWidths[0] + x];
 				if (pixel >> 24u == 0) { continue; }	// skip transparent pixels
 				s_highResBitmap[(yOffset + y - clipTop) * 640 + xOffset + x] = pixel;
 			}

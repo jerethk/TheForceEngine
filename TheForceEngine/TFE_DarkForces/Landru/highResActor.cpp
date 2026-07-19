@@ -56,6 +56,8 @@ namespace TFE_DarkForces
 			}
 
 			array[i] = (u32*)pngData->pixels;
+			actor->imageWidths[i] = pngData->w;
+			actor->imageHeights[i] = pngData->h;
 			arraySize++;
 		}
 
