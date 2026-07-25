@@ -93,7 +93,7 @@ namespace TFE_DarkForces
 				// Check for player visibility
 				if (!actor_canSeeObjFromDist(obj, s_playerObject))
 				{
-					actor_updatePlayerVisiblity(JFALSE, 0, 0);
+					actor_updateTargetObjectVisiblity(JFALSE, 0, 0);
 					attackMod->anim.flags |= AFLAG_READY;
 					attackMod->anim.state = STATE_DELAY;
 					if (attackMod->timing.nextTick < s_curTick)
@@ -106,7 +106,7 @@ namespace TFE_DarkForces
 				}
 				else  // Player is visible
 				{
-					actor_updatePlayerVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+					actor_updateTargetObjectVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
 					fixed16_16 dist = distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
 					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - s_eyePos.y);

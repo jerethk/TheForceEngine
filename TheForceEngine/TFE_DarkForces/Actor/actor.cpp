@@ -190,12 +190,15 @@ namespace TFE_DarkForces
 		dispatch->fov = 9557;			// ~210 degrees
 		dispatch->awareRange = FIXED(20);
 		dispatch->vel = { 0 };
-		dispatch->lastPlayerPos = { 0 };
+		dispatch->lastTargetObjPos = { 0 };
 		dispatch->freeTask = nullptr;
 		dispatch->flags = ACTOR_NPC;	// this is later removed for barrels and scenery
 
 		dispatch->deathScriptCall = -1;
 		dispatch->alertScriptCall = -1;
+
+		dispatch->targetObject = nullptr;
+		dispatch->team = TEAM_DEFAULT;  // vanilla behaviour, only targets the player
 
 		if (obj)
 		{
@@ -497,6 +500,7 @@ namespace TFE_DarkForces
 		physicsActor->vel.z = mul16(cosPitch, physicsActor->vel.z);
 	}
 
+	// Used by Boba Fett, Phase 2 and Phase 3
 	void actor_leadTarget(ProjectileLogic* proj)
 	{
 		SecObject* projObj = proj->logic.obj;
@@ -571,18 +575,18 @@ namespace TFE_DarkForces
 		}
 	}
 
-	void actor_updatePlayerVisiblity(JBool playerVis, fixed16_16 posX, fixed16_16 posZ)
+	void actor_updateTargetObjectVisiblity(JBool targetVis, fixed16_16 posX, fixed16_16 posZ)
 	{
 		ActorDispatch* logic = (ActorDispatch*)s_actorState.curLogic;
 
 		// Update player visibility flag.
 		logic->flags &= ~ACTOR_PLAYER_VISIBLE;
-		logic->flags |= ((playerVis & 1) << 3);	// flag 8 = player visible.
+		logic->flags |= ((targetVis & 1) << 3);	// flag 8 = player visible.
 
-		if (playerVis)
+		if (targetVis)
 		{
-			logic->lastPlayerPos.x = posX;
-			logic->lastPlayerPos.z = posZ;
+			logic->lastTargetObjPos.x = posX;
+			logic->lastTargetObjPos.z = posZ;
 		}
 	}
 
@@ -933,7 +937,7 @@ namespace TFE_DarkForces
 				// Check for player visibility
 				if (!actor_canSeeObjFromDist(obj, s_playerObject))
 				{
-					actor_updatePlayerVisiblity(JFALSE, 0, 0);
+					actor_updateTargetObjectVisiblity(JFALSE, 0, 0);
 					attackMod->anim.flags |= AFLAG_READY;
 					attackMod->anim.state = STATE_DELAY;
 					if (attackMod->timing.nextTick < s_curTick)
@@ -946,7 +950,7 @@ namespace TFE_DarkForces
 				}
 				else  // Player is visible
 				{
-					actor_updatePlayerVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+					actor_updateTargetObjectVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
 					fixed16_16 dist = distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
 					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - s_eyePos.y);
@@ -1227,7 +1231,7 @@ namespace TFE_DarkForces
 			{
 				if (arrivedAtTarget)
 				{
-					thinkerMod->playerLastSeen = 0xffffffff;
+					thinkerMod->targetObjLastSeen = 0xffffffff;
 				}
 				thinkerMod->anim.state = STATE_TURN;
 			}
@@ -1235,16 +1239,16 @@ namespace TFE_DarkForces
 			{
 				if (actorLogic_isVisibleFlagSet())
 				{
-					if (thinkerMod->playerLastSeen != 0xffffffff)
+					if (thinkerMod->targetObjLastSeen != 0xffffffff)
 					{
 						thinkerMod->nextTick = 0;
 						thinkerMod->maxWalkTime = thinkerMod->startDelay;
-						thinkerMod->playerLastSeen = 0xffffffff;
+						thinkerMod->targetObjLastSeen = 0xffffffff;
 					}
 				}
 				else
 				{
-					thinkerMod->playerLastSeen = s_curTick + 0x1111;
+					thinkerMod->targetObjLastSeen = s_curTick + 0x1111;
 				}
 
 				ActorTarget* target = &thinkerMod->target;
@@ -1267,10 +1271,10 @@ namespace TFE_DarkForces
 		{
 			ActorDispatch* logic = actor_getCurrentLogic();
 			fixed16_16 targetX, targetZ;
-			if (thinkerMod->playerLastSeen < s_curTick)
+			if (thinkerMod->targetObjLastSeen < s_curTick)
 			{
-				targetX = logic->lastPlayerPos.x;
-				targetZ = logic->lastPlayerPos.z;
+				targetX = logic->lastTargetObjPos.x;
+				targetZ = logic->lastTargetObjPos.z;
 			}
 			else
 			{
@@ -1346,7 +1350,7 @@ namespace TFE_DarkForces
 		thinkerMod->target.speedVert = FIXED(10);
 		thinkerMod->delay = 72;
 		thinkerMod->nextTick = 0;
-		thinkerMod->playerLastSeen = 0xffffffff;
+		thinkerMod->targetObjLastSeen = 0xffffffff;
 		thinkerMod->anim.state = STATE_TURN;
 		thinkerMod->maxWalkTime = 728;	// ~5 seconds between decision points.
 		thinkerMod->anim.frameRate = 5;
