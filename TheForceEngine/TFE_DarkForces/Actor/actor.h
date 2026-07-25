@@ -216,6 +216,9 @@ namespace TFE_DarkForces
 	void actor_setupInitAnimation();
 	void actor_setDeathCollisionFlags();
 
+	ActorDispatch* actor_getCurrentLogic();
+	JBool actorLogic_isVisibleFlagSet();
+
 	// Returns JTRUE if 'actorObj' can see 'obj'
 	// The object must be as close or closer than 'closeDist' or be within the fov of the 'actorObj'.
 	// Also the distance between actorObj and obj must be less than 200 - 256 units (randomized), and this value is 

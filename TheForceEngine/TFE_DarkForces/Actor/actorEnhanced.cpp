@@ -403,6 +403,130 @@ namespace TFE_DarkForces
 		return attackMod->timing.delay;
 	}
 
+	// This is the ThinkerFunc used by custom logics. It builds on the defaultThinkerFunc
+	Tick enhancedThinkerFunc(ActorModule* module, MovementModule* moveMod)
+	{
+		ThinkerModule* thinkerMod = (ThinkerModule*)module;
+		SecObject* obj = thinkerMod->header.obj;
+
+		if (thinkerMod->anim.state == STATE_MOVE)
+		{
+			ActorTarget* target = &thinkerMod->target;
+			JBool arrivedAtTarget = actor_arrivedAtTarget(target, obj);
+			if (thinkerMod->nextTick < s_curTick || arrivedAtTarget)
+			{
+				if (arrivedAtTarget)
+				{
+					thinkerMod->targetObjLastSeen = 0xffffffff;
+				}
+				thinkerMod->anim.state = STATE_TURN;
+			}
+			else
+			{
+				if (actorLogic_isVisibleFlagSet())
+				{
+					if (thinkerMod->targetObjLastSeen != 0xffffffff)
+					{
+						thinkerMod->nextTick = 0;
+						thinkerMod->maxWalkTime = thinkerMod->startDelay;
+						thinkerMod->targetObjLastSeen = 0xffffffff;
+					}
+				}
+				else
+				{
+					thinkerMod->targetObjLastSeen = s_curTick + 0x1111;
+				}
+
+				ActorTarget* target = &thinkerMod->target;
+				if (actor_handleSteps(moveMod, target))
+				{
+					actor_changeDirFromCollision(moveMod, target, &thinkerMod->prevColTick);
+					if (!actorLogic_isVisibleFlagSet())
+					{
+						thinkerMod->maxWalkTime += 218;
+						if (thinkerMod->maxWalkTime > 1456)
+						{
+							thinkerMod->maxWalkTime = 291;
+						}
+						thinkerMod->nextTick = s_curTick + thinkerMod->maxWalkTime;
+					}
+				}
+			}
+		}
+		else if (thinkerMod->anim.state == STATE_TURN)
+		{
+			ActorDispatch* logic = actor_getCurrentLogic();
+			fixed16_16 targetX, targetZ;
+			if (thinkerMod->targetObjLastSeen < s_curTick)
+			{
+				targetX = logic->lastTargetObjPos.x;
+				targetZ = logic->lastTargetObjPos.z;
+			}
+			else
+			{
+				targetX = s_eyePos.x;
+				targetZ = s_eyePos.z;
+			}
+
+			fixed16_16 targetOffset;
+			if (!actorLogic_isVisibleFlagSet())
+			{
+				// Offset the target by |dx| / 4
+				// This is obviously a typo and bug in the DOS code and should be min(|dx|, |dz|)
+				// but the original code is min(|dx|, |dx|) => |dx|
+				fixed16_16 dx = TFE_Jedi::abs(s_playerObject->posWS.x - obj->posWS.x);
+				targetOffset = dx >> 2;
+			}
+			else
+			{
+				// Offset the target by the targetOffset.
+				targetOffset = thinkerMod->targetOffset;
+			}
+
+			fixed16_16 dx = obj->posWS.x - targetX;
+			fixed16_16 dz = obj->posWS.z - targetZ;
+			angle14_32 angle = vec2ToAngle(dx, dz);
+
+			thinkerMod->target.pos.x = targetX;
+			thinkerMod->target.pos.z = targetZ;
+			thinkerMod->target.flags = (thinkerMod->target.flags | TARGET_MOVE_XZ) & (~TARGET_MOVE_Y);
+			actor_offsetTarget(&thinkerMod->target.pos.x, &thinkerMod->target.pos.z, targetOffset, thinkerMod->targetVariation, angle, thinkerMod->approachVariation);
+
+			dx = thinkerMod->target.pos.x - obj->posWS.x;
+			dz = thinkerMod->target.pos.z - obj->posWS.z;
+			thinkerMod->target.pitch = 0;
+			thinkerMod->target.roll = 0;
+			thinkerMod->target.yaw = vec2ToAngle(dx, dz);
+			thinkerMod->target.flags |= TARGET_MOVE_ROT;
+
+			if (!(logic->flags & ACTOR_MOVING))
+			{
+				if (obj->type == OBJ_TYPE_SPRITE)
+				{
+					actor_setupAnimation(ANIM_MOVE, &thinkerMod->anim);
+				}
+				logic->flags |= ACTOR_MOVING;
+			}
+			thinkerMod->anim.state = STATE_MOVE;
+			thinkerMod->nextTick = s_curTick + thinkerMod->maxWalkTime;
+
+			if (obj->entityFlags & ETFLAG_REMOTE)
+			{
+				if (!(logic->flags & ACTOR_IDLE) && (logic->flags & ACTOR_MOVING))
+				{
+					sound_playCued(s_agentSndSrc[AGENTSND_REMOTE_2], obj->posWS);
+				}
+			}
+		}
+
+		if (obj->type == OBJ_TYPE_SPRITE)
+		{
+			actor_setCurAnimation(&thinkerMod->anim);
+		}
+		moveMod->updateTargetFunc(moveMod, &thinkerMod->target);
+		return 0;
+	}
+
 	// SETUP CUSTOM LOGIC
 	Logic* custom_actor_setup(SecObject* obj, TFE_ExternalData::CustomActorLogic* cust, LogicSetupFunc* setupFunc)
 	{
@@ -464,6 +588,7 @@ namespace TFE_DarkForces
 
 		// Thinker Module
 		ThinkerModule* thinkerMod = actor_createThinkerModule(dispatch);
+		thinkerMod->header.func = enhancedThinkerFunc;
 		thinkerMod->target.speedRotation = floatToAngle((f32)cust->rotationSpeed);
 		thinkerMod->target.speed = FIXED(cust->speed);
 		thinkerMod->approachVariation = floatToAngle((f32)cust->approachVariation);
