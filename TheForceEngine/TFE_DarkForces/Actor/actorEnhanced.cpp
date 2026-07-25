@@ -9,6 +9,8 @@
 #include <TFE_DarkForces/random.h>
 #include <TFE_DarkForces/player.h>
 #include <TFE_Game/igame.h>
+#include <TFE_Jedi/Level/levelData.h>
+#include <TFE_Jedi/Memory/allocator.h>
 
 
 namespace TFE_DarkForces
@@ -36,6 +38,89 @@ namespace TFE_DarkForces
 		return attackMod;
 	}
 
+	// Finds and returns a new target object for an actor to seek & attack
+	SecObject* findNewTargetObject(SecObject* sourceObj, s32 sourceTeam)
+	{
+		if (sourceTeam == TEAM_DEFAULT)
+		{
+			return s_playerObject;	// team "default" always targets the player (vanilla DF behaviour)
+		}
+
+		if (sourceTeam == TEAM_NEUTRAL)
+		{
+			return nullptr;	// team neutral does not target anybody
+		}
+
+		if (sourceTeam != TEAM_PLAYER)
+		{
+			// target the player if it can be seen (50% probability)
+			if (random(10) < 5 && actor_canSeeObject(sourceObj, s_playerObject))
+			{
+				return s_playerObject;
+			}
+		}
+
+		RSector* sector = s_levelState.sectors;
+		for (u32 i = 0; i < s_levelState.sectorCount; i++, sector++)
+		{
+			for (s32 objIndex = 0, objListIndex = 0; objIndex < sector->objectCount && objListIndex < sector->objectCapacity; objListIndex++)
+			{
+				SecObject* obj = sector->objectList[objListIndex];
+				if (!obj) { continue; }
+				objIndex++;
+
+				if (obj == sourceObj) { continue; }	// don't target self!
+
+				if (!(obj->entityFlags & ETFLAG_AI_ACTOR))
+				{
+					continue;	// only target AI actors
+				}
+
+				// don't target actors > 250 DFU distant
+				fixed16_16 dist = distApprox(sourceObj->posWS.x, sourceObj->posWS.z, obj->posWS.x, obj->posWS.z);
+				if (dist > FIXED(250))
+				{
+					continue;
+				}
+
+				// Search for dispatch logic
+				ActorDispatch* dispatch = nullptr;
+				Logic** logicList = (Logic**)allocator_getHead((Allocator*)obj->logic);
+				while (logicList)
+				{
+					Logic* logic = *logicList;
+					if (logic->type == LOGIC_DISPATCH)
+					{
+						dispatch = (ActorDispatch*)logic;
+						break;
+					}
+
+					logicList = (Logic**)allocator_getNext((Allocator*)obj->logic);
+				}
+				if (!dispatch) { continue; }
+
+				if (!(dispatch->flags & ACTOR_NPC)) { continue; }	// only target NPCs (exclude barrels and scenery)
+
+				if (dispatch->team == TEAM_NEUTRAL) { continue; }	// don't target objects on "team neutral"
+
+				if (sourceTeam != TEAM_NONE && sourceTeam == dispatch->team)
+				{
+					continue;	// don't target AI on the same team
+				}
+
+				if (!actor_canSeeObject(sourceObj, obj))
+				{
+					continue;	// don't target an object that can't be seen
+				}
+
+				return obj;
+			}
+		}
+
+		// return the player if above fails
+		return s_playerObject;
+	}
+
 	// This is the AttackFunc used by custom logics. It builds on the defaultAttackFunc
 	Tick enhancedAttackFunc(ActorModule* module, MovementModule* moveMod)
 	{
@@ -44,6 +129,24 @@ namespace TFE_DarkForces
 		SecObject* obj = attackMod->header.obj;
 		LogicAnimation* anim = &attackMod->anim;
 		s32 state = attackMod->anim.state;
+
+		if (logic->team == TEAM_NEUTRAL)
+		{
+			return attackMod->timing.delay;	// neutrals don't attack
+		}
+
+		if (!logic->targetObject ||
+			!logic->targetObject->self ||
+			!logic->targetObject->sector ||							// Killed AIs have sector = nullptr, so need to be reassigned
+			!(logic->targetObject->entityFlags & ETFLAG_AI_ACTOR))	// Corpses and dropitems can sometimes replace a killed AI in s_objData.objectList before the actor has had a chance to recognise that its targetObject has become null, especially when multiple actors are simultaneously killed
+		{
+			logic->targetObject = findNewTargetObject(obj, logic->team);
+
+			if (!logic->targetObject)
+			{
+				return attackMod->timing.delay;
+			}
+		}
 
 		switch (state)
 		{
@@ -79,6 +182,13 @@ namespace TFE_DarkForces
 			} break;
 			case STATE_DECIDE:
 			{
+				// Don't attack the player if on player's team. Try finding another target.
+				if (logic->team == TEAM_PLAYER && logic->targetObject == s_playerObject)
+				{
+					logic->targetObject = findNewTargetObject(obj, logic->team);
+					return attackMod->timing.delay;
+				}
+
 				gameMusic_sustainFight();
 				if (s_playerDying)
 				{
@@ -90,29 +200,29 @@ namespace TFE_DarkForces
 					}
 				}
 
-				// Check for player visibility
-				if (!actor_canSeeObjFromDist(obj, s_playerObject))
+				// Check for target visibility
+				if (!actor_canSeeObjFromDist(obj, logic->targetObject))
 				{
 					actor_updateTargetObjectVisiblity(JFALSE, 0, 0);
 					attackMod->anim.flags |= AFLAG_READY;
 					attackMod->anim.state = STATE_DELAY;
 					if (attackMod->timing.nextTick < s_curTick)
 					{
-						// Lost sight of player for sufficient length of time (losDelay) - return to idle state
+						// Lost sight of target for sufficient length of time (losDelay) - return to idle state
 						attackMod->timing.delay = attackMod->timing.searchDelay;
 						actor_setupInitAnimation();
 					}
 					return attackMod->timing.delay;
 				}
-				else  // Player is visible
+				else  // Target is visible
 				{
-					actor_updateTargetObjectVisiblity(JTRUE, s_eyePos.x, s_eyePos.z);
+					actor_updateTargetObjectVisiblity(JTRUE, logic->targetObject->posWS.x, logic->targetObject->posWS.z);
 					attackMod->timing.nextTick = s_curTick + attackMod->timing.losDelay;
-					fixed16_16 dist = distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
-					fixed16_16 yDiff = TFE_Jedi::abs(obj->posWS.y - obj->worldHeight - s_eyePos.y);
+					fixed16_16 dist = distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 yDiff = TFE_Jedi::abs((obj->posWS.y - obj->worldHeight) - (logic->targetObject->posWS.y - logic->targetObject->worldHeight));
 					angle14_32 vertAngle = vec2ToAngle(yDiff, dist);
 
-					fixed16_16 baseYDiff = TFE_Jedi::abs(s_playerObject->posWS.y - obj->posWS.y);
+					fixed16_16 baseYDiff = TFE_Jedi::abs(logic->targetObject->posWS.y - obj->posWS.y);
 					dist += baseYDiff;
 
 					if (vertAngle < 2275 && dist <= attackMod->maxDist)	// ~50 degrees
@@ -180,7 +290,7 @@ namespace TFE_DarkForces
 
 						attackMod->target.pos.x = obj->posWS.x;
 						attackMod->target.pos.z = obj->posWS.z;
-						attackMod->target.yaw = vec2ToAngle(s_eyePos.x - obj->posWS.x, s_eyePos.z - obj->posWS.z);
+						attackMod->target.yaw = vec2ToAngle(logic->targetObject->posWS.x - obj->posWS.x, logic->targetObject->posWS.z - obj->posWS.z);
 						attackMod->target.pitch = obj->pitch;
 						attackMod->target.roll = obj->roll;
 						attackMod->target.flags |= (TARGET_MOVE_XZ | TARGET_MOVE_ROT);
@@ -204,12 +314,25 @@ namespace TFE_DarkForces
 				if (attackMod->attackFlags & ATTFLAG_MELEE)
 				{
 					attackMod->anim.state = STATE_ANIMATE1;
-					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - s_playerObject->posWS.y);
-					fixed16_16 dist = dy + distApprox(s_playerObject->posWS.x, s_playerObject->posWS.z, obj->posWS.x, obj->posWS.z);
+					fixed16_16 dy = TFE_Jedi::abs(obj->posWS.y - logic->targetObject->posWS.y);
+					fixed16_16 dist = dy + distApprox(logic->targetObject->posWS.x, logic->targetObject->posWS.z, obj->posWS.x, obj->posWS.z);
 					if (dist < attackMod->meleeRange)
 					{
 						sound_playCued(attackMod->attackSecSndSrc, obj->posWS);
-						player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
+						if (logic->targetObject == s_playerObject)
+						{
+							player_applyDamage(attackMod->meleeDmg, 0, JTRUE);
+						}
+						else
+						{
+							// Inflict damage on non-player object
+							// reduce by half, same as with projectiles
+							// use MSG_EXPLOSION (a hack, but it works)
+							s_msgArg1 = attackMod->meleeDmg >> 1;
+							s_msgArg2 = FIXED(10);	// force
+							message_sendToObj(logic->targetObject, MSG_EXPLOSION, nullptr);
+						}
+
 						if (attackMod->attackFlags & ATTFLAG_LIT_MELEE)
 						{
 							obj->flags |= OBJ_FLAG_FULLBRIGHT;
@@ -246,8 +369,8 @@ namespace TFE_DarkForces
 					}
 					else
 					{
-						// Reorient towards the player
-						attackMod->target.yaw = vec2ToAngle(s_playerObject->posWS.x - obj->posWS.x, s_playerObject->posWS.z - obj->posWS.z);
+						// Reorient towards the target
+						attackMod->target.yaw = vec2ToAngle(logic->targetObject->posWS.x - obj->posWS.x, logic->targetObject->posWS.z - obj->posWS.z);
 
 						// Fire the next shot in the burst
 						attackMod->burstFire.lastShot = s_curTick;
@@ -275,19 +398,24 @@ namespace TFE_DarkForces
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
 
+				// Determine Y value to aim at
+				fixed16_16 targetY = logic->targetObject == s_playerObject
+					? s_playerObject->posWS.y - s_playerObject->worldHeight						// player - aim at "head" like usual
+					: logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// NPC - aim 1 unit lower than the head
+
 				// Vanilla DF did not handle arcing projectiles with STATE_ATTACK1; this has been added
 				if (proj->updateFunc == arcingProjectileUpdateFunc)
 				{
 					// TDs are lobbed at an angle that depends on distance from target
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 				}
 				else
 				{
 					// Aim at the target.
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target =	{ logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -338,8 +466,8 @@ namespace TFE_DarkForces
 					}
 					else
 					{
-						// Reorient towards the player
-						attackMod->target.yaw = vec2ToAngle(s_playerObject->posWS.x - obj->posWS.x, s_playerObject->posWS.z - obj->posWS.z);
+						// Reorient towards the target
+						attackMod->target.yaw = vec2ToAngle(logic->targetObject->posWS.x - obj->posWS.x, logic->targetObject->posWS.z - obj->posWS.z);
 
 						// Fire the next shot in the burst
 						attackMod->burstFire.lastShot = s_curTick;
@@ -365,17 +493,22 @@ namespace TFE_DarkForces
 				SecObject* projObj = proj->logic.obj;
 				projObj->yaw = obj->yaw;
 
+				// Determine Y value to aim at
+				fixed16_16 targetY = logic->targetObject == s_playerObject
+					? s_playerObject->posWS.y - s_playerObject->worldHeight						// player - aim at "head" like usual
+					: logic->targetObject->posWS.y - logic->targetObject->worldHeight + ONE_16;	// NPC - aim 1 unit lower than the head
+
 				// The original test here was projType == PROJ_THERMAL_DET. In TFE we want to generalise it to all arcing projectiles.
 				if (proj->updateFunc == arcingProjectileUpdateFunc)
 				{
 					proj->bounceCnt = 0;
 					proj->duration = 0xffffffff;
-					vec3_fixed target = { s_playerObject->posWS.x, s_eyePos.y + ONE_16, s_playerObject->posWS.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimArcing(proj, target, proj->speed);
 				}
 				else
 				{
-					vec3_fixed target = { s_eyePos.x, s_eyePos.y + ONE_16, s_eyePos.z };
+					vec3_fixed target = { logic->targetObject->posWS.x, targetY + ONE_16, logic->targetObject->posWS.z };
 					proj_aimAtTarget(proj, target);
 					if (attackMod->fireSpread)
 					{
@@ -456,6 +589,18 @@ namespace TFE_DarkForces
 		else if (thinkerMod->anim.state == STATE_TURN)
 		{
 			ActorDispatch* logic = actor_getCurrentLogic();
+
+			if (logic->team != TEAM_NEUTRAL)
+			{
+				if (!logic->targetObject ||
+					!logic->targetObject->self ||
+					!logic->targetObject->sector ||
+					(logic->team != TEAM_DEFAULT && !actor_canSeeObject(obj, logic->targetObject)))	// TEAM_DEFAULT stays targeted on the player even if they lose sight
+				{
+					logic->targetObject = findNewTargetObject(obj, logic->team);
+				}
+			}
+
 			fixed16_16 targetX, targetZ;
 			if (thinkerMod->targetObjLastSeen < s_curTick)
 			{
@@ -464,17 +609,26 @@ namespace TFE_DarkForces
 			}
 			else
 			{
-				targetX = s_eyePos.x;
-				targetZ = s_eyePos.z;
+				if (logic->targetObject)
+				{
+					targetX = logic->targetObject->posWS.x;
+					targetZ = logic->targetObject->posWS.z;
+				}
+				else
+				{
+					// Provide a random location to target if there is no targetObject (neutral NPCs)
+					targetX = obj->posWS.x + FIXED(random(100) - 50);
+					targetZ = obj->posWS.z + FIXED(random(100) - 50);
+				}
 			}
 
 			fixed16_16 targetOffset;
-			if (!actorLogic_isVisibleFlagSet())
+			if (!actorLogic_isVisibleFlagSet() && logic->targetObject)
 			{
 				// Offset the target by |dx| / 4
 				// This is obviously a typo and bug in the DOS code and should be min(|dx|, |dz|)
 				// but the original code is min(|dx|, |dx|) => |dx|
-				fixed16_16 dx = TFE_Jedi::abs(s_playerObject->posWS.x - obj->posWS.x);
+				fixed16_16 dx = TFE_Jedi::abs(logic->targetObject->posWS.x - obj->posWS.x);
 				targetOffset = dx >> 2;
 			}
 			else
