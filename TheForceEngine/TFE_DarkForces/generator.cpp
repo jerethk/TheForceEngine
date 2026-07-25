@@ -118,7 +118,7 @@ namespace TFE_DarkForces
 					// Search the externally defined logics for a match
 					TFE_ExternalData::CustomActorLogic* customLogic;
 					customLogic = tryFindCustomActorLogic(gen->logicName);
-					if (customLogic && TFE_Settings::jsonAiLogics())
+					if (customLogic && TFE_Settings::enhancedLogics())
 					{
 						obj_setCustomActorLogic(spawn, customLogic);
 					}

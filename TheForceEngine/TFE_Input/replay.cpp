@@ -327,7 +327,7 @@ namespace TFE_Input
 		dest->df_stepSecondAlt = source->df_stepSecondAlt;
 		dest->df_enableUnusedItem = source->df_enableUnusedItem;
 		dest->df_solidWallFlagFix = source->df_solidWallFlagFix;
-		dest->df_jsonAiLogics = source->df_jsonAiLogics;
+		dest->df_enhancedLogics = source->df_enhancedLogics;
 		dest->df_pitchLimit = source->df_pitchLimit;
 		dest->df_recordFrameRate = source->df_recordFrameRate;
 		dest->df_autoEndMission = source->df_autoEndMission;
@@ -582,7 +582,7 @@ namespace TFE_Input
 			SERIALIZE(ReplayVersionInit, gameSettings->df_stepSecondAlt, 0);
 			SERIALIZE(ReplayVersionInit, gameSettings->df_enableUnusedItem, 0);
 			SERIALIZE(ReplayVersionInit, gameSettings->df_solidWallFlagFix, 0);
-			SERIALIZE(ReplayVersionInit, gameSettings->df_jsonAiLogics, 0);
+			SERIALIZE(ReplayVersionInit, gameSettings->df_enhancedLogics, 0);
 			SERIALIZE(ReplayVersionInit, gameSettings->df_bobaFettFacePlayer, 0);
 			SERIALIZE(ReplayVersionInit, gameSettings->df_recordFrameRate, 0);			
 			int pitchLimit = gameSettings->df_pitchLimit;

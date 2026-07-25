@@ -569,7 +569,7 @@ namespace TFE_Settings
 		writeKeyValue_Int(settings,  "pitchLimit", s_gameSettings.df_pitchLimit);
 		writeKeyValue_Bool(settings, "solidWallFlagFix", s_gameSettings.df_solidWallFlagFix);
 		writeKeyValue_Bool(settings, "enableUnusedItem", s_gameSettings.df_enableUnusedItem);
-		writeKeyValue_Bool(settings, "jsonAiLogics", s_gameSettings.df_jsonAiLogics);
+		writeKeyValue_Bool(settings, "jsonAiLogics", s_gameSettings.df_enhancedLogics);
 		writeKeyValue_Bool(settings, "showReplayCounter", s_gameSettings.df_showReplayCounter);
 		writeKeyValue_Int(settings,  "recordFrameRate", s_gameSettings.df_recordFrameRate);
 		writeKeyValue_Int(settings,  "playbackFrameRate", s_gameSettings.df_playbackFrameRate);
@@ -1221,7 +1221,7 @@ namespace TFE_Settings
 		}
 		else if (strcasecmp("jsonAiLogics", key) == 0)
 		{
-			s_gameSettings.df_jsonAiLogics = parseBool(value);
+			s_gameSettings.df_enhancedLogics = parseBool(value);
 		}
 		else if (strcasecmp("showReplayCounter", key) == 0)
 		{
@@ -1457,13 +1457,13 @@ namespace TFE_Settings
 		return s_graphicsSettings.fix3doNormalOverflow;
 	}
 
-	bool jsonAiLogics()
+	bool enhancedLogics()
 	{
-		if (s_modSettings.jsonAiLogics != MSO_NOT_SET)
+		if (s_modSettings.enhancedLogics != MSO_NOT_SET)
 		{
-			return s_modSettings.jsonAiLogics == MSO_TRUE ? true : false;
+			return s_modSettings.enhancedLogics == MSO_TRUE ? true : false;
 		}
-		return s_gameSettings.df_jsonAiLogics;
+		return s_gameSettings.df_enhancedLogics;
 	}
 		
 	//////////////////////////////////////////////////
@@ -1587,9 +1587,14 @@ namespace TFE_Settings
 		{
 			modSettings->normalFix3do = parseJSonBoolToOverride(tfeOverride);
 		}
+		else if (strcasecmp(tfeOverride->string, "enhancedLogics") == 0)
+		{
+			modSettings->enhancedLogics = parseJSonBoolToOverride(tfeOverride);
+		}
+		// "jsonAiLogics" is kept for backward compatibility
 		else if (strcasecmp(tfeOverride->string, "jsonAiLogics") == 0)
 		{
-			modSettings->jsonAiLogics = parseJSonBoolToOverride(tfeOverride);
+			modSettings->enhancedLogics = parseJSonBoolToOverride(tfeOverride);
 		}
 		else if (strcasecmp(tfeOverride->string, "levelOverrides") == 0)
 		{

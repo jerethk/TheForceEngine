@@ -1384,7 +1384,7 @@ namespace TFE_DarkForces
 		obj->frame = 0;
 
 		// TFE: Find the thinker module and set its animation to the idle animation
-		if (TFE_Settings::jsonAiLogics())
+		if (TFE_Settings::enhancedLogics())
 		{
 			for (s32 i = 0; i < ACTOR_MAX_MODULES; i++)
 			{
@@ -2187,7 +2187,7 @@ namespace TFE_DarkForces
 						}
 
 						// TFE: Animate in idle state
-						if (TFE_Settings::jsonAiLogics())
+						if (TFE_Settings::enhancedLogics())
 						{
 							s_actorState.curAnimation = nullptr;
 							if (obj->type & OBJ_TYPE_SPRITE)

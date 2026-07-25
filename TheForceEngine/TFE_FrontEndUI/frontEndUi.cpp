@@ -1261,7 +1261,7 @@ namespace TFE_FrontEndUI
 			ImGui::Checkbox("Allow the player to step up onto second heights, similar to normal stairs.", &gameSettings->df_stepSecondAlt);
 			ImGui::Checkbox("Enforce solid wall flag for moving walls", &gameSettings->df_solidWallFlagFix);
 			ImGui::Checkbox("Enable unused inventory item \"ITEM10\"", &gameSettings->df_enableUnusedItem);
-			ImGui::Checkbox("Enhanced AI logics (requires restart)", &gameSettings->df_jsonAiLogics);
+			ImGui::Checkbox("Enhanced NPC logics (requires restart)", &gameSettings->df_enhancedLogics);
 			ImGui::TreePop();
 		}
 
@@ -4020,7 +4020,7 @@ namespace TFE_FrontEndUI
 				gameSettings->df_smoothVUEs = true;
 				gameSettings->df_solidWallFlagFix = true;
 				gameSettings->df_enableUnusedItem = true;
-				gameSettings->df_jsonAiLogics = true;
+				gameSettings->df_enhancedLogics = true;
 				gameSettings->df_ignoreInfLimit = true;
 				gameSettings->df_showKeyColors = true;
 				gameSettings->df_stepSecondAlt = true; 
@@ -4089,7 +4089,7 @@ namespace TFE_FrontEndUI
 				gameSettings->df_smoothVUEs = false;
 				gameSettings->df_solidWallFlagFix = false;
 				gameSettings->df_enableUnusedItem = false;
-				gameSettings->df_jsonAiLogics = false;
+				gameSettings->df_enhancedLogics = false;
 				gameSettings->df_ignoreInfLimit = false;
 				gameSettings->df_showKeyColors = false;
 				gameSettings->df_stepSecondAlt = false;
