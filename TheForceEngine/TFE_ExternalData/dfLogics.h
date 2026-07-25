@@ -15,6 +15,7 @@ namespace TFE_ExternalData
 		bool isFlying = false;
 		u32 fov = 210;			// 9557 in DF angle
 		u32 awareRange = 20;
+		s32 team = 0;
 
 		// Sound effects
 		const char* alertSound = "";
