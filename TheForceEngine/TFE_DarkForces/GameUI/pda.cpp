@@ -234,7 +234,6 @@ namespace TFE_DarkForces
 
 		if (highRes)
 		{
-			TFE_Jedi::render_setResolution();
 			TFE_Jedi::s_drawQuadsFirst = false;		// in the PDA we draw lines before quads, so the automap is drawn behind the PDA graphics
 			TFE_Jedi::s_clipLinesToRect = true;		// PDA map needs to be clipped in widescreen mode
 		}
@@ -338,6 +337,9 @@ namespace TFE_DarkForces
 			return;
 		}
 		
+		bool highRes = TFE_Settings::getEnhancementsSettings()->enableHdPda &&
+			TFE_Settings::getGraphicsSettings()->colorMode == COLORMODE_TRUE_COLOR;
+
 		// Special case to support Escape during demo playback
 		if (inputMapping_getActionState(IADF_PDA_TOGGLE) == STATE_PRESSED 
 			|| TFE_Input::keyPressed(KEY_ESCAPE) 
@@ -346,7 +348,7 @@ namespace TFE_DarkForces
 			pda_close();
 			return;
 		}
-		else if (TFE_Jedi::renderer_getType() != RENDERER_SOFTWARE)
+		else if (TFE_Jedi::renderer_getType() != RENDERER_SOFTWARE && !highRes)
 		{
 			// Convert back to CPU rendering.
 			TFE_Jedi::renderer_setType(RENDERER_SOFTWARE);
@@ -364,8 +366,6 @@ namespace TFE_DarkForces
 		vfb_getResolution(&outWidth, &outHeight);
 		memset(vfb_getCpuBuffer(), 0, outWidth * outHeight);
 		
-		bool highRes = TFE_Settings::getEnhancementsSettings()->enableHdPda &&
-			TFE_Settings::getGraphicsSettings()->colorMode == COLORMODE_TRUE_COLOR;
 		if (highRes && s_isGpuMode)
 		{
 			memset(s_highResBitmap, 0, sizeof(s_highResBitmap));
@@ -1149,7 +1149,12 @@ namespace TFE_DarkForces
 		for (u8 chr = *text; chr != 0;)
 		{
 			const ImFontGlyph* glyph = font->FindGlyph((ImWchar)chr);
-			if (!glyph) { continue; }
+			if (!glyph)
+			{
+				text++;
+				chr = *text;
+				continue;
+			}
 
 			s32 x0 = (s32)(glyph->U0 * s_fontTexWidth);
 			s32 y0 = (s32)(glyph->V0 * s_fontTexHeight);
@@ -1184,7 +1189,12 @@ namespace TFE_DarkForces
 		for (u8 chr = *str; chr != 0;)
 		{
 			const ImFontGlyph* glyph = font->FindGlyph((ImWchar)chr);
-			if (!glyph) { continue; }
+			if (!glyph)
+			{
+				str++;
+				chr = *str;
+				continue;
+			}
 
 			s32 x0 = (s32)(glyph->U0 * s_fontTexWidth);
 			s32 x1 = (s32)(glyph->U1 * s_fontTexWidth);
@@ -1216,10 +1226,7 @@ namespace TFE_DarkForces
 			automap_draw(vfb_getCpuBuffer());
 
 			// Set the clip area
-			TFE_Jedi::s_clipX = xOffset;
-			TFE_Jedi::s_clipY = 0;
-			TFE_Jedi::s_clipW = virtualWidth;
-			TFE_Jedi::s_clipH = virtualHeight;
+			renderer_setClipRect(xOffset, 0, virtualWidth, virtualHeight);
 		}
 		else if (s_pdaMode == PDA_MODE_WEAPONS && s_weapons && s_weaponsHigh)
 		{

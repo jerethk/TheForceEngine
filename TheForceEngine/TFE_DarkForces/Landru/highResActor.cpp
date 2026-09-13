@@ -25,7 +25,7 @@ namespace TFE_DarkForces
 		return TFE_Image::get(utf8Path);
 	}
 
-	HighResActor* highResActor_loadFromPng(const char* lfdName, const char* actorName, u16 count, bool anim/*default true*/)
+	HighResActor* highResActor_loadFromPng(const char* lfdName, const char* actorName, u16 frameCount, bool anim/*default true*/)
 	{
 		HighResActor* actor = actorHighRes_alloc();
 		if (!actor)
@@ -33,13 +33,13 @@ namespace TFE_DarkForces
 			return nullptr;
 		}
 
-		u32** array = (u32**)TFE_Memory::region_alloc(s_alloc, sizeof(u32*) * count);
+		u32** array = (u32**)TFE_Memory::region_alloc(s_alloc, sizeof(u32*) * frameCount);
 		s32 arraySize = 0;
 
 		const char* actorType = anim ? "ANIM" : "DELT";
 		const char* formatStr = anim ? "%slfd/enhanced/%s/%s%s_%d.png" : "%slfd/enhanced/%s/%s%s.png";
 
-		for (s32 i = 0; i < count; i++)
+		for (s32 i = 0; i < frameCount; i++)
 		{
 			char path[TFE_MAX_PATH];
 			sprintf(
@@ -64,7 +64,7 @@ namespace TFE_DarkForces
 			arraySize++;
 		}
 
-		if (arraySize != count)
+		if (arraySize != frameCount)
 		{
 			TFE_System::logWrite(LOG_ERROR, "loadFromPng", "Error - Number of PNGs does not match number of DELTs");
 		}

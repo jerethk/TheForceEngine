@@ -1,5 +1,4 @@
 #include "jediRenderer.h"
-#include <TFE_DarkForces/GameUI/pda.h>
 #include <TFE_Jedi/Math/fixedPoint.h>
 #include <TFE_Jedi/Level/robject.h>
 #include <TFE_Jedi/Level/level.h>
@@ -272,12 +271,8 @@ namespace TFE_Jedi
 		// Make sure the adjustedWidth is divisible by 4.
 		width = 4 * ((width + 3) >> 2);
 
-		bool highRes = TFE_Settings::getEnhancementsSettings()->enableHdPda &&
-			TFE_Settings::getGraphicsSettings()->colorMode == COLORMODE_TRUE_COLOR;
-		bool inHighResPda = highRes && TFE_DarkForces::pda_isOpen();
-
 		TFE_SubRenderer subRenderer = s_rendererType == RENDERER_HARDWARE ? TSR_CLASSIC_GPU : (width == 320 && height == 200) ? TSR_CLASSIC_FIXED : TSR_CLASSIC_FLOAT;
-		vfb_setMode(subRenderer == TSR_CLASSIC_GPU || inHighResPda ? VFB_RENDER_TRAGET : VFB_TEXTURE);
+		vfb_setMode(subRenderer == TSR_CLASSIC_GPU ? VFB_RENDER_TRAGET : VFB_TEXTURE);
 		bool updateTexturePacking = forceTextureUpdate;
 		bool enableMips = s_trueColor && graphics->useMipmapping;
 		if (s_trueColor != (graphics->colorMode == COLORMODE_TRUE_COLOR))
@@ -480,7 +475,15 @@ namespace TFE_Jedi
 		RClassic_Float::computeCameraTransform(sector, f32(clampedPitch), f32(yaw), fixed16ToFloat(camX), fixed16ToFloat(camY), fixed16ToFloat(camZ));
 		RClassic_GPU::computeCameraTransform(sector, f32(pitch), f32(yaw), fixed16ToFloat(camX), fixed16ToFloat(camY), fixed16ToFloat(camZ));
 	}
-		
+
+	void renderer_setClipRect(s32 x, s32 y, s32 width, s32 height)
+	{
+		s_clipX = x;
+		s_clipY = y;
+		s_clipW = width;
+		s_clipH = height;
+	}
+
 	void beginRender()
 	{
 		if (!s_sectorRenderer)
@@ -503,6 +506,7 @@ namespace TFE_Jedi
 	{
 		if (s_subRenderer == TSR_CLASSIC_GPU)
 		{
+			// Draw quads before lines: the automap will be drawn over the top of weapon and HUD textures
 			if (s_drawQuadsFirst)
 			{
 				screenDraw_endQuads();
@@ -520,6 +524,7 @@ namespace TFE_Jedi
 				TFE_RenderBackend::setScissorRect(false);
 			}
 
+			// Draw quads after lines: the automap will be drawn behind PDA graphics
 			if (!s_drawQuadsFirst)
 			{
 				screenDraw_endQuads();

@@ -1505,7 +1505,7 @@ namespace TFE_FrontEndUI
 		if (enhanceGOBExists())
 		{
 			TFE_Settings_Enhancements* enhancements = TFE_Settings::getEnhancementsSettings();
-			bool usingHdAssets = enhancements->enableHdTextures && enhancements->enableHdSprites && enhancements->enableHdHud && enhancements->enableHdCutscenes && enhancements->enableHdPda;
+			bool usingHdAssets = enhancements->enableHdTextures && enhancements->enableHdSprites && enhancements->enableHdHud && enhancements->enableHdCutscenes;
 
 			// Enhanced graphics cannot be turned on if not in True Color mode
 			if (!usingHdAssets && TFE_Settings::getGraphicsSettings()->colorMode != COLORMODE_TRUE_COLOR)
