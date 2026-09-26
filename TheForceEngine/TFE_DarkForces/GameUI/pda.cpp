@@ -1026,6 +1026,35 @@ namespace TFE_DarkForces
 		s_weaponsHigh = highResActor_loadFromPng("dfbrief", "guns", s_weapons->arraySize);
 	}
 
+	u32 pda_blendRgbPixels(u32 srcPixel, u32 dstPixel)
+	{
+		u32 alpha = srcPixel >> 24u;
+
+		if (alpha == 0)
+		{
+			return dstPixel;
+		}
+		if (alpha == 0xff)
+		{
+			return srcPixel;
+		}
+
+		u32 srcR = (srcPixel) & 0xff;
+		u32 srcG = (srcPixel >> 8u) & 0xff;
+		u32 srcB = (srcPixel >> 16u) & 0xff;
+		u32 dstR = (dstPixel) & 0xff;
+		u32 dstG = (dstPixel >> 8u) & 0xff;
+		u32 dstB = (dstPixel >> 16u) & 0xff;
+
+		alpha += 1; // Add 1 so we can rightshift 8 bits to divide by 256, to approximate division by 255
+
+		u32 r = (srcR * alpha + dstR * (256 - alpha)) >> 8u;
+		u32 g = (srcG * alpha + dstG * (256 - alpha)) >> 8u;
+		u32 b = (srcB * alpha + dstB * (256 - alpha)) >> 8u;
+
+		return r | (g << 8u) | (b << 16u) | (0xff << 24u);
+	}
+
 	// This is specifically for ANIMpda_0.PNG
 	void pda_copyHighResBackgroundToBitmap()
 	{

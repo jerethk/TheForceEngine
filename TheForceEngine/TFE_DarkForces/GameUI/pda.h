@@ -18,4 +18,5 @@ namespace TFE_DarkForces
 
 	// TFE
 	void pda_initHighResFont();
+	u32 pda_blendRgbPixels(u32 srcPixel, u32 dstPixel);
 }

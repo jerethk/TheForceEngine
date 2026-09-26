@@ -655,6 +655,7 @@ namespace TFE_DarkForces
 			if (!missionBriefing_update(&skill, &abort))
 			{
 				missionBriefing_cleanup();
+				TFE_Jedi::renderer_setType(RENDERER_SOFTWARE);
 				TFE_Input::clearAccumulatedMouseMove();
 
 				if (abort)
