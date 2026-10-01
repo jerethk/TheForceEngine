@@ -1082,7 +1082,10 @@ namespace TFE_DarkForces
 			for (s32 x = 0; x < width; x++)
 			{
 				if ((x >= contentRect.left && x <= contentRect.right) && (y >= contentRect.top && y <= contentRect.bottom)) { continue; }	// skip pixels in the content rect
-				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = s_pdaArtHigh->array[index][y * s_pdaArtHigh->imageWidths[index] + x];
+
+				u32 srcPixel = s_pdaArtHigh->array[index][y * s_pdaArtHigh->imageWidths[index] + x];
+				u32 dstPixel = s_highResBitmap[(yOffset + y) * 640 + xOffset + x];
+				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = pda_blendRgbPixels(srcPixel, dstPixel);
 			}
 		}
 	}
@@ -1107,9 +1110,9 @@ namespace TFE_DarkForces
 		{
 			for (s32 x = 0; x < width; x++)
 			{
-				u32 pixel = hiResActor->array[index][y * hiResActor->imageWidths[index] + x];
-				if (pixel >> 24u == 0) { continue; }	// skip transparent pixels
-				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = pixel;
+				u32 srcPixel = hiResActor->array[index][y * hiResActor->imageWidths[index] + x];
+				u32 dstPixel = s_highResBitmap[(yOffset + y) * 640 + xOffset + x];
+				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = pda_blendRgbPixels(srcPixel, dstPixel);
 			}
 		}
 
@@ -1145,9 +1148,9 @@ namespace TFE_DarkForces
 		{
 			for (s32 x = 0; x < width; x++)
 			{
-				u32 pixel = s_briefingHigh->array[0][y * s_briefingHigh->imageWidths[0] + x];
-				if (pixel >> 24u == 0) { continue; }	// skip transparent pixels
-				s_highResBitmap[(yOffset + y - clipTop) * 640 + xOffset + x] = pixel;
+				u32 srcPixel = s_briefingHigh->array[0][y * s_briefingHigh->imageWidths[0] + x];
+				u32 dstPixel = s_highResBitmap[(yOffset + y - clipTop) * 640 + xOffset + x];
+				s_highResBitmap[(yOffset + y - clipTop) * 640 + xOffset + x] = pda_blendRgbPixels(srcPixel, dstPixel);
 			}
 		}
 	}

@@ -502,9 +502,9 @@ namespace TFE_DarkForces
 		{
 			for (s32 x = 0; x < width; x++)
 			{
-				u32 pixel = hiResActor->array[index][y * hiResActor->imageWidths[index] + x];
-				if (pixel >> 24u == 0) { continue; }	// skip transparent pixels
-				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = pixel;
+				u32 srcPixel = hiResActor->array[index][y * hiResActor->imageWidths[index] + x];
+				u32 dstPixel = s_highResBitmap[(yOffset + y) * 640 + xOffset + x];
+				s_highResBitmap[(yOffset + y) * 640 + xOffset + x] = pda_blendRgbPixels(srcPixel, dstPixel);
 			}
 		}
 	}
