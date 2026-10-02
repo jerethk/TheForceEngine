@@ -236,6 +236,7 @@ namespace TFE_DarkForces
 		{
 			TFE_Jedi::s_drawQuadsFirst = false;		// in the PDA we draw lines before quads, so the automap is drawn behind the PDA graphics
 			TFE_Jedi::s_clipLinesToRect = true;		// PDA map needs to be clipped in widescreen mode
+			TFE_RenderBackend::bloomPostEnable(false);
 		}
 
 		s_pdaOpen = JTRUE;
@@ -317,6 +318,7 @@ namespace TFE_DarkForces
 
 		// TFE
 		reticle_enable(true);
+		TFE_RenderBackend::bloomPostEnable(true);
 
 		// Convert back to level rendering.
 		TFE_Settings_Graphics* graphics = TFE_Settings::getGraphicsSettings();
