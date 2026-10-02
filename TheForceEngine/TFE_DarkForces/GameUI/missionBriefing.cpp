@@ -153,6 +153,7 @@ namespace TFE_DarkForces
 			s_briefHigh = highResActor_loadFromPng("dfbrief", mission, 1, false);
 			s_menuHigh = highResActor_loadFromPng("dfbrief", bgAnim, s_menuActor->arraySize);
 			TFE_Jedi::renderer_setType(RENDERER_HARDWARE);
+			TFE_RenderBackend::bloomPostEnable(false); // disable bloom in briefing screen
 		}
 
 		s16 state_btn_index = 600;

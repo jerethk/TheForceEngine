@@ -51,6 +51,7 @@
 #include <TFE_Jedi/InfSystem/infSystem.h>
 #include <TFE_Jedi/Task/task.h>
 #include <TFE_Jedi/Renderer/jediRenderer.h>
+#include <TFE_RenderBackend/renderBackend.h>
 #include <TFE_Jedi/Task/task.h>
 #include <TFE_Jedi/IMuse/imuse.h>
 #include <TFE_Jedi/Serialization/serialization.h>
@@ -656,6 +657,7 @@ namespace TFE_DarkForces
 			{
 				missionBriefing_cleanup();
 				TFE_Jedi::renderer_setType(RENDERER_SOFTWARE);
+				TFE_RenderBackend::bloomPostEnable(true);
 				TFE_Input::clearAccumulatedMouseMove();
 
 				if (abort)
