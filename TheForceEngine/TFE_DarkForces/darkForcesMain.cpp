@@ -1329,6 +1329,11 @@ namespace TFE_DarkForces
 		}
 
 		TFE_Settings::loadCustomModSettings();
+
+		// To date, the vast majority of mods do not have high res briefing or PDA assets
+		// We want players to see modded DELTs (briefings, inventory etc.) rather than having these replaced by the DF Remaster's PNGs
+		// TODO: add support for loading PNGs from mods
+		TFE_Settings::getEnhancementsSettings()->enableHdPda = false;
 	}
 
 	s32 loadLocalMessages()
