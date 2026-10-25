@@ -34,7 +34,7 @@ namespace TFE_Editor
 	// API Implementation
 	//////////////////////////////////////////
 	// Load the full asset data.
-	AssetHandle loadAssetData(AssetType type, Archive* archive, const AssetColorData* colorData, const char* name)
+	AssetHandle loadAssetData(AssetType type, Archive* archive, const AssetColorData* colorData, const char* name, const char* filePath = "")
 	{
 		// First check if the asset has already been loaded.
 		AssetHandle handle = findAsset(name);
@@ -49,11 +49,11 @@ namespace TFE_Editor
 		{
 			case TYPE_TEXTURE:
 			{
-				index = loadEditorTexture(TEX_BM, archive, name, colorData->palette, colorData->palIndex);
+				index = loadEditorTexture(TEX_BM, archive, name, filePath, colorData->palette, colorData->palIndex);
 			} break;
 			case TYPE_EXT_TEXTURE:
 			{
-				index = loadEditorTexture(TEX_RAW, archive, name, nullptr, 0);
+				index = loadEditorTexture(TEX_RAW, archive, name, filePath, nullptr, 0);
 			} break;
 			case TYPE_PALETTE:
 			{
@@ -61,15 +61,15 @@ namespace TFE_Editor
 			} break;
 			case TYPE_FRAME:
 			{
-				index = loadEditorFrame(FRAME_FME, archive, name, colorData->palette, colorData->palIndex);
+				index = loadEditorFrame(FRAME_FME, archive, name, filePath, colorData->palette, colorData->palIndex);
 			} break;
 			case TYPE_SPRITE:
 			{
-				index = loadEditorSprite(SPRITE_WAX, archive, name, colorData->palette, colorData->palIndex);
+				index = loadEditorSprite(SPRITE_WAX, archive, name, filePath, colorData->palette, colorData->palIndex);
 			} break;
 			case TYPE_3DOBJ:
 			{
-				index = loadEditorObj3D(OBJ3D_3DO, archive, name, colorData->palette, colorData->palIndex);
+				index = loadEditorObj3D(OBJ3D_3DO, archive, name, filePath, colorData->palette, colorData->palIndex);
 			} break;
 			case TYPE_LEVEL:
 			{
@@ -77,7 +77,7 @@ namespace TFE_Editor
 			} break;
 			case TYPE_SOUND:
 			{
-				index = loadEditorSound(SOUND_VOC, archive, name);
+				index = loadEditorSound(SOUND_VOC, archive, name, filePath);
 			} break;
 			default:
 			{

@@ -1880,7 +1880,7 @@ namespace AssetBrowser
 	{
 		s32 palId = getAssetPalette(asset->name.c_str());
 		AssetColorData colorData = { s_palettes[palId].data, nullptr, palId, 32 };
-		return loadAssetData(asset->type, asset->archive, &colorData, asset->name.c_str());
+		return loadAssetData(asset->type, asset->archive, &colorData, asset->name.c_str(), asset->filePath.c_str());
 	}
 
 	void loadAsset(const Asset* projAsset)
@@ -1898,7 +1898,7 @@ namespace AssetBrowser
 		s32 palId = getAssetPalette(projAsset->name.c_str());
 
 		AssetColorData colorData = { s_palettes[palId].data, nullptr, palId, 32 };
-		asset.handle = loadAssetData(projAsset->type, projAsset->archive, &colorData, projAsset->name.c_str());
+		asset.handle = loadAssetData(projAsset->type, projAsset->archive, &colorData, projAsset->name.c_str(), projAsset->filePath.c_str());
 		// For now allow stubbed types to squeak through...
 		// TODO: Make this more strict once those are properly loaded.
 		if (asset.handle != NULL_ASSET || asset.type == TYPE_3DOBJ || asset.type == TYPE_LEVEL)
@@ -1954,7 +1954,7 @@ namespace AssetBrowser
 			s32 palId = getAssetPalette(projAsset->name.c_str());
 
 			AssetColorData colorData = { s_palettes[palId].data, nullptr, palId, 32 };
-			asset.handle = loadAssetData(projAsset->type, projAsset->archive, &colorData, projAsset->name.c_str());
+			asset.handle = loadAssetData(projAsset->type, projAsset->archive, &colorData, projAsset->name.c_str(), projAsset->filePath.c_str());
 			list.push_back(asset);
 		}
 	}
@@ -2092,7 +2092,7 @@ namespace AssetBrowser
 				}
 
 				AssetColorData colorData = { nullptr, hasColormap ? colormapData : nullptr, 0, 32 };
-				asset.handle = loadAssetData(TYPE_PALETTE, archive, &colorData, projAsset->name.c_str());
+				asset.handle = loadAssetData(TYPE_PALETTE, archive, &colorData, projAsset->name.c_str(), projAsset->filePath.c_str());
 				s_viewAssetList.push_back(asset);
 			}
 		}
