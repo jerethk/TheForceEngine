@@ -101,6 +101,8 @@ namespace AssetBrowser
 	static AssetList s_viewAssetList;
 	static AssetList s_projectAssetList[TYPE_COUNT];
 
+	static bool s_browseLevels = false;
+
 	// Forward Declarations
 	void updateAssetList();
 	void reloadAsset(Asset* asset, s32 palId, s32 lightLevel = 32);
@@ -187,7 +189,13 @@ namespace AssetBrowser
 			*index = lvlIndex - 1;
 		}
 	}
-		
+
+	void setBrowseLevels(bool value)
+	{
+		s_browseLevels = value;
+		s_viewInfo.type = s_browseLevels ? TYPE_LEVEL : TYPE_TEXTURE;
+	}
+
 	void infoPanel(u32 infoWidth, u32 infoHeight)
 	{
 		DisplayInfo displayInfo;
@@ -202,16 +210,23 @@ namespace AssetBrowser
 			h += (u32)UI_SCALE(40);
 		}
 
-		ImGui::SetWindowPos("Asset Browser##Settings", { 0.0f, f32(s_menuHeight) });
-		ImGui::SetWindowSize("Asset Browser##Settings", { f32(w), f32(h) });
+		const char* panelName = s_browseLevels ? "Level Browser##Settings" : "Asset Browser##Settings" ;
+
+		ImGui::SetWindowPos(panelName, { 0.0f, f32(s_menuHeight) });
+		ImGui::SetWindowSize(panelName, { f32(w), f32(h) });
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
 		bool active = true;
 		s32 levelSource = s_viewInfo.levelSource;
-		ImGui::Begin("Asset Browser##Settings", &active, window_flags);
+		ImGui::Begin(panelName, &active, window_flags);
 		LIST_SELECT("Game", c_games, s_viewInfo.game);
-		LIST_SELECT("Asset Type", c_assetType, s_viewInfo.type);
-		listSelectionLevel("Level", s_levelAssets, &levelSource);
+
+		if (!s_browseLevels)
+		{
+			LIST_SELECT("Asset Type", c_assetType, s_viewInfo.type);
+			listSelectionLevel("Level", s_levelAssets, &levelSource);
+		}
+
 		ImGui::Separator();
 
 		bool listChanged = false;
@@ -287,12 +302,14 @@ namespace AssetBrowser
 			infoHeight += (u32)UI_SCALE(40);
 		}
 
-		ImGui::SetWindowPos("Asset Info", { 0.0f, f32(infoHeight + s_menuHeight) });
-		ImGui::SetWindowSize("Asset Info", { f32(w), f32(h) });
+		const char* panelName = s_browseLevels ? "Level Info" : "Asset Info" ;
+
+		ImGui::SetWindowPos(panelName, { 0.0f, f32(infoHeight + s_menuHeight) });
+		ImGui::SetWindowSize(panelName, { f32(w), f32(h) });
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
 		bool active = true;
-		ImGui::Begin("Asset Info", &active, window_flags);
+		ImGui::Begin(panelName, &active, window_flags);
 		if (multiselect)
 		{
 			AssetType type = s_viewAssetList[s_selected[0]].type;
@@ -708,6 +725,17 @@ namespace AssetBrowser
 		s32 a = 0, yOffset = 0;
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
 		AssetSource src = s_viewAssetList[0].assetSource;
+
+		if (s_viewAssetList[0].assetSource == ASRC_PROJECT)
+		{
+			ImGui::Text("Project");
+		}
+		else if (s_viewAssetList[0].assetSource == ASRC_VANILLA)
+		{
+			ImGui::Text("Game");
+		}
+
+		yOffset += 25;
 		for (s32 y = 0; a < count; y++)
 		{
 			for (s32 x = 0; x < columnCount && a < count; x++, a++)
@@ -718,7 +746,16 @@ namespace AssetBrowser
 					src = s_viewAssetList[a].assetSource;
 					ImGui::Separator();
 
-					yOffset += 10;
+					if (s_viewAssetList[a].assetSource == ASRC_PROJECT)
+					{
+						ImGui::Text("Project");
+					}
+					else if (s_viewAssetList[a].assetSource == ASRC_VANILLA)
+					{
+						ImGui::Text("Game");
+					}
+
+					yOffset += 30;
 					if (x != 0) { y++; }
 					x = 0;
 				}
@@ -902,12 +939,14 @@ namespace AssetBrowser
 		s32 h = displayInfo.height - s_menuHeight;
 		if (w <= 0 || h <= 0) { return; }
 
-		ImGui::SetWindowPos("Asset List", { f32(infoWidth), f32(s_menuHeight) });
-		ImGui::SetWindowSize("Asset List", { f32(w), f32(h) });
+		const char* panelName = s_browseLevels ? "Level List" : "Asset List";
+
+		ImGui::SetWindowPos(panelName, { f32(infoWidth), f32(s_menuHeight) });
+		ImGui::SetWindowSize(panelName, { f32(w), f32(h) });
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
 		bool active = true;
-		ImGui::Begin("Asset List", &active, window_flags);
+		ImGui::Begin(panelName, &active, window_flags);
 
 		// Draw items
 		if (!s_viewAssetList.empty())

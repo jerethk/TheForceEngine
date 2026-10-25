@@ -38,4 +38,5 @@ namespace AssetBrowser
 	bool isAssetInLevel(const char* name, u32 levelIndex);
 
 	bool readWriteFile(const char* outFilePath, const char* assetName, Archive* archive, TFE_Editor::WorkBuffer& buffer);
+	void setBrowseLevels(bool value);
 }
