@@ -1762,7 +1762,7 @@ namespace LevelEditor
 				*propHeight = elemHeight * countBits(elev->overrideSet & IEO_VAR_MASK) + 16;
 				// Expand if flags are selected.
 				if (curClass && (s_infEditor.curPropIndex == IEV_FLAGS)) { *propHeight += elemHeight; }
-				else if (curClass && s_infEditor.curPropIndex == IEV_EVENT_MASK || s_infEditor.curPropIndex == IEV_ENTITY_MASK) { *propHeight += elemHeight * 4.0f; }
+				else if (curClass && (s_infEditor.curPropIndex == IEV_EVENT_MASK || s_infEditor.curPropIndex == IEV_ENTITY_MASK)) { *propHeight += elemHeight * 4.0f; }
 
 				const s32 stopCount = (s32)elev->stops.size();
 				const s32 slaveCount = (s32)elev->slaves.size();
