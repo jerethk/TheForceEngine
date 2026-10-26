@@ -1700,7 +1700,7 @@ namespace AssetBrowser
 				FileUtil::getFileExtension(fileName, ext);
 
 				char filepath[TFE_MAX_PATH];
-				sprintf(filepath, "%s%s", pathOS, fileName);
+				sprintf(filepath, "%s%s", dir.c_str(), fileName);
 				FileUtil::fixupPath(filepath);
 
 				// Exported results are archives too, so this doesn't work correctly for project directories.
