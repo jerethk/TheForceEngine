@@ -728,11 +728,15 @@ namespace AssetBrowser
 
 		if (s_viewAssetList[0].assetSource == ASRC_PROJECT)
 		{
-			ImGui::Text("Project");
+			ImGui::Text("PROJECT");
 		}
 		else if (s_viewAssetList[0].assetSource == ASRC_VANILLA)
 		{
-			ImGui::Text("Game");
+			ImGui::Text("GAME");
+		}
+		else if (s_viewAssetList[0].assetSource == ASRC_EXTERNAL)
+		{
+			ImGui::Text("RESOURCES");
 		}
 
 		yOffset += 25;
@@ -744,18 +748,24 @@ namespace AssetBrowser
 				if (src != s_viewAssetList[a].assetSource)
 				{
 					src = s_viewAssetList[a].assetSource;
+					ImGui::NewLine();
 					ImGui::Separator();
+					ImGui::NewLine();
 
 					if (s_viewAssetList[a].assetSource == ASRC_PROJECT)
 					{
-						ImGui::Text("Project");
+						ImGui::Text("PROJECT");
 					}
 					else if (s_viewAssetList[a].assetSource == ASRC_VANILLA)
 					{
-						ImGui::Text("Game");
+						ImGui::Text("GAME");
+					}
+					else if (s_viewAssetList[a].assetSource == ASRC_EXTERNAL)
+					{
+						ImGui::Text("RESOURCES");
 					}
 
-					yOffset += 30;
+					yOffset += 75;
 					if (x != 0) { y++; }
 					x = 0;
 				}
@@ -1149,7 +1159,7 @@ namespace AssetBrowser
 		return Archive::getArchive(ARCHIVE_GOB, name, filePath);
 	}
 		
-	void addPalette(const char* name, Archive* archive)
+	void addPalette(const char* name, Archive* archive, const char* filePath)
 	{
 		s32 id = -1;
 		const size_t count = s_palettes.size();
@@ -1162,12 +1172,26 @@ namespace AssetBrowser
 			}
 		}
 
-		if (!archive->openFile(name)) { return; }
 		WorkBuffer& buffer = getWorkBuffer();
-		const size_t len = archive->getFileLength();
-		buffer.resize(len);
-		archive->readFile(buffer.data(), len);
-		archive->closeFile();
+		size_t len;
+		if (archive)
+		{
+			if (!archive->openFile(name)) { return; }
+			len = archive->getFileLength();
+			buffer.resize(len);
+			archive->readFile(buffer.data(), len);
+			archive->closeFile();
+		}
+		else
+		{
+			// Load from path
+			FileStream file;
+			if (!filePath || !file.open(filePath, Stream::MODE_READ)) {	return;	}
+			len = file.getSize();
+			buffer.resize(len);
+			file.readBuffer(buffer.data(), len);
+			file.close();
+		}
 
 		const u8* pal666 = buffer.data();
 		Palette dstPalette;
@@ -1301,7 +1325,7 @@ namespace AssetBrowser
 		const Asset* projAsset = s_projectAssetList[TYPE_PALETTE].data();
 		for (u32 f = 0; f < count; f++, projAsset++)
 		{
-			addPalette(projAsset->name.c_str(), projAsset->archive);
+			addPalette(projAsset->name.c_str(), projAsset->archive, projAsset->filePath.c_str());
 		}
 
 		// Then for levels.

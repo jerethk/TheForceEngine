@@ -57,7 +57,7 @@ namespace TFE_Editor
 			} break;
 			case TYPE_PALETTE:
 			{
-				index = loadPaletteAsTexture(archive, name, colorData->colormap);
+				index = loadPaletteAsTexture(archive, name, filePath, colorData->colormap);
 			} break;
 			case TYPE_FRAME:
 			{
@@ -79,6 +79,8 @@ namespace TFE_Editor
 			{
 				index = loadEditorSound(SOUND_VOC, archive, name, filePath);
 			} break;
+			case TYPE_EXT_FRAME: // todo
+			case TYPE_EXT_WAX: // todo
 			default:
 			{
 				TFE_System::logWrite(LOG_WARNING, "Editor", "Asset data loading not implemented, or bad type: %d", type);

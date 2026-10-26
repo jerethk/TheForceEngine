@@ -269,24 +269,41 @@ namespace TFE_Editor
 		return result;
 	}
 
-	s32 loadPaletteAsTexture(Archive* archive, const char* filename, const u8* colormapData, s32 id)
+	s32 loadPaletteAsTexture(Archive* archive, const char* filename, const char* filePath, const u8* colormapData, s32 id)
 	{
 		if (!archive && !filename) { return -1; }
 
-		if (!archive->openFile(filename))
-		{
-			return -1;
-		}
-		size_t len = archive->getFileLength();
-		if (!len)
-		{
-			archive->closeFile();
-			return -1;
-		}
 		WorkBuffer& buffer = getWorkBuffer();
-		buffer.resize(len);
-		archive->readFile(buffer.data(), len);
-		archive->closeFile();
+		size_t len;
+
+		if (archive)
+		{
+			if (!archive->openFile(filename))
+			{
+				return -1;
+			}
+			len = archive->getFileLength();
+			if (!len)
+			{
+				archive->closeFile();
+				return -1;
+			}
+			buffer.resize(len);
+			archive->readFile(buffer.data(), len);
+			archive->closeFile();
+		}
+		else
+		{
+			FileStream file;
+			if (!filePath || !file.open(filePath, Stream::MODE_READ))
+			{
+				return -1;
+			}
+			len = file.getSize();
+			buffer.resize(len);
+			file.readBuffer(buffer.data(), len);
+			file.close();
+		}
 
 		if (id < 0) { id = allocateTexture(filename); }
 		strcpy(s_textureList[id].name, filename);
