@@ -2277,15 +2277,29 @@ namespace AssetBrowser
 		}
 	}
 
-	bool readWriteFile(const char* outFilePath, const char* assetName, Archive* archive, WorkBuffer& buffer)
+	bool readWriteFile(const char* outFilePath, const char* assetName, const char* assetPath, Archive* archive, WorkBuffer& buffer)
 	{
-		if (!archive->openFile(assetName)) { return false; }
-
+		size_t len;
 		bool success = false;
-		size_t len = archive->getFileLength();
-		buffer.resize(len);
-		archive->readFile(buffer.data(), len);
-		archive->closeFile();
+
+		if (archive)
+		{
+			if (!archive->openFile(assetName)) { return false; }
+			len = archive->getFileLength();
+			buffer.resize(len);
+			archive->readFile(buffer.data(), len);
+			archive->closeFile();
+		}
+		else
+		{
+			FileStream file;
+			if (!assetPath || !file.open(assetPath, Stream::MODE_READ)) { return false; }
+			len = file.getSize();
+			buffer.resize(len);
+			file.readBuffer(buffer.data(), len);
+			file.close();
+		}
+
 
 		FileStream outFile;
 		if (outFile.open(outFilePath, FileStream::MODE_WRITE))
@@ -2327,7 +2341,7 @@ namespace AssetBrowser
 
 			// Write files to the temp directory.
 			WorkBuffer buffer;
-			if (!readWriteFile(levPath, asset->name.c_str(), archive, buffer)) { continue; }
+			if (!readWriteFile(levPath, asset->name.c_str(), asset->filePath.c_str(), archive, buffer)) { continue; }
 
 			char objPath[TFE_MAX_PATH];
 			char infPath[TFE_MAX_PATH];
@@ -2340,8 +2354,8 @@ namespace AssetBrowser
 			FileUtil::replaceExtension(asset->name.c_str(), "INF", assetInf);
 
 			// These are mostly optional, so we continue even if they don't exist.
-			readWriteFile(objPath, assetObj, archive, buffer);
-			readWriteFile(infPath, assetInf, archive, buffer);
+			readWriteFile(objPath, assetObj, nullptr, archive, buffer);
+			readWriteFile(infPath, assetInf, nullptr, archive, buffer);
 
 			// Then copy them into the project directory.
 			char dstLevPath[TFE_MAX_PATH];
