@@ -115,7 +115,8 @@ namespace TFE_Editor
 	void enable()
 	{
 		// Ui begin/render is called so we have a "UI Frame" in which to setup UI state.
-		s_editorMode = EDIT_ASSET_BROWSER;
+		s_editorMode = EDIT_LEVEL_BROWSER;
+		AssetBrowser::setBrowseLevels(true);
 		s_exitEditor = false;
 		s_programExiting = false;
 		loadFonts();
