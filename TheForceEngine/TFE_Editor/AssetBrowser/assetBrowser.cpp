@@ -694,6 +694,7 @@ namespace AssetBrowser
 		const Asset* asset = s_viewAssetList.data();
 
 		s32 textWidth = (s32)ImGui::CalcTextSize("12345678.123").x;
+		s32 textHeight = (s32)ImGui::CalcTextSize("12345678.123").y;
 		s32 fontSize = (s32)ImGui::GetFontSize();
 
 		char buttonLabel[32];
@@ -739,7 +740,7 @@ namespace AssetBrowser
 			ImGui::Text("RESOURCES");
 		}
 
-		yOffset += 25;
+		yOffset += textHeight * 1.5;
 		for (s32 y = 0; a < count; y++)
 		{
 			for (s32 x = 0; x < columnCount && a < count; x++, a++)
@@ -765,7 +766,7 @@ namespace AssetBrowser
 						ImGui::Text("RESOURCES");
 					}
 
-					yOffset += 75;
+					yOffset += textHeight * 4.5;
 					if (x != 0) { y++; }
 					x = 0;
 				}
