@@ -2120,6 +2120,7 @@ namespace LevelEditor
 		}
 
 		// Add other project files (eg. text.msg, briefing.lst) if they exist
+		// For now, just take what is in the project path. In the future, we can add support for creating & editing these in the TFE editor.
 		for (int i = 0; i < PROJFILE_COUNT; i++)
 		{
 			char projFilePath[TFE_MAX_PATH];
